@@ -1,11 +1,33 @@
-type GeocodeInput = {
+export type GeocodeInput = {
   address: string;
 };
 
-type GeocodeResult = {
+export type GeocodeResult = {
   lat: number;
   lng: number;
 };
+
+export type GeocodeProvider = "kakao" | "naver";
+
+export type GeocodeDetailedResult = {
+  status: "success" | "not-found" | "no-config" | "error";
+  provider: GeocodeProvider | null;
+  coordinates: GeocodeResult | null;
+  attemptedProviders: GeocodeProvider[];
+  reason?: string;
+};
+
+function hasKakaoRestKey() {
+  return Boolean(process.env.KAKAO_REST_API_KEY?.trim());
+}
+
+function hasNaverGeocodeKeys() {
+  return Boolean(process.env.NAVER_CLIENT_ID?.trim() && process.env.NAVER_CLIENT_SECRET?.trim());
+}
+
+export function hasGeocodeServerConfig() {
+  return hasKakaoRestKey() || hasNaverGeocodeKeys();
+}
 
 async function geocodeWithKakao(address: string): Promise<GeocodeResult | null> {
   const restKey = process.env.KAKAO_REST_API_KEY?.trim();
@@ -61,15 +83,81 @@ async function geocodeWithNaver(address: string): Promise<GeocodeResult | null> 
 }
 
 export async function geocodeAddress(input: GeocodeInput): Promise<GeocodeResult | null> {
+  const detailed = await geocodeAddressDetailed(input);
+  return detailed.coordinates;
+}
+
+export async function geocodeAddressDetailed(input: GeocodeInput): Promise<GeocodeDetailedResult> {
   const address = input.address.trim();
-  if (!address) return null;
-  if (!process.env.KAKAO_REST_API_KEY && !(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET)) {
-    return null;
+  if (!address) {
+    return {
+      status: "not-found",
+      provider: null,
+      coordinates: null,
+      attemptedProviders: [],
+      reason: "Address is empty.",
+    };
   }
 
-  try {
-    return await geocodeWithKakao(address);
-  } catch {
-    return geocodeWithNaver(address);
+  const attemptedProviders: GeocodeProvider[] = [];
+  const reasons: string[] = [];
+  let hadError = false;
+
+  if (!hasGeocodeServerConfig()) {
+    return {
+      status: "no-config",
+      provider: null,
+      coordinates: null,
+      attemptedProviders,
+      reason: "KAKAO_REST_API_KEY or NAVER_CLIENT_ID/NAVER_CLIENT_SECRET is required.",
+    };
   }
+
+  if (hasKakaoRestKey()) {
+    attemptedProviders.push("kakao");
+    try {
+      const coordinates = await geocodeWithKakao(address);
+      if (coordinates) {
+        return {
+          status: "success",
+          provider: "kakao",
+          coordinates,
+          attemptedProviders,
+        };
+      }
+
+      reasons.push("kakao returned no coordinates");
+    } catch (error) {
+      hadError = true;
+      reasons.push(error instanceof Error ? error.message : "kakao geocode failed");
+    }
+  }
+
+  if (hasNaverGeocodeKeys()) {
+    attemptedProviders.push("naver");
+    try {
+      const coordinates = await geocodeWithNaver(address);
+      if (coordinates) {
+        return {
+          status: "success",
+          provider: "naver",
+          coordinates,
+          attemptedProviders,
+        };
+      }
+
+      reasons.push("naver returned no coordinates");
+    } catch (error) {
+      hadError = true;
+      reasons.push(error instanceof Error ? error.message : "naver geocode failed");
+    }
+  }
+
+  return {
+    status: hadError ? "error" : "not-found",
+    provider: null,
+    coordinates: null,
+    attemptedProviders,
+    reason: reasons.join("; ") || "No coordinates returned.",
+  };
 }
