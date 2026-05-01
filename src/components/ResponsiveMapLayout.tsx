@@ -133,28 +133,28 @@ export function ResponsiveMapLayout({
   return (
     <section>
       <div className="mb-4 flex gap-2 md:hidden">
-        <button type="button" onClick={() => setMobileView("list")} className={`flex-1 rounded-full px-4 py-3 text-sm font-black ${mobileView === "list" ? "bg-[var(--brand)] text-white" : "bg-white/70 text-[#5f5550]"}`.trim()}>
+        <button type="button" onClick={() => setMobileView("list")} className={`flex-1 rounded-xl border px-4 py-3 text-sm font-black ${mobileView === "list" ? "border-[var(--brand)] bg-[var(--brand)] text-white" : "border-[var(--line)] bg-white text-[var(--muted)]"}`.trim()}>
           리스트
         </button>
-        <button type="button" onClick={() => setMobileView("map")} className={`flex-1 rounded-full px-4 py-3 text-sm font-black ${mobileView === "map" ? "bg-[var(--brand)] text-white" : "bg-white/70 text-[#5f5550]"}`.trim()}>
+        <button type="button" onClick={() => setMobileView("map")} className={`flex-1 rounded-xl border px-4 py-3 text-sm font-black ${mobileView === "map" ? "border-[var(--brand)] bg-[var(--brand)] text-white" : "border-[var(--line)] bg-white text-[var(--muted)]"}`.trim()}>
           지도
         </button>
       </div>
 
       <div className="grid gap-5 lg:grid-cols-[0.42fr_0.58fr]">
         <div className={mobileView === "map" ? "hidden md:block" : "space-y-4"}>{sidebar}</div>
-        <aside className={mobileView === "list" ? "hidden md:block" : "section-shell min-h-[420px] p-5"}>
-          <div className="relative z-10 flex h-full flex-col rounded-[1.8rem] border border-[rgba(56,41,29,0.08)] bg-[linear-gradient(180deg,rgba(255,255,255,0.72),rgba(243,239,234,0.9))] p-5">
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#9d8e82]">Live Map</p>
+        <aside className={mobileView === "list" ? "hidden md:block" : "section-shell min-h-[420px] p-4"}>
+          <div className="relative z-10 flex h-full flex-col rounded-[1rem] border border-[var(--line)] bg-[var(--surface)] p-5">
+            <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">지도</p>
             <h3 className="mt-3 text-2xl font-black tracking-tight">{title}</h3>
-            <p className="mt-3 max-w-md text-sm leading-7 text-[#665950]">{description}</p>
-            <div className="mt-5 flex-1 overflow-hidden rounded-[1.5rem] border border-[rgba(56,41,29,0.1)] bg-white/70">
-              <div ref={mapRef} className="h-[360px] w-full bg-[radial-gradient(circle_at_20%_20%,rgba(189,237,220,0.45),transparent_24%),radial-gradient(circle_at_80%_16%,rgba(255,184,107,0.35),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,244,238,0.95))]" />
-              <div className="border-t border-[rgba(56,41,29,0.08)] p-4 text-sm leading-7 text-[#665950]">
+            <p className="mt-3 max-w-md text-sm leading-7 text-[var(--muted)]">{description}</p>
+            <div className="mt-5 flex-1 overflow-hidden rounded-[1rem] border border-[var(--line)] bg-white">
+              <div ref={mapRef} className="h-[360px] w-full bg-[#f4f7f5]" />
+              <div className="border-t border-[var(--line)] p-4 text-sm leading-7 text-[var(--muted)]">
                 {mapStatus === "error" ? (
                   <p>지도 SDK를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
                 ) : mappableItems.length === 0 ? (
-                  <p>현재 저장된 좌표 데이터가 없어 목록 중심으로 보여주고 있습니다. 다음 배치 동기화에서 공식 파일 좌표 또는 서버 지오코딩이 반영되면 지도 마커가 나타납니다.</p>
+                  <p>현재 지도에 표시할 좌표를 준비 중입니다. 아래 목록에서 먼저 장소를 확인해 주세요.</p>
                 ) : selectedItem ? (
                   <div>
                     <p className="font-black text-[var(--ink)]">{selectedItem.name}</p>
@@ -162,7 +162,7 @@ export function ResponsiveMapLayout({
                     {selectedItem.address ? <p className="mt-1">{selectedItem.address}</p> : null}
                   </div>
                 ) : (
-                  <p>지도의 마커를 누르거나 왼쪽 리스트를 선택하면 현재 선택 장소 정보가 여기 표시됩니다.</p>
+                  <p>지도의 마커나 목록을 선택하면 이곳에 선택한 장소 정보가 표시됩니다.</p>
                 )}
               </div>
             </div>

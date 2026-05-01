@@ -6,7 +6,6 @@ import { PlaceCard } from "@/components/PlaceCard";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { AdSlot } from "@/components/AdSlot";
 import { DataFreshnessNotice } from "@/components/DataFreshnessNotice";
-import { CharacterImage } from "@/components/CharacterImage";
 import { getPlaceCategoryLabel, QUICK_CATEGORIES } from "@/lib/platform-content";
 import { searchUnifiedContent } from "@/lib/unified-search";
 
@@ -21,13 +20,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:py-10">
       <section className="section-shell px-6 py-6 sm:px-8 sm:py-8">
-        <div className="absolute right-2 top-4 hidden h-24 w-24 opacity-95 sm:block">
-          <CharacterImage asset="cat-peeking" className="h-full w-full" imageClassName="object-contain" />
-        </div>
         <div className="relative z-10">
-          <p className="eyebrow">Search</p>
+          <p className="eyebrow">검색</p>
           <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">통합 검색</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#655a53] sm:text-base">식당, 병원, 장소, 가이드, 실종 제보를 한 번에 찾습니다. 사용자 요청은 우리 DB만 조회하며 외부 원본 사이트는 호출하지 않습니다.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">식당, 병원, 장소, 생활 가이드, 실종 제보를 한 번에 찾아보세요.</p>
         </div>
         <div className="mt-6"><SearchBox defaultValue={keyword} /></div>
         <div className="mt-5 flex flex-wrap gap-2">
@@ -35,7 +31,6 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           {params.sido ? <span className="badge">시도 {params.sido}</span> : null}
           {params.category ? <span className="badge">카테고리 {params.category}</span> : null}
           <span className="badge">총 결과 {total.toLocaleString("ko-KR")}건</span>
-          <span className="badge">DB 기반 검색</span>
         </div>
       </section>
 
@@ -47,7 +42,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <section className="mt-8">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Restaurants</p>
+              <p className="eyebrow">식당</p>
               <h2 className="mt-4 text-2xl font-black tracking-tight">식당</h2>
             </div>
           </div>
@@ -61,7 +56,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <section className="mt-8">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Places</p>
+              <p className="eyebrow">장소</p>
               <h2 className="mt-4 text-2xl font-black tracking-tight">장소</h2>
             </div>
           </div>
@@ -89,7 +84,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <section className="mt-8">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Guides</p>
+              <p className="eyebrow">생활 가이드</p>
               <h2 className="mt-4 text-2xl font-black tracking-tight">가이드</h2>
             </div>
           </div>
@@ -111,8 +106,8 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         <section className="mt-8">
           <div className="mb-5 flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Lost Pets</p>
-              <h2 className="mt-4 text-2xl font-black tracking-tight">실종 제보</h2>
+              <p className="eyebrow">댕냥이 찾아요</p>
+              <h2 className="mt-4 text-2xl font-black tracking-tight">댕냥이 찾아요</h2>
             </div>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">

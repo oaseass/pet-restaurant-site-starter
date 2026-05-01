@@ -32,24 +32,24 @@ export function PlaceCard({
       </div>
       <h3 className="mt-4 text-xl font-black tracking-tight">{item.name}</h3>
       {item.address ? (
-        <p className="mt-3 flex gap-2 text-sm leading-7 text-[#665950]">
+        <p className="mt-3 flex gap-2 text-sm leading-7 text-[var(--muted)]">
           <MapPin className="mt-1 shrink-0" size={16} />
           <span>{item.address}</span>
         </p>
       ) : null}
       {item.phone ? (
-        <p className="mt-2 flex gap-2 text-sm leading-6 text-[#665950]">
+        <p className="mt-2 flex gap-2 text-sm leading-6 text-[var(--muted)]">
           <Phone className="mt-0.5 shrink-0" size={15} />
           <span>{item.phone}</span>
         </p>
       ) : null}
-      {!item.address && !item.phone ? <p className="mt-3 text-sm leading-7 text-[#665950]">기본 정보가 준비 중입니다. 공식 데이터와 제보, 업체 등록을 구분해 순차적으로 확장합니다.</p> : null}
+      {!item.address && !item.phone ? <p className="mt-3 text-sm leading-7 text-[var(--muted)]">기본 정보는 순차적으로 보강하고 있습니다. 먼저 운영 여부와 위치를 확인해 주세요.</p> : null}
     </>
   );
 
   if (!item.href) {
-    return <article className="card rounded-[2rem] p-5">{body}</article>;
+    return <article className="card rounded-[1rem] p-5">{body}</article>;
   }
 
-  return <Link href={item.href} className="card block rounded-[2rem] p-5 transition hover:-translate-y-1">{body}</Link>;
+  return <Link href={item.href} className="card block rounded-[1rem] p-5 transition hover:border-[rgba(31,107,91,0.2)] hover:bg-[#fcfbf9]">{body}</Link>;
 }

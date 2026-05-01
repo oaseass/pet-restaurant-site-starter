@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Compass, Search, SlidersHorizontal } from "lucide-react";
-import { CharacterImage } from "@/components/CharacterImage";
 import { MapCategoryChips } from "@/components/map/MapCategoryChips";
 import { MapShell } from "@/components/map/MapShell";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
@@ -18,29 +17,29 @@ const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
 
 const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants">, PreparedCategoryState> = {
   hospitals: {
-    title: "동물병원 지도 공개 준비중",
-    description: "병원 카테고리는 외부 수집 없이 운영 정책과 검수 기준을 먼저 정리하고 있습니다.",
-    note: "지금은 식당 지도만 실제 데이터로 공개하고, 병원은 준비중 상태와 지도 구조만 먼저 제공합니다.",
+    title: "동물병원 지도는 준비 중입니다.",
+    description: "병원 정보는 곧 지도에서 볼 수 있도록 준비하고 있습니다.",
+    note: "지금은 식당 지도를 먼저 이용해 주세요.",
   },
   grooming: {
-    title: "미용 지도 공개 준비중",
-    description: "미용 카테고리는 실제 업체 데이터 없이 구조와 필터 경험을 먼저 다듬고 있습니다.",
-    note: "외부 원천 호출 없이 준비중 UI만 유지하며, 식당 지도 UX를 중심으로 서비스 품질을 먼저 올립니다.",
+    title: "미용 지도는 준비 중입니다.",
+    description: "미용 정보도 같은 방식으로 지도에서 볼 수 있도록 정리하고 있습니다.",
+    note: "지금은 식당 지도를 먼저 이용해 주세요.",
   },
   daycare: {
-    title: "유치원 지도 공개 준비중",
-    description: "유치원과 호텔은 운영 기준과 데이터 정합성 기준을 정리한 뒤 단계적으로 공개합니다.",
-    note: "현재는 식당 카테고리만 실제 핀과 리스트를 연결하고, 나머지 카테고리는 준비중 상태를 분명히 보여줍니다.",
+    title: "유치원 지도는 준비 중입니다.",
+    description: "유치원과 호텔 정보도 순차적으로 지도에 반영할 예정입니다.",
+    note: "지금은 식당 지도를 먼저 이용해 주세요.",
   },
   funeral: {
-    title: "장례 지도 공개 준비중",
-    description: "장례 카테고리는 민감한 안내 품질을 우선해 데이터 공개 전에 운영 문구와 검수 기준을 먼저 고정합니다.",
-    note: "준비중 카테고리는 실제 데이터가 없는 상태를 숨기지 않고 명확히 표시합니다.",
+    title: "장례 지도는 준비 중입니다.",
+    description: "장례 정보는 신중하게 정리한 뒤 순차적으로 공개할 예정입니다.",
+    note: "지금은 식당 지도를 먼저 이용해 주세요.",
   },
   "lost-pets": {
-    title: "찾아요 지도 공개 준비중",
-    description: "실종 제보는 별도 게시판 흐름을 유지하고 있어 지도형 노출은 운영 정책 확정 후 반영합니다.",
-    note: "현재는 리스트·가이드·게시판 흐름을 유지하고, 지도 화면에는 준비중 상태만 보여줍니다.",
+    title: "찾아요 지도는 준비 중입니다.",
+    description: "실종 제보도 지도에서 보기 쉽게 보여드릴 수 있도록 준비하고 있습니다.",
+    note: "지금은 식당 지도를 먼저 이용해 주세요.",
   },
 };
 
@@ -164,57 +163,26 @@ export default async function MapPage({
 
   return (
     <main className="mx-auto max-w-[1400px] px-4 pb-10 sm:px-5 lg:px-6">
-      <section className="grid gap-5 py-7 lg:grid-cols-[1.08fr_0.92fr] lg:py-8">
-        <div className="section-shell overflow-hidden px-6 py-6 sm:px-8 sm:py-8">
-          <div className="absolute -right-8 -top-10 h-40 w-40 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(122,232,204,0.34),rgba(255,255,255,0)_70%)]" />
-          <div className="absolute bottom-2 right-4 hidden h-28 w-28 opacity-80 sm:block">
-            <CharacterImage asset="cat-peeking" className="h-full w-full" imageClassName="object-contain" />
-          </div>
-          <div className="relative z-10 max-w-3xl">
-            <p className="eyebrow">Map First</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="badge bg-[#e9f8f2] text-[#1a463f]">정적 스냅샷 식당 {categoryCounts.restaurantCount.toLocaleString("ko-KR")}건</span>
-              <span className="badge bg-[#fff1e6] text-[#b9632e]">핀 가능 {categoryCounts.restaurantCoordinateReadyCount.toLocaleString("ko-KR")}건</span>
-              <span className="badge">좌표 준비중 {categoryCounts.restaurantCoordinatePendingCount.toLocaleString("ko-KR")}건</span>
-            </div>
-            <h1 className="mt-5 text-4xl font-black tracking-tight text-[#161310] sm:text-[3.4rem]">리스트가 아니라, 지도를 중심으로 반려동물 동반 식당을 찾습니다.</h1>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-[#60554d] sm:text-base">댕냥지도는 외부 원천을 다시 호출하지 않고 내부 DB에 저장된 식당 데이터만으로 지도 탐색 경험을 만듭니다. 좌표가 있는 식당만 핀으로 올리고, 좌표가 없는 식당은 리스트에서 좌표 준비중 상태를 정확히 보여줍니다.</p>
+      <section className="section-shell px-6 py-6 sm:px-8 sm:py-8">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-3xl">
+            <p className="eyebrow">지도 중심</p>
+            <h1 className="mt-5 text-4xl font-black tracking-tight text-[var(--ink)] sm:text-[3.25rem]">우리 동네 반려동물 동반 식당 지도</h1>
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">좌표가 준비된 식당은 지도에서 바로 보고, 아직 준비 중인 식당은 리스트에서 함께 확인하세요.</p>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/restaurants" className="btn-secondary">리스트 전용 보기</Link>
-              <Link href="/search" className="btn-secondary">통합 검색 보기</Link>
+              <Link href="/restaurants" className="btn-secondary">전체 식당 보기</Link>
+              <Link href="/search" className="btn-secondary">통합 검색</Link>
             </div>
           </div>
-        </div>
-
-        <div className="section-shell overflow-hidden p-5 sm:p-6">
-          <div className="absolute right-3 top-3 hidden h-24 w-24 opacity-75 sm:block">
-            <CharacterImage asset="dog-brown" className="h-full w-full mascot-drift" imageClassName="object-contain" />
-          </div>
-          <div className="relative z-10 rounded-[1.9rem] bg-[#1c2623] p-6 text-white shadow-[0_28px_52px_rgba(18,22,21,0.18)]">
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#f6bf91]">Map Policy</p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight">핀은 정확하게, 리스트는 숨기지 않게.</h2>
-            <ul className="mt-5 space-y-3 text-sm leading-6 text-[#d8cfc7]">
-              <li>1. 식당 카테고리만 실제 DB 데이터로 운영</li>
-              <li>2. 좌표 없는 식당은 핀으로 억지 표시하지 않음</li>
-              <li>3. 지도 SDK 키가 없어도 fallback 레이아웃 유지</li>
-            </ul>
-          </div>
-          <div className="relative z-10 mt-4 grid gap-3 sm:grid-cols-2">
-            <div className="rounded-[1.6rem] border border-[rgba(28,28,28,0.08)] bg-white/82 p-4">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8f7f73]">현재 결과</p>
-              <p className="mt-2 text-2xl font-black text-[#1f1915]">{isRestaurantView ? filteredCount.toLocaleString("ko-KR") : "준비중"}</p>
-              <p className="mt-2 text-sm leading-6 text-[#665950]">{isRestaurantView ? "현재 필터에 맞는 식당 결과" : "선택 카테고리는 공개 준비중"}</p>
-            </div>
-            <div className="rounded-[1.6rem] border border-[rgba(28,28,28,0.08)] bg-[#eef8f5] p-4">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8f7f73]">데이터 기준</p>
-              <p className="mt-2 text-2xl font-black text-[#1f1915]">정적 JSON</p>
-              <p className="mt-2 text-sm leading-6 text-[#665950]">public/data 스냅샷 기반으로 즉시 렌더링</p>
-            </div>
+          <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
+            <span className="badge">등록 식당 {categoryCounts.restaurantCount.toLocaleString("ko-KR")}건</span>
+            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">핀 가능 {categoryCounts.restaurantCoordinateReadyCount.toLocaleString("ko-KR")}건</span>
+            <span className="badge bg-[var(--accent-soft)] text-[#b9632e]">좌표 준비중 {categoryCounts.restaurantCoordinatePendingCount.toLocaleString("ko-KR")}건</span>
           </div>
         </div>
       </section>
 
-      <section className="sticky top-[86px] z-30 rounded-[2rem] border border-[rgba(28,28,28,0.08)] bg-[rgba(255,249,244,0.94)] p-3 shadow-[0_20px_42px_rgba(35,26,22,0.08)] backdrop-blur-xl md:top-[102px] lg:static lg:mt-1 lg:p-4">
+      <section className="sticky top-[72px] z-30 mt-5 rounded-[1.125rem] border border-[var(--line)] bg-[rgba(255,255,255,0.94)] p-3 shadow-[0_10px_26px_rgba(23,23,23,0.06)] backdrop-blur-sm lg:static lg:p-4">
         <form action="/map" className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_220px_auto] lg:items-center">
           <input type="hidden" name="category" value={activeCategory} />
           <label className="relative block">
@@ -248,15 +216,15 @@ export default async function MapPage({
             <button className="btn-primary min-h-11 flex-1 sm:flex-none" type="submit">
               필터 적용
             </button>
-            <Link href={activeCategory === "restaurants" ? "/map" : `/map?category=${activeCategory}`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[rgba(28,28,28,0.08)] bg-white/88 px-4 py-2 text-sm font-black text-[#1f1915]">
+            <Link href={activeCategory === "restaurants" ? "/map" : `/map?category=${activeCategory}`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-black text-[var(--ink)]">
               초기화
             </Link>
           </div>
         </form>
 
-        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-[#8b7c72]">
+        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
           <SlidersHorizontal size={14} />
-          <span>식당만 실제 데이터 기반 필터가 적용됩니다.</span>
+          <span>병원, 미용, 유치원, 장례, 찾아요 카테고리는 순차적으로 준비하고 있습니다.</span>
         </div>
 
         <div className="mt-4">
@@ -264,9 +232,9 @@ export default async function MapPage({
         </div>
       </section>
 
-      <div className="mt-5 flex items-center gap-2 text-sm font-bold text-[#665950]">
+      <div className="mt-5 flex items-center gap-2 text-sm font-bold text-[var(--muted)]">
         <Compass size={16} />
-        <span>{isRestaurantView ? `필터 결과 ${filteredCount.toLocaleString("ko-KR")}건 중 최신/지도 중심 120건까지 표시합니다.` : `${MAP_CATEGORY_LABELS[activeCategory]} 카테고리는 준비중 상태로만 노출합니다.`}</span>
+        <span>{isRestaurantView ? `필터 결과 ${filteredCount.toLocaleString("ko-KR")}건 중 지도와 함께 보기 좋은 120건을 먼저 보여드립니다.` : `${MAP_CATEGORY_LABELS[activeCategory]} 지도는 준비 중입니다.`}</span>
       </div>
 
       <MapShell

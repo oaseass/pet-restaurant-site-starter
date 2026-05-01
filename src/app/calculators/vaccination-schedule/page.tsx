@@ -21,13 +21,13 @@ export default async function VaccinationSchedulePage({ searchParams }: { search
     <main className="mx-auto max-w-4xl px-5 py-8 sm:py-10">
       <section className="section-shell px-6 py-6 sm:px-8 sm:py-8">
         <div className="relative z-10 max-w-3xl">
-          <p className="eyebrow">Calculator</p>
+          <p className="eyebrow">계산기</p>
           <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">예방접종 일정 계산기</h1>
-          <p className="mt-4 text-sm leading-8 text-[#655a53] sm:text-base">월령과 최근 접종일을 기준으로 다음에 확인할 접종 흐름을 빠르게 정리합니다.</p>
+          <p className="mt-4 text-sm leading-8 text-[var(--muted)] sm:text-base">월령과 최근 접종일을 기준으로 다음에 확인할 접종 흐름을 빠르게 정리합니다.</p>
         </div>
       </section>
 
-      <form className="mt-6 card grid gap-4 rounded-[2rem] p-6 md:grid-cols-2">
+      <form className="mt-6 card grid gap-4 rounded-[1rem] p-6 md:grid-cols-2">
         <label className="space-y-2 text-sm font-bold text-[#4b423c]">
           동물 종류
           <select name="animalType" defaultValue={input.animalType} className="input">
@@ -50,7 +50,7 @@ export default async function VaccinationSchedulePage({ searchParams }: { search
         <button type="submit" className="btn-primary md:col-span-2 md:w-fit">일정 계산</button>
       </form>
 
-      <section className="mt-6 card rounded-[2rem] p-6">
+      <section className="mt-6 card rounded-[1rem] p-6">
         <div className="flex flex-wrap gap-2">
           <span className="badge">현재 월령 {result.currentStage}</span>
           <span className="badge">최근 접종 {result.lastVaccinationLabel}</span>
@@ -60,13 +60,13 @@ export default async function VaccinationSchedulePage({ searchParams }: { search
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <article>
             <h3 className="text-lg font-black">접종 전</h3>
-            <ul className="mt-3 space-y-2 text-sm leading-7 text-[#665950]">
+            <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--muted)]">
               {result.precautionsBefore.map((item) => <li key={item}>· {item}</li>)}
             </ul>
           </article>
           <article>
             <h3 className="text-lg font-black">접종 후</h3>
-            <ul className="mt-3 space-y-2 text-sm leading-7 text-[#665950]">
+            <ul className="mt-3 space-y-2 text-sm leading-7 text-[var(--muted)]">
               {result.precautionsAfter.map((item) => <li key={item}>· {item}</li>)}
             </ul>
           </article>

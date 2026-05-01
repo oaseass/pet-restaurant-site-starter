@@ -11,9 +11,7 @@ import { ResponsiveMapLayout } from "@/components/ResponsiveMapLayout";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { MedicalDisclaimer } from "@/components/MedicalDisclaimer";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
-import { SourceBadge } from "@/components/SourceBadge";
 import { AdSlot } from "@/components/AdSlot";
-import { CharacterImage } from "@/components/CharacterImage";
 import { getCategoryCountsSnapshot, getRegionsSnapshot, getRestaurantsLightSnapshot, sortRestaurantsLight, toRestaurantCardItem } from "@/lib/public-data";
 import {
   PLACE_CATEGORY_LABELS,
@@ -38,14 +36,14 @@ function getCategoryReadinessCopy(category: PlaceCategory, count: number) {
   const label = PLACE_CATEGORY_LABELS[category];
   if (count === 0) {
     return {
-      title: `${label} 공식 데이터 연동 준비 중`,
-      description: `${label} 카테고리는 아직 공개 데이터 연동과 운영 검수 체계를 준비 중입니다. 업체 등록과 사용자 제보 흐름을 정리한 뒤 순차적으로 공개합니다.`,
+      title: `${label} 정보를 준비 중입니다.`,
+      description: `${label} 정보는 지역별로 정리한 뒤 순차적으로 공개할 예정입니다.`,
     };
   }
 
   return {
-    title: `${label} 데이터 운영 안내`,
-    description: `${label} 카테고리는 식당과 달리 공식 일일 동기화 대신 관리자 검수와 수동 등록을 우선 적용하고 있습니다. 방문 전 최신 운영 여부를 업소에 다시 확인해 주세요.`,
+    title: `${label} 이용 안내`,
+    description: `${label} 목록은 계속 보강하고 있습니다. 방문 전 최신 운영 여부와 이용 조건을 다시 확인해 주세요.`,
   };
 }
 
@@ -66,7 +64,7 @@ export async function PlaceDirectoryPage({
   const pageDescription =
     description ??
     categoryInfo?.description ??
-    `${PLACE_CATEGORY_LABELS[category]} 데이터를 공식 동기화, 제보, 업체 등록 기준으로 분리해서 보여줍니다.`;
+    `${PLACE_CATEGORY_LABELS[category]} 정보를 지도와 목록으로 보기 쉽게 정리했습니다.`;
 
   const isRestaurant = category === "PET_RESTAURANT";
 
@@ -109,18 +107,14 @@ export async function PlaceDirectoryPage({
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:py-10">
       <section className="section-shell overflow-hidden px-6 py-6 sm:px-8 sm:py-8">
-        <div className="absolute -right-2 -top-2 h-40 w-40 rounded-full bg-[radial-gradient(circle_at_30%_30%,rgba(255,184,107,0.32),rgba(255,255,255,0)_70%)]" />
-        <div className="absolute bottom-0 right-2 h-28 w-28 sm:h-32 sm:w-32">
-          <CharacterImage asset={categoryInfo?.character ?? "dog-brown"} className="h-full w-full" imageClassName="object-contain" />
-        </div>
         <div className="relative z-10 max-w-3xl">
-          <p className="eyebrow">Place Directory</p>
+          <p className="eyebrow">카테고리</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <SourceBadge label={isRestaurant ? "공식 일일 동기화" : "공식·제보·업체 등록 분리"} />
-            <SourceBadge label={`등록 ${count.toLocaleString("ko-KR")}건`} tone="manual" />
+            <span className="badge">등록 {count.toLocaleString("ko-KR")}건</span>
+            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{isRestaurant ? "지도 탐색 가능" : "지역별 목록 제공"}</span>
           </div>
           <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">{pageTitle}</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-[#665950] sm:text-base">{pageDescription}</p>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">{pageDescription}</p>
           <div className="mt-6 max-w-3xl">
             <SearchBox />
           </div>
@@ -148,8 +142,8 @@ export async function PlaceDirectoryPage({
 
       <div className="mt-6">
         <ResponsiveMapLayout
-          title={`${pageTitle} 탐색 레이아웃`}
-          description="사용자 검색과 목록 노출은 내부 DB만 사용합니다. 공식 데이터 접근은 서버 배치에서만 실행하며, 모바일에서는 리스트와 필터를 먼저 보기 쉽게 배치합니다."
+          title={`${pageTitle} 지도`}
+          description="지도와 목록을 함께 보며 위치를 비교할 수 있습니다. 모바일에서는 목록과 지도를 번갈아 확인할 수 있습니다."
           items={mapItems}
           sidebar={
             <>
@@ -193,15 +187,14 @@ export async function PlaceDirectoryPage({
         {isRestaurant ? (
           <OfficialDataNotice />
         ) : (
-          <section className="card rounded-[2rem] p-5 sm:p-6">
-            <p className="eyebrow">Category Note</p>
+          <section className="card rounded-[1rem] p-5 sm:p-6">
+            <p className="eyebrow">이용 안내</p>
             <h2 className="mt-4 text-xl font-black tracking-tight">{getCategoryReadinessCopy(category, count).title}</h2>
             <div className="mt-5 flex flex-wrap gap-2">
-              <span className="badge bg-[rgba(56,41,29,0.08)] text-[#5f5550]">식당 전용 식품안전나라 안내 미노출</span>
               <span className="badge">등록 {count.toLocaleString("ko-KR")}건</span>
-              <span className="badge">공식 데이터 연동 준비 중</span>
+              <span className="badge">지역별 정보 정리 중</span>
             </div>
-            <p className="mt-4 text-sm leading-7 text-[#5e544d] sm:text-[15px]">
+            <p className="mt-4 text-sm leading-7 text-[var(--muted)] sm:text-[15px]">
               {getCategoryReadinessCopy(category, count).description}
             </p>
           </section>

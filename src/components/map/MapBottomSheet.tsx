@@ -27,20 +27,20 @@ export function MapBottomSheet({
   emptyState?: { title: string; description: string; href: string; hrefLabel: string };
 }) {
   return (
-    <section className="-mt-7 rounded-t-[2rem] border border-[rgba(28,28,28,0.08)] bg-[rgba(255,251,247,0.96)] shadow-[0_-14px_38px_rgba(30,22,18,0.08)] backdrop-blur-xl lg:hidden">
+    <section className="-mt-5 rounded-t-[1.25rem] border border-[var(--line)] bg-[rgba(255,255,255,0.98)] shadow-[0_-10px_28px_rgba(23,23,23,0.06)] backdrop-blur-sm lg:hidden">
       <button
         type="button"
         onClick={onToggle}
         className="flex min-h-11 w-full items-center justify-between gap-3 px-4 py-3 text-left"
       >
         <div>
-          <div className="mx-auto mb-2 h-1.5 w-14 rounded-full bg-[rgba(31,25,21,0.12)]" />
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-[#8f7f73]">Bottom Sheet</p>
-          <p className="mt-1 text-base font-black text-[#1f1915]">리스트 {filteredCount.toLocaleString("ko-KR")}건</p>
+          <div className="mx-auto mb-2 h-1.5 w-14 rounded-full bg-[rgba(23,23,23,0.12)]" />
+          <p className="text-xs font-black text-[var(--muted)]">목록</p>
+          <p className="mt-1 text-base font-black text-[var(--ink)]">리스트 {filteredCount.toLocaleString("ko-KR")}건</p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-[#dff3ec] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">핀 {coordinateReadyCount.toLocaleString("ko-KR")}</span>
-          <span className="rounded-full bg-[#fff0e3] px-2.5 py-1 text-[11px] font-black text-[#b9632e]">대기 {coordinatePendingCount.toLocaleString("ko-KR")}</span>
+          <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[11px] font-black text-[var(--brand)]">핀 {coordinateReadyCount.toLocaleString("ko-KR")}</span>
+          <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-black text-[#b9632e]">대기 {coordinatePendingCount.toLocaleString("ko-KR")}</span>
           <ChevronUp className={clsx("transition", open ? "rotate-0" : "rotate-180")} size={18} />
         </div>
       </button>
@@ -48,18 +48,18 @@ export function MapBottomSheet({
       {open ? (
         <div className="max-h-[48vh] overflow-y-auto px-4 pb-5">
           {preparedState ? (
-            <div className="rounded-[1.7rem] bg-[#1d2624] p-5 text-white shadow-[0_20px_40px_rgba(20,22,21,0.18)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#f6bf91]">Coming Soon</p>
+            <div className="rounded-[1rem] border border-[var(--line)] bg-white p-5 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
+              <p className="text-[11px] font-black text-[var(--brand)]">준비 중</p>
               <h3 className="mt-3 text-xl font-black tracking-tight">{preparedState.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-[#d6cec7]">{preparedState.description}</p>
-              <p className="mt-4 rounded-[1.3rem] bg-white/8 p-3 text-sm leading-6 text-[#efe8e1]">{preparedState.note}</p>
+              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{preparedState.description}</p>
+              <p className="mt-4 rounded-[1rem] bg-[#fcfbf8] p-3 text-sm leading-6 text-[var(--muted)]">{preparedState.note}</p>
             </div>
           ) : emptyState ? (
-            <div className="rounded-[1.7rem] border border-[rgba(28,28,28,0.08)] bg-white/88 p-5 shadow-[0_18px_38px_rgba(41,31,25,0.08)]">
-              <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8f7f73]">No Results</p>
-              <h3 className="mt-3 text-xl font-black tracking-tight text-[#1f1915]">{emptyState.title}</h3>
-              <p className="mt-4 text-sm leading-7 text-[#5f5750]">{emptyState.description}</p>
-              <Link href={emptyState.href} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[#1a463f] px-4 py-2 text-sm font-black text-white">
+            <div className="rounded-[1rem] border border-[var(--line)] bg-white p-5 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
+              <p className="text-[11px] font-black text-[var(--muted)]">검색 결과 없음</p>
+              <h3 className="mt-3 text-xl font-black tracking-tight text-[var(--ink)]">{emptyState.title}</h3>
+              <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{emptyState.description}</p>
+              <Link href={emptyState.href} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">
                 {emptyState.hrefLabel}
               </Link>
             </div>
@@ -72,10 +72,10 @@ export function MapBottomSheet({
                   <article
                     key={item.id}
                     className={clsx(
-                      "rounded-[1.5rem] border p-4 transition",
+                      "rounded-[1rem] border p-4 transition",
                       isSelected
-                        ? "border-[rgba(26,70,63,0.24)] bg-[#f3fbf8] shadow-[0_18px_32px_rgba(26,70,63,0.12)]"
-                        : "border-[rgba(28,28,28,0.08)] bg-white/84",
+                        ? "border-[rgba(31,107,91,0.24)] bg-[#f4faf7] shadow-[0_8px_20px_rgba(31,107,91,0.08)]"
+                        : "border-[var(--line)] bg-white",
                     )}
                   >
                     <button type="button" onClick={() => onSelect(item.id)} className="block w-full text-left">
@@ -90,15 +90,15 @@ export function MapBottomSheet({
                         <span className={clsx("rounded-full px-2.5 py-1 text-[11px] font-black", item.coordinateStatus === "ready" ? "bg-[#dff3ec] text-[#1a463f]" : "bg-[#fff0e3] text-[#b9632e]")}>{item.coordinateStatus === "ready" ? "핀 표시" : "좌표 준비중"}</span>
                       </div>
                       <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
-                      <p className="mt-2 text-sm font-bold text-[#675b51]">{item.regionLabel}</p>
-                      <p className="mt-2 flex gap-2 text-sm leading-6 text-[#5f5750]">
+                      <p className="mt-2 text-sm font-bold text-[var(--muted)]">{item.regionLabel}</p>
+                      <p className="mt-2 flex gap-2 text-sm leading-6 text-[var(--muted)]">
                         <MapPin className="mt-0.5 shrink-0" size={15} />
                         <span>{item.address}</span>
                       </p>
                     </button>
-                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[rgba(28,28,28,0.08)] pt-3">
-                      <p className="text-xs font-bold text-[#8f7f73]">기준일 {item.dataUpdatedLabel}</p>
-                      <Link href={item.href} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[#1f1915] px-4 py-2 text-sm font-black text-white">
+                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
+                      <p className="text-xs font-bold text-[var(--muted)]">기준일 {item.dataUpdatedLabel}</p>
+                      <Link href={item.href} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-black text-white">
                         상세보기
                       </Link>
                     </div>

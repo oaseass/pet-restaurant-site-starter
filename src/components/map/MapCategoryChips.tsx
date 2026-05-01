@@ -21,8 +21,8 @@ export function MapCategoryChips({
             className={clsx(
               "flex min-h-11 shrink-0 items-center gap-3 rounded-full border px-4 py-2.5 text-sm font-black transition",
               isActive
-                ? "border-transparent bg-[#1a463f] text-white shadow-[0_18px_35px_rgba(26,70,63,0.24)]"
-                : "border-[rgba(34,34,34,0.08)] bg-white/88 text-[#1f1915] hover:border-[rgba(255,141,76,0.26)] hover:bg-white",
+                ? "border-[var(--brand)] bg-[var(--brand)] text-white"
+                : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[rgba(31,107,91,0.22)] hover:bg-[#fcfbf9]",
             )}
           >
             <span>{category.label}</span>
@@ -32,8 +32,8 @@ export function MapCategoryChips({
                 isActive
                   ? "bg-white/16 text-white"
                   : category.status === "active"
-                    ? "bg-[#dff3ec] text-[#1a463f]"
-                    : "bg-[#fff0e3] text-[#b9632e]",
+                    ? "bg-[var(--brand-soft)] text-[var(--brand)]"
+                    : "bg-[var(--accent-soft)] text-[#b9632e]",
               )}
             >
               {category.countLabel}
