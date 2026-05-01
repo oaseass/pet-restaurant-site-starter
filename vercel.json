@@ -3,6 +3,22 @@
     {
       "path": "/api/cron/sync-pet-restaurants",
       "schedule": "10 19 * * *"
+    },
+    {
+      "path": "/api/cron/sync-animal-hospitals",
+      "schedule": "20 19 * * *"
+    },
+    {
+      "path": "/api/cron/sync-pet-businesses",
+      "schedule": "30 19 * * *"
+    },
+    {
+      "path": "/api/cron/sync-clinic-fees",
+      "schedule": "40 19 * * *"
+    },
+    {
+      "path": "/api/cron/daily-sync",
+      "schedule": "50 19 * * *"
     }
   ]
 }

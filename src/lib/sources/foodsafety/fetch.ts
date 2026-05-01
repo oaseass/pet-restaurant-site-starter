@@ -1,0 +1,1 @@
+export { fetchFoodSafetyRestaurants } from "@/lib/foodsafety/fetch";

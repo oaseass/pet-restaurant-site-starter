@@ -18,6 +18,69 @@ enum SyncStatus {
   FAILED
 }
 
+enum PlaceCategory {
+  PET_RESTAURANT
+  ANIMAL_HOSPITAL
+  EMERGENCY_HOSPITAL
+  VACCINATION
+  REGISTRATION
+  SURGERY
+  TRAVEL
+  FLIGHT
+  SHIP
+  GROOMING
+  DAYCARE
+  HOTEL
+  TRAINING
+  PET_SUPPLY
+  PET_FOOD
+  FUNERAL
+  LOST_PET
+  INSURANCE
+  CHECKLIST
+}
+
+enum SourceType {
+  OFFICIAL_DATA
+  USER_REPORT
+  OWNER_SUBMISSION
+  MANUAL_DATA
+  ADMIN_VERIFIED
+}
+
+enum SyncSource {
+  FOODSAFETY_PET_RESTAURANT
+  LOCALDATA_ANIMAL_HOSPITAL
+  LOCALDATA_GROOMING
+  LOCALDATA_DAYCARE
+  LOCALDATA_FUNERAL
+  ANIMAL_CLINIC_FEE
+  AIRLINE_OFFICIAL
+  SHIP_MANUAL
+  MANUAL_GUIDE
+  PLATFORM_DAILY_SYNC
+}
+
+enum LostPetStatus {
+  PENDING
+  APPROVED
+  FOUND
+  CLOSED
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  APPROVED
+  REJECTED
+}
+
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Restaurant {
   id                 String           @id @default(cuid())
   sourceKey          String           @unique
@@ -46,17 +109,191 @@ model Restaurant {
   @@index([name])
 }
 
+model Place {
+  id              String        @id @default(cuid())
+  category        PlaceCategory
+  name            String
+  normalizedName  String
+  sido            String?
+  sigungu         String?
+  eupmyeondong    String?
+  address         String?
+  roadAddress     String?
+  lat             Float?
+  lng             Float?
+  phone           String?
+  businessStatus  String?
+  sourceType      SourceType
+  sourceName      SyncSource?
+  sourceUrl       String?
+  sourceId        String?
+  sourceUpdatedAt DateTime?
+  firstSeenAt     DateTime      @default(now())
+  lastSeenAt      DateTime      @default(now())
+  ownerVerified   Boolean       @default(false)
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  profile         PlaceProfile?
+  priceReports    PriceReport[]
+  businessClaims  BusinessClaim[]
+
+  @@index([category, isActive])
+  @@index([sido, sigungu])
+  @@index([normalizedName])
+  @@index([sourceType])
+  @@unique([sourceType, sourceId])
+}
+
+model PlaceProfile {
+  id               String   @id @default(cuid())
+  placeId          String   @unique
+  description      String?
+  openingHours     String?
+  priceText        String?
+  serviceTags      Json?
+  parkingAvailable Boolean?
+  reservationUrl   String?
+  largeDogAllowed  Boolean?
+  catAllowed       Boolean?
+  indoorAllowed    Boolean?
+  outdoorAllowed   Boolean?
+  cageRequired     Boolean?
+  leashRequired    Boolean?
+  ownerUpdatedAt   DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  place Place @relation(fields: [placeId], references: [id], onDelete: Cascade)
+}
+
+model Guide {
+  id                String        @id @default(cuid())
+  category          PlaceCategory
+  title             String
+  slug              String        @unique
+  summary           String
+  content           String
+  sourceNote        String?
+  sourceUrls        Json?
+  reviewedAt        DateTime?
+  medicalDisclaimer Boolean       @default(false)
+  legalDisclaimer   Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([category])
+}
+
+model LostPet {
+  id            String        @id @default(cuid())
+  petName       String
+  animalType    String
+  breed         String?
+  sex           String?
+  age           String?
+  photoUrls     Json?
+  lostSido      String
+  lostSigungu   String?
+  lostAddress   String
+  lostLat       Float?
+  lostLng       Float?
+  lostAt        DateTime
+  description   String
+  rewardAmount  Int?
+  contactToken  String        @unique
+  contactMasked String
+  status        LostPetStatus @default(PENDING)
+  approvedAt    DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  reports LostPetReport[]
+
+  @@index([lostSido, lostSigungu])
+  @@index([status, createdAt])
+}
+
+model LostPetReport {
+  id                    String       @id @default(cuid())
+  lostPetId             String
+  reporterName          String
+  reporterContactMasked String
+  seenAt                DateTime
+  seenAddress           String
+  seenLat               Float?
+  seenLng               Float?
+  description           String
+  status                ReportStatus @default(PENDING)
+  createdAt             DateTime     @default(now())
+
+  lostPet LostPet @relation(fields: [lostPetId], references: [id], onDelete: Cascade)
+
+  @@index([lostPetId, createdAt])
+}
+
+model PriceReport {
+  id              String       @id @default(cuid())
+  placeId         String?
+  category        PlaceCategory
+  itemName        String
+  price           Int?
+  receiptImageUrl String?
+  reportNote      String?
+  sourceType      SourceType
+  status          ReportStatus @default(PENDING)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  place Place? @relation(fields: [placeId], references: [id], onDelete: SetNull)
+
+  @@index([category, status])
+}
+
+model BusinessClaim {
+  id                               String      @id @default(cuid())
+  placeId                          String?
+  businessName                     String
+  ownerName                        String
+  phoneMasked                      String
+  businessRegistrationNumberMasked String
+  requestType                      String
+  status                           ClaimStatus @default(PENDING)
+  submittedAt                      DateTime    @default(now())
+  approvedAt                       DateTime?
+  createdAt                        DateTime    @default(now())
+
+  place Place? @relation(fields: [placeId], references: [id], onDelete: SetNull)
+
+  @@index([status, submittedAt])
+}
+
 model SyncLog {
-  id           String     @id @default(cuid())
-  source       String
-  status       SyncStatus
-  startedAt    DateTime   @default(now())
-  finishedAt   DateTime?
-  totalCount   Int        @default(0)
-  addedCount   Int        @default(0)
-  updatedCount Int        @default(0)
-  removedCount Int        @default(0)
-  message      String?
+  id            String     @id @default(cuid())
+  source        SyncSource
+  mode          String     @default("scheduled")
+  status        SyncStatus
+  startedAt     DateTime   @default(now())
+  finishedAt    DateTime?
+  totalCount    Int        @default(0)
+  addedCount    Int        @default(0)
+  updatedCount  Int        @default(0)
+  removedCount  Int        @default(0)
+  skippedReason String?
+  errorMessage  String?
+  sourceUrl     String?
+  message       String?
 
   @@index([source, status, finishedAt])
+}
+
+model SyncLock {
+  id        String     @id @default(cuid())
+  source    SyncSource @unique
+  lockedAt  DateTime   @default(now())
+  expiresAt DateTime
+  status    String     @default("LOCKED")
+
+  @@index([source, expiresAt])
 }

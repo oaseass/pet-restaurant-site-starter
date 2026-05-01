@@ -1,90 +1,149 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { SearchBox } from "@/components/SearchBox";
+import { CategoryCard } from "@/components/CategoryCard";
+import { CharacterImage } from "@/components/CharacterImage";
+import { DataFreshnessNotice } from "@/components/DataFreshnessNotice";
+import { GuideCard } from "@/components/GuideCard";
+import { LostPetCard } from "@/components/LostPetCard";
+import { PriceNote } from "@/components/PriceNote";
 import { RestaurantCard } from "@/components/RestaurantCard";
-import { SourceNotice } from "@/components/SourceNotice";
 import { AdSlot } from "@/components/AdSlot";
-
-const REGIONS = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "경기", "강원", "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
+import { BRAND_NAME, BRAND_SUBTITLE, BRAND_TAGLINE } from "@/lib/brand";
+import { AROUND_ME_ITEMS, QUICK_CATEGORIES, TODAY_GUIDES } from "@/lib/platform-content";
 
 export default async function HomePage() {
-  const count = await prisma.restaurant.count({ where: { status: "ACTIVE" } });
-  const recent = await prisma.restaurant.findMany({
-    where: { status: "ACTIVE" },
-    orderBy: { updatedAt: "desc" },
-    take: 6,
-  });
-  const lastSync = await prisma.syncLog.findFirst({
-    where: { status: "SUCCESS" },
-    orderBy: { finishedAt: "desc" },
-  });
+  const [restaurantCount, placeCount, lostPetCount, recentRestaurants, recentLostPets, lastSync] = await Promise.all([
+    prisma.restaurant.count({ where: { status: "ACTIVE" } }),
+    prisma.place.count({ where: { isActive: true } }),
+    prisma.lostPet.count({ where: { status: { in: ["APPROVED", "FOUND"] } } }),
+    prisma.restaurant.findMany({ where: { status: "ACTIVE" }, orderBy: { updatedAt: "desc" }, take: 6 }),
+    prisma.lostPet.findMany({ where: { status: { in: ["APPROVED", "FOUND"] } }, orderBy: { createdAt: "desc" }, take: 3 }),
+    prisma.syncLog.findFirst({ where: { status: "SUCCESS" }, orderBy: { finishedAt: "desc" } }),
+  ]);
 
   return (
-    <main className="mx-auto max-w-6xl px-5">
-      <section className="grid gap-8 py-10 lg:grid-cols-[1.15fr_0.85fr] lg:items-center lg:py-12">
-        <div>
-          <div className="mb-4 inline-flex rounded-full border border-gray-200 bg-white/70 px-4 py-2 text-sm font-extrabold text-gray-600">
-            공식 공개 데이터 기반 · 1일 1회 업데이트
+    <main className="mx-auto max-w-6xl px-5 pb-10">
+      <section className="grid gap-6 py-8 lg:grid-cols-[1.16fr_0.84fr] lg:items-stretch lg:py-10">
+        <div className="section-shell px-6 py-6 sm:px-8 sm:py-8">
+          <div className="absolute -bottom-1 right-4 hidden h-36 w-36 opacity-95 sm:block lg:h-40 lg:w-40">
+            <CharacterImage asset="cat-peeking" className="h-full w-full mascot-float" priority imageClassName="object-contain" />
           </div>
-          <h1 className="text-4xl font-black tracking-tight sm:text-6xl">
-            반려동물 동반 가능 식당을<br className="hidden sm:block" /> 더 쉽게 찾으세요.
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-8 text-gray-600">
-            식품안전나라 공개 정보를 지역별 검색, 업소명 검색, 상세 페이지로 정리한 조회 서비스입니다.
-          </p>
-          <div className="mt-8"><SearchBox /></div>
-          <p className="mt-4 text-sm font-bold text-gray-500">
-            현재 DB 등록 {count.toLocaleString("ko-KR")}곳
-            {lastSync?.finishedAt ? ` · 마지막 업데이트 ${lastSync.finishedAt.toLocaleString("ko-KR")}` : ""}
-          </p>
+          <div className="relative z-10 max-w-2xl">
+            <p className="eyebrow">{BRAND_NAME}</p>
+            <h1 className="mt-5 display-title">{BRAND_TAGLINE}</h1>
+            <p className="mt-6 max-w-2xl text-base leading-8 text-[#655a53] sm:text-lg">
+              {BRAND_SUBTITLE} 검색은 내부 DB만 사용하고, 공식 원천은 서버 배치에서만 접근합니다. 원본 사이트를 사용자 요청마다 다시 호출하지 않습니다.
+            </p>
+            <div className="mt-8 max-w-3xl"><SearchBox /></div>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link href="/places" className="btn-secondary">내 주변 카테고리 보기</Link>
+              <Link href="/guide" className="btn-secondary">생활 가이드 보기</Link>
+            </div>
+            <p className="mt-6 text-sm font-bold text-[#85786d]">
+              현재 식당 {restaurantCount.toLocaleString("ko-KR")}곳 · 장소 {placeCount.toLocaleString("ko-KR")}건 · 실종 제보 {lostPetCount.toLocaleString("ko-KR")}건
+              {lastSync?.finishedAt ? ` · 마지막 업데이트 ${lastSync.finishedAt.toLocaleString("ko-KR")}` : ""}
+            </p>
+          </div>
         </div>
-        <div className="card rounded-[2.5rem] p-4 sm:p-6">
-          <div className="rounded-[2rem] bg-gray-950 p-6 text-white">
-            <p className="text-sm font-bold text-lime-200">오늘의 체크</p>
-            <h2 className="mt-3 text-3xl font-black">방문 전 3가지만 확인</h2>
-            <ul className="mt-5 space-y-3 text-sm leading-6 text-gray-200">
-              <li>1. 실제 영업 여부와 좌석 운영 방식</li>
-              <li>2. 목줄·케이지·대형견 가능 여부</li>
-              <li>3. 업소별 반려동물 동반 조건</li>
+
+        <div className="section-shell p-5 sm:p-6">
+          <div className="absolute right-4 top-4 h-28 w-28 opacity-95 sm:h-32 sm:w-32">
+            <CharacterImage asset="dog-hoodie" className="h-full w-full mascot-drift" imageClassName="object-contain" />
+          </div>
+          <div className="relative z-10 rounded-[1.9rem] bg-[#162320] p-6 text-white">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e7c694]">Daily Policy</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight">데이터는 내부에 저장하고, 검색은 내부에서 끝냅니다.</h2>
+            <ul className="mt-5 space-y-3 text-sm leading-6 text-[#d4cdc8]">
+              <li>1. 사용자 검색 시 원본 사이트 호출 금지</li>
+              <li>2. 공식/공공 데이터는 서버 배치로만 접근</li>
+              <li>3. 공식 데이터 업데이트는 하루 1회 이하 유지</li>
             </ul>
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <div className="rounded-[1.5rem] border border-white/60 bg-white/70 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400">등록 업소</p>
-              <p className="mt-2 text-2xl font-black text-gray-900">{count.toLocaleString("ko-KR")}</p>
+          <div className="relative z-10 mt-4 grid grid-cols-2 gap-3">
+            <div className="stat-tile">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">식당</p>
+              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{restaurantCount.toLocaleString("ko-KR")}</p>
             </div>
-            <div className="rounded-[1.5rem] border border-white/60 bg-white/70 p-4">
-              <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400">SEO 지역</p>
-              <p className="mt-2 text-2xl font-black text-gray-900">{REGIONS.length}개</p>
+            <div className="stat-tile">
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">장소</p>
+              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{placeCount.toLocaleString("ko-KR")}</p>
+            </div>
+          </div>
+          <div className="relative z-10 mt-4 rounded-[1.6rem] border border-[rgba(56,41,29,0.08)] bg-white/72 p-4">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">오늘 많이 찾는 카테고리</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {AROUND_ME_ITEMS.map((item) => (
+                <Link key={item.href} href={item.href} className="badge">{item.title}</Link>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-6">
-        <h2 className="mb-4 text-2xl font-black">지역별 바로가기</h2>
-        <div className="flex flex-wrap gap-2">
-          {REGIONS.map((region) => (
-            <Link key={region} href={`/regions/${encodeURIComponent(region)}`} className="badge px-4 py-2 text-sm">
-              {region}
-            </Link>
+      <section className="section-shell px-5 py-6 sm:px-6">
+        <div className="absolute bottom-3 right-4 hidden h-20 w-20 opacity-90 sm:block">
+          <CharacterImage asset="puppy-front-white" className="h-full w-full" imageClassName="object-contain" />
+        </div>
+        <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="eyebrow">Categories</p>
+            <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">생활 동선을 기준으로 카테고리를 나눴습니다.</h2>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-[#645952] sm:text-base">식당과 병원만 따로 떼지 않고 여행, 접종, 실종 제보까지 실제 반려생활 흐름에 맞춰 묶었습니다.</p>
+          </div>
+        </div>
+        <div className="relative z-10 mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {QUICK_CATEGORIES.slice(0, 9).map((category) => <CategoryCard key={category.href} category={category} />)}
+        </div>
+      </section>
+
+      <DataFreshnessNotice className="mt-8" />
+
+      <AdSlot label="메인 중단 광고 영역" />
+
+      <section className="py-2">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow">Guides</p>
+            <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">오늘 많이 보는 생활 가이드</h2>
+          </div>
+          <Link href="/guide" className="ink-link text-sm">전체 가이드</Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {TODAY_GUIDES.map((guide) => (
+            <GuideCard key={guide.href} title={guide.title} description={guide.description} href={guide.href} character={guide.character} />
           ))}
         </div>
       </section>
 
-      <AdSlot label="메인 중단 광고 영역" />
-
-      <section className="py-8">
-        <div className="mb-4 flex items-end justify-between gap-4">
-          <h2 className="text-2xl font-black">최근 업데이트 업소</h2>
-          <Link href="/search" className="text-sm font-black text-gray-600">전체 보기</Link>
+      <section className="py-2">
+        <div className="mb-5 flex items-end justify-between gap-4">
+          <div>
+            <p className="eyebrow">Recent</p>
+            <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">최근 반영 식당</h2>
+          </div>
+          <Link href="/restaurants" className="ink-link text-sm">식당 전체 보기</Link>
         </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {recent.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} />)}
+          {recentRestaurants.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} />)}
         </div>
       </section>
 
-      <SourceNotice className="mt-8" />
+      <section className="mt-8 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+        <div>
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">Lost Pets</p>
+              <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">최근 실종 제보</h2>
+            </div>
+            <Link href="/lost-pets" className="ink-link text-sm">전체 보기</Link>
+          </div>
+          <div className="grid gap-4">
+            {recentLostPets.length > 0 ? recentLostPets.map((item) => <LostPetCard key={item.id} item={item} />) : <div className="card rounded-[2rem] p-6 text-sm leading-7 text-[#665950]">공개된 실종 제보가 아직 없습니다.</div>}
+          </div>
+        </div>
+        <PriceNote />
+      </section>
     </main>
   );
 }

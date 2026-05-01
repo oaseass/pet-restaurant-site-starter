@@ -1,25 +1,42 @@
 import Link from "next/link";
+import { CharacterImage } from "@/components/CharacterImage";
+import { BRAND_NAME, BRAND_TAGLINE } from "@/lib/brand";
+import { POLICY_LINKS, PRIMARY_NAV } from "@/lib/platform-content";
 
 export function Footer() {
   return (
-    <footer className="mt-20 px-5 pb-10 pt-4">
-      <div className="mx-auto grid max-w-6xl gap-4 md:grid-cols-[1.5fr_0.8fr_0.9fr]">
-        <div className="card rounded-[2rem] p-5 text-sm leading-7 text-gray-600">
-          본 사이트는 식품안전나라 공개 정보를 보기 쉽게 정리한 조회 서비스입니다. 사용자 검색 시 원본 사이트를 호출하지 않고,
-          서버 크론이 하루 1회만 동기화한 자체 DB를 조회합니다. 실제 방문 전 영업 여부와 반려동물 동반 조건은 업소에 직접 확인하세요.
-        </div>
-        <div className="card rounded-[2rem] p-5 text-sm text-gray-600">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400">Quick Links</p>
-          <div className="mt-4 flex flex-col gap-3 font-bold">
-            <Link href="/search">식당 검색</Link>
-            <Link href="/regions/서울">지역별 보기</Link>
-            <Link href="/guide">이용 가이드</Link>
+    <footer className="mt-24 px-5 pb-28 pt-6 md:pb-12">
+      <div className="mx-auto max-w-6xl">
+        <div className="section-shell grid gap-4 p-4 sm:p-6 md:grid-cols-[1.45fr_0.85fr_0.9fr]">
+          <div className="relative overflow-hidden rounded-[1.8rem] bg-[#18211e] p-6 text-[#f8f2eb]">
+            <div className="absolute bottom-0 right-1 h-28 w-28 opacity-95 sm:h-32 sm:w-32">
+              <CharacterImage asset="cat-waving" className="h-full w-full" imageClassName="object-contain" />
+            </div>
+            <p className="text-[11px] font-black uppercase tracking-[0.24em] text-[#f0caa4]">{BRAND_NAME}</p>
+            <h2 className="mt-3 max-w-sm text-2xl font-black tracking-tight">{BRAND_TAGLINE}</h2>
+            <p className="mt-4 max-w-md text-sm leading-7 text-[#d7ccc2]">
+              사용자 검색 시 원본 사이트를 호출하지 않고, 공식 데이터 접근은 서버 배치에서만 처리합니다. 모든 공식/공공 데이터 업데이트는 하루 1회 이하를 원칙으로 운영합니다.
+            </p>
           </div>
-        </div>
-        <div className="card rounded-[2rem] p-5 text-sm leading-7 text-gray-600">
-          <p className="text-xs font-black uppercase tracking-[0.18em] text-gray-400">Policy</p>
-          <p className="mt-4">목록에 없다고 동반 불가라고 단정하지 않습니다.</p>
-          <p className="mt-2">공식 데이터 출처와 기준일을 주요 페이지에 계속 표시합니다.</p>
+
+          <div className="card rounded-[1.8rem] p-5 text-sm text-[#665950]">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#9d8e82]">Quick Links</p>
+            <div className="mt-4 flex flex-col gap-3 font-bold">
+              {PRIMARY_NAV.map((item) => (
+                <Link key={item.href} href={item.href} className="ink-link">{item.label}</Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="card rounded-[1.8rem] p-5 text-sm leading-7 text-[#665950]">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#9d8e82]">Policy</p>
+            <div className="mt-4 flex flex-col gap-2">
+              {POLICY_LINKS.map((item) => (
+                <Link key={item.href} href={item.href} className="ink-link">{item.label}</Link>
+              ))}
+            </div>
+            <p className="mt-4">목록에 없다고 이용 불가로 단정하지 않습니다. 최신 조건과 운영 시간은 반드시 공식 기관이나 업체에 다시 확인하세요.</p>
+          </div>
         </div>
       </div>
     </footer>

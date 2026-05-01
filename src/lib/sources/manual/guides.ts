@@ -1,0 +1,1 @@
+export { GUIDE_DOCS } from "@/lib/platform-content";

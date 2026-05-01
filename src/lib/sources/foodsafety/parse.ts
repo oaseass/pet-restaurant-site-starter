@@ -1,0 +1,1 @@
+export { parseRestaurantsFromHtml } from "@/lib/foodsafety/parse";
