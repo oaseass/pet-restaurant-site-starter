@@ -74,6 +74,25 @@ export async function PlaceDirectoryPage({
         }),
   ]);
 
+  const mapItems = isRestaurant
+    ? restaurants.map((restaurant) => ({
+        id: restaurant.id,
+        name: restaurant.name,
+        address: restaurant.address,
+        lat: restaurant.lat,
+        lng: restaurant.lng,
+        categoryLabel: restaurant.businessType,
+        href: `/restaurants/${restaurant.id}`,
+      }))
+    : places.map((place) => ({
+        id: place.id,
+        name: place.name,
+        address: place.address,
+        lat: place.lat,
+        lng: place.lng,
+        categoryLabel: PLACE_CATEGORY_LABELS[place.category],
+      }));
+
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:py-10">
       <section className="section-shell overflow-hidden px-6 py-6 sm:px-8 sm:py-8">
@@ -107,6 +126,7 @@ export async function PlaceDirectoryPage({
         <ResponsiveMapLayout
           title={`${pageTitle} 탐색 레이아웃`}
           description="사용자 검색과 목록 노출은 내부 DB만 사용합니다. 공식 데이터 접근은 서버 배치에서만 실행하며, 모바일에서는 리스트와 필터를 먼저 보기 쉽게 배치합니다."
+          items={mapItems}
           sidebar={
             <>
               {isRestaurant ? (

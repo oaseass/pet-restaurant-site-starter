@@ -1,16 +1,11 @@
-import { runManagedSync } from "@/lib/sources/sync-runner";
+import { syncLocalDataCategory } from "@/lib/sources/localdata/common";
 
 export async function syncAnimalHospitals(options: { force?: boolean } = {}) {
-  return runManagedSync({
+  return syncLocalDataCategory({
     source: "LOCALDATA_ANIMAL_HOSPITAL",
-    sourceUrl: "https://www.localdata.go.kr",
-    force: options.force,
-    runner: async () => ({
-      totalCount: 0,
-      addedCount: 0,
-      updatedCount: 0,
-      removedCount: 0,
-      message: "LocalData animal hospital connector is prepared for daily batch execution. Last successful data remains served until official import is enabled.",
-    }),
-  });
+    category: "ANIMAL_HOSPITAL",
+    urlEnvName: "LOCALDATA_ANIMAL_HOSPITAL_URL",
+    sourceLabel: "동물병원",
+    activeStatusKeywords: ["정상", "영업", "운영", "개설"],
+  }, options);
 }
