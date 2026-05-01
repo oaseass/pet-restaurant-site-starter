@@ -296,6 +296,7 @@ export async function syncLocalDataCategory(config: LocalDataConfig, options: { 
     source: config.source,
     sourceUrl: sourceUrl || "https://www.localdata.go.kr",
     force: options.force,
+    skipWhenExternalSyncDisabled: true,
     runner: async () => {
       if (!sourceUrl) {
         return {
