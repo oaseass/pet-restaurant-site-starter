@@ -14,56 +14,58 @@ type MapItem = {
 
 declare global {
   interface Window {
-    kakao?: {
-      maps: {
-        load: (callback: () => void) => void;
-        Map: new (container: HTMLElement, options: { center: unknown; level: number }) => unknown;
-        LatLng: new (lat: number, lng: number) => unknown;
-        Marker: new (options: { position: unknown; map: unknown }) => unknown;
-        LatLngBounds: new () => {
-          extend: (latLng: unknown) => void;
-        };
-        event: {
-          addListener: (target: unknown, eventName: string, handler: () => void) => void;
-        };
+    L?: {
+      map: (container: HTMLElement) => {
+        setView: (center: [number, number], zoom: number) => unknown;
+        fitBounds: (bounds: [number, number][]) => void;
+        remove: () => void;
+        eachLayer: (callback: (layer: unknown) => void) => void;
+        removeLayer: (layer: unknown) => void;
+      };
+      tileLayer: (url: string, options: { attribution: string }) => { addTo: (map: unknown) => void };
+      marker: (latLng: [number, number]) => {
+        addTo: (map: unknown) => { on: (event: string, handler: () => void) => void };
+        on: (event: string, handler: () => void) => void;
       };
     };
   }
 }
 
-function useKakaoMapScript() {
-  const [status, setStatus] = useState<"idle" | "ready" | "missing-key" | "error">("idle");
+function useLeafletScript() {
+  const [status, setStatus] = useState<"idle" | "ready" | "error">("idle");
 
   useEffect(() => {
-    const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
-    if (!appKey) {
-      setStatus("missing-key");
+    if (window.L) {
+      setStatus("ready");
       return;
     }
 
-    if (window.kakao?.maps) {
-      window.kakao.maps.load(() => setStatus("ready"));
+    const existingScript = document.querySelector<HTMLScriptElement>('script[data-leaflet-map="true"]');
+    const existingStyle = document.querySelector<HTMLLinkElement>('link[data-leaflet-map="true"]');
+
+    if (existingScript && existingStyle) {
+      existingScript.addEventListener("load", () => setStatus("ready"), { once: true });
+      existingScript.addEventListener("error", () => setStatus("error"), { once: true });
       return;
     }
 
-    const existing = document.querySelector<HTMLScriptElement>('script[data-kakao-map="true"]');
-    if (existing) {
-      existing.addEventListener("load", () => window.kakao?.maps.load(() => setStatus("ready")), { once: true });
-      existing.addEventListener("error", () => setStatus("error"), { once: true });
-      return;
-    }
+    const style = document.createElement("link");
+    style.rel = "stylesheet";
+    style.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+    style.dataset.leafletMap = "true";
+    document.head.appendChild(style);
 
     const script = document.createElement("script");
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${appKey}&autoload=false`;
+    script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
     script.async = true;
-    script.dataset.kakaoMap = "true";
-    script.addEventListener("load", () => window.kakao?.maps.load(() => setStatus("ready")), { once: true });
+    script.dataset.leafletMap = "true";
+    script.addEventListener("load", () => setStatus("ready"), { once: true });
     script.addEventListener("error", () => setStatus("error"), { once: true });
     document.head.appendChild(script);
 
     return () => {
       script.removeEventListener("error", () => setStatus("error"));
-      script.removeEventListener("load", () => window.kakao?.maps.load(() => setStatus("ready")));
+      script.removeEventListener("load", () => setStatus("ready"));
     };
   }, []);
 
@@ -83,8 +85,9 @@ export function ResponsiveMapLayout({
 }) {
   const [mobileView, setMobileView] = useState<"list" | "map">("list");
   const [selectedId, setSelectedId] = useState<string | null>(items[0]?.id ?? null);
-  const mapStatus = useKakaoMapScript();
+  const mapStatus = useLeafletScript();
   const mapRef = useRef<HTMLDivElement | null>(null);
+  const mapInstanceRef = useRef<{ remove: () => void; setView: (center: [number, number], zoom: number) => unknown } | null>(null);
   const mappableItems = items.filter((item) => typeof item.lat === "number" && typeof item.lng === "number");
   const selectedItem = items.find((item) => item.id === selectedId) ?? items[0] ?? null;
 
@@ -94,32 +97,38 @@ export function ResponsiveMapLayout({
   }, [items, selectedId]);
 
   useEffect(() => {
-    if (mapStatus !== "ready" || !mapRef.current || !window.kakao?.maps) return;
+    if (mapStatus !== "ready" || !mapRef.current || !window.L) return;
 
-    const kakaoMaps = window.kakao.maps;
-    const fallbackCenter = new kakaoMaps.LatLng(36.35, 127.9);
-    const map = new kakaoMaps.Map(mapRef.current, {
-      center: fallbackCenter,
-      level: mappableItems.length > 1 ? 8 : 5,
-    });
+    mapInstanceRef.current?.remove();
 
-    const bounds = new kakaoMaps.LatLngBounds();
+    const map = window.L.map(mapRef.current);
+    map.setView([36.35, 127.9], mappableItems.length > 1 ? 7 : 8);
+    window.L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
 
-    for (const item of mappableItems) {
-      const position = new kakaoMaps.LatLng(item.lat as number, item.lng as number);
-      const marker = new kakaoMaps.Marker({ position, map });
-      bounds.extend(position);
-      kakaoMaps.event.addListener(marker, "click", () => setSelectedId(item.id));
+    if (mappableItems.length > 0) {
+      const bounds = mappableItems.map((item) => [item.lat as number, item.lng as number] as [number, number]);
+      map.fitBounds(bounds);
+
+      for (const item of mappableItems) {
+        const marker = window.L.marker([item.lat as number, item.lng as number]).addTo(map);
+        marker.on("click", () => setSelectedId(item.id));
+      }
     }
 
-    if (mappableItems.length > 0 && "setBounds" in (map as object)) {
-      (map as { setBounds: (bounds: unknown) => void }).setBounds(bounds);
-    }
+    mapInstanceRef.current = map;
 
-    if (selectedItem && selectedItem.lat && selectedItem.lng && "panTo" in (map as object)) {
-      (map as { panTo: (position: unknown) => void }).panTo(new kakaoMaps.LatLng(selectedItem.lat, selectedItem.lng));
-    }
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
   }, [mapStatus, mappableItems, selectedItem]);
+
+  useEffect(() => {
+    if (!mapInstanceRef.current || !selectedItem?.lat || !selectedItem.lng) return;
+    mapInstanceRef.current.setView([selectedItem.lat, selectedItem.lng], 8);
+  }, [selectedItem]);
 
   return (
     <section>
@@ -142,9 +151,7 @@ export function ResponsiveMapLayout({
             <div className="mt-5 flex-1 overflow-hidden rounded-[1.5rem] border border-[rgba(56,41,29,0.1)] bg-white/70">
               <div ref={mapRef} className="h-[360px] w-full bg-[radial-gradient(circle_at_20%_20%,rgba(189,237,220,0.45),transparent_24%),radial-gradient(circle_at_80%_16%,rgba(255,184,107,0.35),transparent_22%),linear-gradient(180deg,rgba(255,255,255,0.72),rgba(248,244,238,0.95))]" />
               <div className="border-t border-[rgba(56,41,29,0.08)] p-4 text-sm leading-7 text-[#665950]">
-                {mapStatus === "missing-key" ? (
-                  <p>NEXT_PUBLIC_KAKAO_MAP_APP_KEY가 없어 실제 지도를 띄우지 못하고 있습니다. 키를 넣으면 같은 화면에서 즉시 지도 모드가 활성화됩니다.</p>
-                ) : mapStatus === "error" ? (
+                {mapStatus === "error" ? (
                   <p>지도 SDK를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
                 ) : mappableItems.length === 0 ? (
                   <p>현재 저장된 좌표 데이터가 없어 목록 중심으로 보여주고 있습니다. 다음 배치 동기화에서 공식 파일 좌표 또는 서버 지오코딩이 반영되면 지도 마커가 나타납니다.</p>
