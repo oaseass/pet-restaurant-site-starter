@@ -1,0 +1,1004 @@
+{
+  "bySido": [
+    {
+      "sido": "경기",
+      "count": 487
+    },
+    {
+      "sido": "서울",
+      "count": 362
+    },
+    {
+      "sido": "경남",
+      "count": 174
+    },
+    {
+      "sido": "강원",
+      "count": 142
+    },
+    {
+      "sido": "부산",
+      "count": 102
+    },
+    {
+      "sido": "제주",
+      "count": 83
+    },
+    {
+      "sido": "인천",
+      "count": 82
+    },
+    {
+      "sido": "대구",
+      "count": 63
+    },
+    {
+      "sido": "경북",
+      "count": 58
+    },
+    {
+      "sido": "충남",
+      "count": 53
+    },
+    {
+      "sido": "대전",
+      "count": 48
+    },
+    {
+      "sido": "충북",
+      "count": 42
+    },
+    {
+      "sido": "전남",
+      "count": 40
+    },
+    {
+      "sido": "전북",
+      "count": 39
+    },
+    {
+      "sido": "광주",
+      "count": 35
+    },
+    {
+      "sido": "울산",
+      "count": 34
+    },
+    {
+      "sido": "세종",
+      "count": 5
+    }
+  ],
+  "bySigungu": [
+    {
+      "sido": "경기",
+      "sigungu": "용인시",
+      "count": 56
+    },
+    {
+      "sido": "경기",
+      "sigungu": "수원시",
+      "count": 48
+    },
+    {
+      "sido": "경남",
+      "sigungu": "거제시",
+      "count": 47
+    },
+    {
+      "sido": "강원",
+      "sigungu": "춘천시",
+      "count": 46
+    },
+    {
+      "sido": "제주",
+      "sigungu": "제주시",
+      "count": 44
+    },
+    {
+      "sido": "경기",
+      "sigungu": "부천시",
+      "count": 39
+    },
+    {
+      "sido": "서울",
+      "sigungu": "마포구",
+      "count": 39
+    },
+    {
+      "sido": "제주",
+      "sigungu": "서귀포시",
+      "count": 39
+    },
+    {
+      "sido": "경기",
+      "sigungu": "고양시",
+      "count": 37
+    },
+    {
+      "sido": "경기",
+      "sigungu": "화성시",
+      "count": 30
+    },
+    {
+      "sido": "경기",
+      "sigungu": "파주시",
+      "count": 27
+    },
+    {
+      "sido": "인천",
+      "sigungu": "중구",
+      "count": 27
+    },
+    {
+      "sido": "강원",
+      "sigungu": "강릉시",
+      "count": 26
+    },
+    {
+      "sido": "서울",
+      "sigungu": "서초구",
+      "count": 26
+    },
+    {
+      "sido": "서울",
+      "sigungu": "송파구",
+      "count": 26
+    },
+    {
+      "sido": "경남",
+      "sigungu": "양산시",
+      "count": 25
+    },
+    {
+      "sido": "서울",
+      "sigungu": "광진구",
+      "count": 24
+    },
+    {
+      "sido": "서울",
+      "sigungu": "성동구",
+      "count": 24
+    },
+    {
+      "sido": "전북",
+      "sigungu": "전주시",
+      "count": 24
+    },
+    {
+      "sido": "경기",
+      "sigungu": "남양주시",
+      "count": 23
+    },
+    {
+      "sido": "경기",
+      "sigungu": "하남시",
+      "count": 23
+    },
+    {
+      "sido": "경기",
+      "sigungu": "의정부시",
+      "count": 22
+    },
+    {
+      "sido": "부산",
+      "sigungu": "수영구",
+      "count": 22
+    },
+    {
+      "sido": "서울",
+      "sigungu": "서대문구",
+      "count": 22
+    },
+    {
+      "sido": "강원",
+      "sigungu": "원주시",
+      "count": 21
+    },
+    {
+      "sido": "경기",
+      "sigungu": "김포시",
+      "count": 21
+    },
+    {
+      "sido": "경기",
+      "sigungu": "양평군",
+      "count": 21
+    },
+    {
+      "sido": "대전",
+      "sigungu": "서구",
+      "count": 20
+    },
+    {
+      "sido": "서울",
+      "sigungu": "강남구",
+      "count": 20
+    },
+    {
+      "sido": "경기",
+      "sigungu": "성남시",
+      "count": 19
+    },
+    {
+      "sido": "경남",
+      "sigungu": "김해시",
+      "count": 19
+    },
+    {
+      "sido": "부산",
+      "sigungu": "기장군",
+      "count": 18
+    },
+    {
+      "sido": "서울",
+      "sigungu": "강서구",
+      "count": 18
+    },
+    {
+      "sido": "서울",
+      "sigungu": "성북구",
+      "count": 18
+    },
+    {
+      "sido": "서울",
+      "sigungu": "용산구",
+      "count": 18
+    },
+    {
+      "sido": "경남",
+      "sigungu": "진주시",
+      "count": 17
+    },
+    {
+      "sido": "대구",
+      "sigungu": "중구",
+      "count": 17
+    },
+    {
+      "sido": "서울",
+      "sigungu": "영등포구",
+      "count": 17
+    },
+    {
+      "sido": "충북",
+      "sigungu": "청주시",
+      "count": 17
+    },
+    {
+      "sido": "대전",
+      "sigungu": "동구",
+      "count": 16
+    },
+    {
+      "sido": "충남",
+      "sigungu": "천안시",
+      "count": 16
+    },
+    {
+      "sido": "경기",
+      "sigungu": "시흥시",
+      "count": 15
+    },
+    {
+      "sido": "경기",
+      "sigungu": "안양시",
+      "count": 15
+    },
+    {
+      "sido": "경남",
+      "sigungu": "창원시",
+      "count": 15
+    },
+    {
+      "sido": "부산",
+      "sigungu": "부산진구",
+      "count": 15
+    },
+    {
+      "sido": "서울",
+      "sigungu": "강동구",
+      "count": 15
+    },
+    {
+      "sido": "서울",
+      "sigungu": "관악구",
+      "count": 15
+    },
+    {
+      "sido": "인천",
+      "sigungu": "연수구",
+      "count": 15
+    },
+    {
+      "sido": "충북",
+      "sigungu": "충주시",
+      "count": 15
+    },
+    {
+      "sido": "경기",
+      "sigungu": "광주시",
+      "count": 14
+    },
+    {
+      "sido": "경북",
+      "sigungu": "경주시",
+      "count": 14
+    },
+    {
+      "sido": "경북",
+      "sigungu": "포항시",
+      "count": 14
+    },
+    {
+      "sido": "경남",
+      "sigungu": "사천시",
+      "count": 12
+    },
+    {
+      "sido": "서울",
+      "sigungu": "종로구",
+      "count": 12
+    },
+    {
+      "sido": "인천",
+      "sigungu": "남동구",
+      "count": 12
+    },
+    {
+      "sido": "경기",
+      "sigungu": "여주시",
+      "count": 11
+    },
+    {
+      "sido": "광주",
+      "sigungu": "광산구",
+      "count": 11
+    },
+    {
+      "sido": "대구",
+      "sigungu": "수성구",
+      "count": 11
+    },
+    {
+      "sido": "강원",
+      "sigungu": "양양군",
+      "count": 10
+    },
+    {
+      "sido": "경기",
+      "sigungu": "이천시",
+      "count": 10
+    },
+    {
+      "sido": "경기",
+      "sigungu": "포천시",
+      "count": 10
+    },
+    {
+      "sido": "경남",
+      "sigungu": "하동군",
+      "count": 10
+    },
+    {
+      "sido": "대구",
+      "sigungu": "달서구",
+      "count": 10
+    },
+    {
+      "sido": "서울",
+      "sigungu": "금천구",
+      "count": 10
+    },
+    {
+      "sido": "서울",
+      "sigungu": "동대문구",
+      "count": 10
+    },
+    {
+      "sido": "서울",
+      "sigungu": "중랑구",
+      "count": 10
+    },
+    {
+      "sido": "울산",
+      "sigungu": "북구",
+      "count": 10
+    },
+    {
+      "sido": "전남",
+      "sigungu": "순천시",
+      "count": 10
+    },
+    {
+      "sido": "강원",
+      "sigungu": "삼척시",
+      "count": 9
+    },
+    {
+      "sido": "강원",
+      "sigungu": "홍천군",
+      "count": 9
+    },
+    {
+      "sido": "경기",
+      "sigungu": "안산시",
+      "count": 9
+    },
+    {
+      "sido": "경기",
+      "sigungu": "양주시",
+      "count": 9
+    },
+    {
+      "sido": "경남",
+      "sigungu": "밀양시",
+      "count": 9
+    },
+    {
+      "sido": "경북",
+      "sigungu": "구미시",
+      "count": 9
+    },
+    {
+      "sido": "대구",
+      "sigungu": "북구",
+      "count": 9
+    },
+    {
+      "sido": "대전",
+      "sigungu": "유성구",
+      "count": 9
+    },
+    {
+      "sido": "부산",
+      "sigungu": "연제구",
+      "count": 9
+    },
+    {
+      "sido": "부산",
+      "sigungu": "해운대구",
+      "count": 9
+    },
+    {
+      "sido": "인천",
+      "sigungu": "서구",
+      "count": 9
+    },
+    {
+      "sido": "충남",
+      "sigungu": "태안군",
+      "count": 9
+    },
+    {
+      "sido": "서울",
+      "sigungu": "노원구",
+      "count": 8
+    },
+    {
+      "sido": "울산",
+      "sigungu": "중구",
+      "count": 8
+    },
+    {
+      "sido": "충북",
+      "sigungu": "제천시",
+      "count": 8
+    },
+    {
+      "sido": "경기",
+      "sigungu": "평택시",
+      "count": 7
+    },
+    {
+      "sido": "광주",
+      "sigungu": "동구",
+      "count": 7
+    },
+    {
+      "sido": "광주",
+      "sigungu": "서구",
+      "count": 7
+    },
+    {
+      "sido": "대구",
+      "sigungu": "남구",
+      "count": 7
+    },
+    {
+      "sido": "서울",
+      "sigungu": "은평구",
+      "count": 7
+    },
+    {
+      "sido": "경기",
+      "sigungu": "광명시",
+      "count": 6
+    },
+    {
+      "sido": "경남",
+      "sigungu": "통영시",
+      "count": 6
+    },
+    {
+      "sido": "경북",
+      "sigungu": "경산시",
+      "count": 6
+    },
+    {
+      "sido": "서울",
+      "sigungu": "강북구",
+      "count": 6
+    },
+    {
+      "sido": "서울",
+      "sigungu": "구로구",
+      "count": 6
+    },
+    {
+      "sido": "서울",
+      "sigungu": "중구",
+      "count": 6
+    },
+    {
+      "sido": "울산",
+      "sigungu": "동구",
+      "count": 6
+    },
+    {
+      "sido": "인천",
+      "sigungu": "미추홀구",
+      "count": 6
+    },
+    {
+      "sido": "충남",
+      "sigungu": "부여군",
+      "count": 6
+    },
+    {
+      "sido": "광주",
+      "sigungu": "남구",
+      "count": 5
+    },
+    {
+      "sido": "광주",
+      "sigungu": "북구",
+      "count": 5
+    },
+    {
+      "sido": "부산",
+      "sigungu": "동래구",
+      "count": 5
+    },
+    {
+      "sido": "울산",
+      "sigungu": "남구",
+      "count": 5
+    },
+    {
+      "sido": "울산",
+      "sigungu": "울주군",
+      "count": 5
+    },
+    {
+      "sido": "인천",
+      "sigungu": "옹진군",
+      "count": 5
+    },
+    {
+      "sido": "전북",
+      "sigungu": "군산시",
+      "count": 5
+    },
+    {
+      "sido": "강원",
+      "sigungu": "고성군",
+      "count": 4
+    },
+    {
+      "sido": "강원",
+      "sigungu": "동해시",
+      "count": 4
+    },
+    {
+      "sido": "경기",
+      "sigungu": "오산시",
+      "count": 4
+    },
+    {
+      "sido": "대구",
+      "sigungu": "달성군",
+      "count": 4
+    },
+    {
+      "sido": "부산",
+      "sigungu": "금정구",
+      "count": 4
+    },
+    {
+      "sido": "부산",
+      "sigungu": "북구",
+      "count": 4
+    },
+    {
+      "sido": "부산",
+      "sigungu": "영도구",
+      "count": 4
+    },
+    {
+      "sido": "인천",
+      "sigungu": "부평구",
+      "count": 4
+    },
+    {
+      "sido": "전남",
+      "sigungu": "나주시",
+      "count": 4
+    },
+    {
+      "sido": "전남",
+      "sigungu": "여수시",
+      "count": 4
+    },
+    {
+      "sido": "전남",
+      "sigungu": "영암군",
+      "count": 4
+    },
+    {
+      "sido": "전북",
+      "sigungu": "김제시",
+      "count": 4
+    },
+    {
+      "sido": "충남",
+      "sigungu": "서산시",
+      "count": 4
+    },
+    {
+      "sido": "충남",
+      "sigungu": "홍성군",
+      "count": 4
+    },
+    {
+      "sido": "강원",
+      "sigungu": "화천군",
+      "count": 3
+    },
+    {
+      "sido": "경기",
+      "sigungu": "가평군",
+      "count": 3
+    },
+    {
+      "sido": "경기",
+      "sigungu": "연천군",
+      "count": 3
+    },
+    {
+      "sido": "경남",
+      "sigungu": "고성군",
+      "count": 3
+    },
+    {
+      "sido": "경남",
+      "sigungu": "합천군",
+      "count": 3
+    },
+    {
+      "sido": "경북",
+      "sigungu": "영덕군",
+      "count": 3
+    },
+    {
+      "sido": "대구",
+      "sigungu": "서구",
+      "count": 3
+    },
+    {
+      "sido": "부산",
+      "sigungu": "동구",
+      "count": 3
+    },
+    {
+      "sido": "부산",
+      "sigungu": "사상구",
+      "count": 3
+    },
+    {
+      "sido": "인천",
+      "sigungu": "계양구",
+      "count": 3
+    },
+    {
+      "sido": "전남",
+      "sigungu": "구례군",
+      "count": 3
+    },
+    {
+      "sido": "전남",
+      "sigungu": "목포시",
+      "count": 3
+    },
+    {
+      "sido": "전남",
+      "sigungu": "진도군",
+      "count": 3
+    },
+    {
+      "sido": "충남",
+      "sigungu": "금산군",
+      "count": 3
+    },
+    {
+      "sido": "충남",
+      "sigungu": "예산군",
+      "count": 3
+    },
+    {
+      "sido": "강원",
+      "sigungu": "양구군",
+      "count": 2
+    },
+    {
+      "sido": "강원",
+      "sigungu": "철원군",
+      "count": 2
+    },
+    {
+      "sido": "강원",
+      "sigungu": "평창군",
+      "count": 2
+    },
+    {
+      "sido": "경기",
+      "sigungu": "구리시",
+      "count": 2
+    },
+    {
+      "sido": "경남",
+      "sigungu": "거창군",
+      "count": 2
+    },
+    {
+      "sido": "경남",
+      "sigungu": "함안군",
+      "count": 2
+    },
+    {
+      "sido": "경남",
+      "sigungu": "함양군",
+      "count": 2
+    },
+    {
+      "sido": "경북",
+      "sigungu": "안동시",
+      "count": 2
+    },
+    {
+      "sido": "경북",
+      "sigungu": "영천시",
+      "count": 2
+    },
+    {
+      "sido": "경북",
+      "sigungu": "울진군",
+      "count": 2
+    },
+    {
+      "sido": "경북",
+      "sigungu": "의성군",
+      "count": 2
+    },
+    {
+      "sido": "경북",
+      "sigungu": "칠곡군",
+      "count": 2
+    },
+    {
+      "sido": "대구",
+      "sigungu": "동구",
+      "count": 2
+    },
+    {
+      "sido": "대전",
+      "sigungu": "중구",
+      "count": 2
+    },
+    {
+      "sido": "부산",
+      "sigungu": "중구",
+      "count": 2
+    },
+    {
+      "sido": "서울",
+      "sigungu": "도봉구",
+      "count": 2
+    },
+    {
+      "sido": "서울",
+      "sigungu": "동작구",
+      "count": 2
+    },
+    {
+      "sido": "세종",
+      "sigungu": "장군",
+      "count": 2
+    },
+    {
+      "sido": "전남",
+      "sigungu": "담양군",
+      "count": 2
+    },
+    {
+      "sido": "전남",
+      "sigungu": "무안군",
+      "count": 2
+    },
+    {
+      "sido": "전남",
+      "sigungu": "장성군",
+      "count": 2
+    },
+    {
+      "sido": "전북",
+      "sigungu": "남원시",
+      "count": 2
+    },
+    {
+      "sido": "전북",
+      "sigungu": "익산시",
+      "count": 2
+    },
+    {
+      "sido": "충남",
+      "sigungu": "당진시",
+      "count": 2
+    },
+    {
+      "sido": "충남",
+      "sigungu": "보령시",
+      "count": 2
+    },
+    {
+      "sido": "충남",
+      "sigungu": "아산시",
+      "count": 2
+    },
+    {
+      "sido": "강원",
+      "sigungu": "속초시",
+      "count": 1
+    },
+    {
+      "sido": "강원",
+      "sigungu": "영월군",
+      "count": 1
+    },
+    {
+      "sido": "강원",
+      "sigungu": "인제군",
+      "count": 1
+    },
+    {
+      "sido": "강원",
+      "sigungu": "정선군",
+      "count": 1
+    },
+    {
+      "sido": "경기",
+      "sigungu": "과천시",
+      "count": 1
+    },
+    {
+      "sido": "경기",
+      "sigungu": "군포시",
+      "count": 1
+    },
+    {
+      "sido": "경기",
+      "sigungu": "안성시",
+      "count": 1
+    },
+    {
+      "sido": "경남",
+      "sigungu": "남해군",
+      "count": 1
+    },
+    {
+      "sido": "경남",
+      "sigungu": "산청군",
+      "count": 1
+    },
+    {
+      "sido": "경북",
+      "sigungu": "김천시",
+      "count": 1
+    },
+    {
+      "sido": "경북",
+      "sigungu": "성주군",
+      "count": 1
+    },
+    {
+      "sido": "대전",
+      "sigungu": "대덕구",
+      "count": 1
+    },
+    {
+      "sido": "부산",
+      "sigungu": "강서구",
+      "count": 1
+    },
+    {
+      "sido": "부산",
+      "sigungu": "남구",
+      "count": 1
+    },
+    {
+      "sido": "부산",
+      "sigungu": "사하구",
+      "count": 1
+    },
+    {
+      "sido": "부산",
+      "sigungu": "서구",
+      "count": 1
+    },
+    {
+      "sido": "서울",
+      "sigungu": "양천구",
+      "count": 1
+    },
+    {
+      "sido": "인천",
+      "sigungu": "강화군",
+      "count": 1
+    },
+    {
+      "sido": "전남",
+      "sigungu": "광양시",
+      "count": 1
+    },
+    {
+      "sido": "전남",
+      "sigungu": "해남군",
+      "count": 1
+    },
+    {
+      "sido": "전남",
+      "sigungu": "화순군",
+      "count": 1
+    },
+    {
+      "sido": "전북",
+      "sigungu": "무주군",
+      "count": 1
+    },
+    {
+      "sido": "전북",
+      "sigungu": "정읍시",
+      "count": 1
+    },
+    {
+      "sido": "충남",
+      "sigungu": "공주시",
+      "count": 1
+    },
+    {
+      "sido": "충남",
+      "sigungu": "청양군",
+      "count": 1
+    },
+    {
+      "sido": "충북",
+      "sigungu": "단양군",
+      "count": 1
+    },
+    {
+      "sido": "충북",
+      "sigungu": "보은군",
+      "count": 1
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import { LegalDisclaimer } from "@/components/LegalDisclaimer";
 import { SourceBadge } from "@/components/SourceBadge";
 import { AdSlot } from "@/components/AdSlot";
 import { CharacterImage } from "@/components/CharacterImage";
+import { getCategoryCountsSnapshot, getRegionsSnapshot, getRestaurantsLightSnapshot, sortRestaurantsLight, toRestaurantCardItem } from "@/lib/public-data";
 import {
   PLACE_CATEGORY_LABELS,
   QUICK_CATEGORIES,
@@ -69,17 +70,11 @@ export async function PlaceDirectoryPage({
 
   const isRestaurant = category === "PET_RESTAURANT";
 
-  const [count, restaurants, places] = await Promise.all([
-    isRestaurant
-      ? prisma.restaurant.count({ where: { status: "ACTIVE" } })
-      : prisma.place.count({ where: { category, isActive: true } }),
-    isRestaurant
-      ? prisma.restaurant.findMany({
-          where: { status: "ACTIVE" },
-          orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
-          take: 18,
-        })
-      : Promise.resolve([]),
+  const [categoryCounts, restaurantsLight, regions, placeCount, places] = await Promise.all([
+    getCategoryCountsSnapshot(),
+    isRestaurant ? getRestaurantsLightSnapshot() : Promise.resolve([]),
+    isRestaurant ? getRegionsSnapshot() : Promise.resolve(null),
+    isRestaurant ? Promise.resolve(0) : prisma.place.count({ where: { category, isActive: true } }),
     isRestaurant
       ? Promise.resolve([])
       : prisma.place.findMany({
@@ -88,6 +83,9 @@ export async function PlaceDirectoryPage({
           take: 18,
         }),
   ]);
+
+  const restaurants = isRestaurant ? sortRestaurantsLight(restaurantsLight).slice(0, 18).map(toRestaurantCardItem) : [];
+  const count = isRestaurant ? categoryCounts.restaurantCount : placeCount;
 
   const mapItems = isRestaurant
     ? restaurants.map((restaurant) => ({
@@ -126,14 +124,25 @@ export async function PlaceDirectoryPage({
           <div className="mt-6 max-w-3xl">
             <SearchBox />
           </div>
+          {isRestaurant && regions && regions.bySido.length > 0 ? (
+            <div className="mt-5 flex flex-wrap gap-2">
+              {regions.bySido.slice(0, 8).map((region) => (
+                <span key={region.sido} className="badge bg-[rgba(31,74,64,0.08)] text-[#1a463f]">{region.sido} {region.count.toLocaleString("ko-KR")}건</span>
+              ))}
+            </div>
+          ) : null}
         </div>
       </section>
 
       <FilterBottomSheet title="모바일 필터 열기">
         <div className="flex flex-wrap gap-2">
-          {REGION_OPTIONS.map((region) => (
-            <span key={region} className="badge">{region}</span>
-          ))}
+          {isRestaurant && regions
+            ? regions.bySido.slice(0, 12).map((region) => (
+                <span key={region.sido} className="badge">{region.sido} {region.count.toLocaleString("ko-KR")}건</span>
+              ))
+            : REGION_OPTIONS.map((region) => (
+                <span key={region} className="badge">{region}</span>
+              ))}
         </div>
       </FilterBottomSheet>
 

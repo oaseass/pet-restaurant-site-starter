@@ -1,13 +1,25 @@
 import Link from "next/link";
 import { MapPin, ShieldCheck } from "lucide-react";
-import type { Restaurant } from "@prisma/client";
 
-export function RestaurantCard({ restaurant }: { restaurant: Restaurant }) {
+export type RestaurantCardItem = {
+  id: string;
+  name: string;
+  businessType: string;
+  sido: string;
+  sigungu: string | null;
+  address: string;
+  lat?: number | null;
+  lng?: number | null;
+  officialRegistered?: boolean;
+  dataUpdatedAt: Date;
+};
+
+export function RestaurantCard({ restaurant }: { restaurant: RestaurantCardItem }) {
   return (
     <Link href={`/restaurants/${restaurant.id}`} className="card group block rounded-[2rem] p-5 transition duration-200 hover:-translate-y-1">
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="mb-3 flex flex-wrap gap-2">
-          <span className="badge"><ShieldCheck size={14} /> 공식 등록</span>
+          {restaurant.officialRegistered === false ? null : <span className="badge"><ShieldCheck size={14} /> 공식 등록</span>}
           <span className="badge">{restaurant.businessType}</span>
           <span className="badge">{restaurant.sido}{restaurant.sigungu ? ` · ${restaurant.sigungu}` : ""}</span>
         </div>

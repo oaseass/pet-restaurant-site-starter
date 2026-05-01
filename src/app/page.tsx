@@ -10,19 +10,16 @@ import { PriceNote } from "@/components/PriceNote";
 import { RestaurantCard } from "@/components/RestaurantCard";
 import { AdSlot } from "@/components/AdSlot";
 import { BRAND_NAME, BRAND_SUBTITLE, BRAND_TAGLINE } from "@/lib/brand";
+import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot, toRestaurantCardItem } from "@/lib/public-data";
 import { AROUND_ME_ITEMS, QUICK_CATEGORIES, TODAY_GUIDES } from "@/lib/platform-content";
 
 export default async function HomePage() {
-  const [restaurantCount, restaurantMapReadyCount, placeCount, lostPetCount, recentRestaurants, recentLostPets, lastSync] = await Promise.all([
-    prisma.restaurant.count({ where: { status: "ACTIVE" } }),
-    prisma.restaurant.count({ where: { status: "ACTIVE", lat: { not: null }, lng: { not: null } } }),
-    prisma.place.count({ where: { isActive: true } }),
-    prisma.lostPet.count({ where: { status: { in: ["APPROVED", "FOUND"] } } }),
-    prisma.restaurant.findMany({ where: { status: "ACTIVE" }, orderBy: { updatedAt: "desc" }, take: 6 }),
-    prisma.lostPet.findMany({ where: { status: { in: ["APPROVED", "FOUND"] } }, orderBy: { createdAt: "desc" }, take: 3 }),
-    prisma.syncLog.findFirst({ where: { status: "SUCCESS" }, orderBy: { finishedAt: "desc" } }),
-  ]);
-  const restaurantCoordinatePendingCount = Math.max(restaurantCount - restaurantMapReadyCount, 0);
+  const [categoryCounts, restaurantsLight] = await Promise.all([getCategoryCountsSnapshot(), getRestaurantsLightSnapshot()]);
+  const recentRestaurants = restaurantsLight.slice(0, 6).map(toRestaurantCardItem);
+  const recentLostPets = categoryCounts.lostPetCount > 0
+    ? await prisma.lostPet.findMany({ where: { status: { in: ["APPROVED", "FOUND"] } }, orderBy: { createdAt: "desc" }, take: 3 })
+    : [];
+  const lastSnapshotUpdatedAt = categoryCounts.lastUpdatedAt ? new Date(categoryCounts.lastUpdatedAt) : null;
 
   return (
     <main className="mx-auto max-w-6xl px-5 pb-10">
@@ -44,8 +41,8 @@ export default async function HomePage() {
               <Link href="/guide" className="btn-secondary">생활 가이드 보기</Link>
             </div>
             <p className="mt-6 text-sm font-bold text-[#85786d]">
-              현재 식당 {restaurantCount.toLocaleString("ko-KR")}곳 · 장소 {placeCount.toLocaleString("ko-KR")}건 · 실종 제보 {lostPetCount.toLocaleString("ko-KR")}건
-              {lastSync?.finishedAt ? ` · 마지막 업데이트 ${lastSync.finishedAt.toLocaleString("ko-KR")}` : ""}
+              현재 식당 {categoryCounts.restaurantCount.toLocaleString("ko-KR")}곳 · 장소 {categoryCounts.placeCount.toLocaleString("ko-KR")}건 · 실종 제보 {categoryCounts.lostPetCount.toLocaleString("ko-KR")}건
+              {lastSnapshotUpdatedAt ? ` · 마지막 업데이트 ${lastSnapshotUpdatedAt.toLocaleString("ko-KR")}` : ""}
             </p>
           </div>
         </div>
@@ -66,11 +63,11 @@ export default async function HomePage() {
           <div className="relative z-10 mt-4 grid grid-cols-2 gap-3">
             <div className="stat-tile">
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">핀 가능 식당</p>
-              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{restaurantMapReadyCount.toLocaleString("ko-KR")}</p>
+              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{categoryCounts.restaurantCoordinateReadyCount.toLocaleString("ko-KR")}</p>
             </div>
             <div className="stat-tile">
               <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">좌표 준비중</p>
-              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{restaurantCoordinatePendingCount.toLocaleString("ko-KR")}</p>
+              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{categoryCounts.restaurantCoordinatePendingCount.toLocaleString("ko-KR")}</p>
             </div>
           </div>
           <div className="relative z-10 mt-4 rounded-[1.6rem] border border-[rgba(56,41,29,0.08)] bg-white/72 p-4">

@@ -1,15 +1,11 @@
 import Link from "next/link";
-import type { Prisma } from "@prisma/client";
 import { Compass, Search, SlidersHorizontal } from "lucide-react";
 import { CharacterImage } from "@/components/CharacterImage";
 import { MapCategoryChips } from "@/components/map/MapCategoryChips";
 import { MapShell } from "@/components/map/MapShell";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
-import { prisma } from "@/lib/prisma";
 import { REGION_OPTIONS } from "@/lib/platform-content";
-import { buildRestaurantSearchWhere, normalizeRestaurantSearchParams } from "@/lib/search";
-
-export const dynamic = "force-dynamic";
+import { filterRestaurantsLight, getCategoryCountsSnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
 
 const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   restaurants: "식당",
@@ -78,47 +74,15 @@ export default async function MapPage({
 }) {
   const params = await searchParams;
   const activeCategory = resolveMapCategory(params.category);
-  const normalized = normalizeRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
-  const restaurantWhere = buildRestaurantSearchWhere({ q: normalized.q, sido: normalized.sido, type: normalized.type });
-  const readyCoordinateWhere: Prisma.RestaurantWhereInput = {
-    AND: [restaurantWhere, { lat: { not: null }, lng: { not: null } }],
-  };
+  const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
+  const [categoryCounts, restaurantsLight] = await Promise.all([getCategoryCountsSnapshot(), getRestaurantsLightSnapshot()]);
 
   const isRestaurantView = activeCategory === "restaurants";
 
-  const [
-    restaurantTotalCount,
-    restaurantTotalCoordinateReadyCount,
-    filteredRestaurantCount,
-    filteredCoordinateReadyCount,
-    rawRestaurants,
-    businessTypeOptions,
-  ] = await Promise.all([
-    prisma.restaurant.count({ where: { status: "ACTIVE" } }),
-    prisma.restaurant.count({ where: { status: "ACTIVE", lat: { not: null }, lng: { not: null } } }),
-    isRestaurantView ? prisma.restaurant.count({ where: restaurantWhere }) : Promise.resolve(0),
-    isRestaurantView ? prisma.restaurant.count({ where: readyCoordinateWhere }) : Promise.resolve(0),
-    isRestaurantView
-      ? prisma.restaurant.findMany({
-          where: restaurantWhere,
-          orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
-          take: 120,
-        })
-      : Promise.resolve([]),
-    prisma.restaurant.findMany({
-      where: { status: "ACTIVE" },
-      distinct: ["businessType"],
-      select: { businessType: true },
-      orderBy: { businessType: "asc" },
-    }),
-  ]);
-
-  const restaurants = [...rawRestaurants].sort((left, right) => {
-    const leftHasCoordinates = left.lat !== null && left.lng !== null;
-    const rightHasCoordinates = right.lat !== null && right.lng !== null;
-    if (leftHasCoordinates !== rightHasCoordinates) return Number(rightHasCoordinates) - Number(leftHasCoordinates);
-    return right.updatedAt.getTime() - left.updatedAt.getTime();
-  });
+  const businessTypeOptions = getRestaurantBusinessTypes(restaurantsLight);
+  const restaurants = isRestaurantView ? sortRestaurantsLight(filterRestaurantsLight(restaurantsLight, normalized)).slice(0, 120) : [];
+  const filteredRestaurantCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).length : 0;
+  const filteredCoordinateReadyCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).filter((restaurant) => restaurant.lat !== null && restaurant.lng !== null).length : 0;
 
   const listItems: MapRestaurantListItem[] = restaurants.map((restaurant) => ({
     id: restaurant.id,
@@ -131,7 +95,7 @@ export default async function MapPage({
     lat: restaurant.lat,
     lng: restaurant.lng,
     coordinateStatus: restaurant.lat !== null && restaurant.lng !== null ? "ready" : "pending",
-    dataUpdatedLabel: restaurant.dataUpdatedAt.toLocaleDateString("ko-KR"),
+    dataUpdatedLabel: new Date(restaurant.updatedAt).toLocaleDateString("ko-KR"),
   }));
 
   const categories: MapCategoryOption[] = [
@@ -141,7 +105,7 @@ export default async function MapPage({
       description: "실제 DB 데이터 운영 중",
       href: buildCategoryHref("restaurants", normalized),
       status: "active",
-      countLabel: `${restaurantTotalCount.toLocaleString("ko-KR")}건`,
+      countLabel: `${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`,
     },
     {
       key: "hospitals",
@@ -209,9 +173,9 @@ export default async function MapPage({
           <div className="relative z-10 max-w-3xl">
             <p className="eyebrow">Map First</p>
             <div className="mt-4 flex flex-wrap gap-2">
-              <span className="badge bg-[#e9f8f2] text-[#1a463f]">내부 DB 식당 {restaurantTotalCount.toLocaleString("ko-KR")}건</span>
-              <span className="badge bg-[#fff1e6] text-[#b9632e]">핀 가능 {restaurantTotalCoordinateReadyCount.toLocaleString("ko-KR")}건</span>
-              <span className="badge">좌표 준비중 {(restaurantTotalCount - restaurantTotalCoordinateReadyCount).toLocaleString("ko-KR")}건</span>
+              <span className="badge bg-[#e9f8f2] text-[#1a463f]">정적 스냅샷 식당 {categoryCounts.restaurantCount.toLocaleString("ko-KR")}건</span>
+              <span className="badge bg-[#fff1e6] text-[#b9632e]">핀 가능 {categoryCounts.restaurantCoordinateReadyCount.toLocaleString("ko-KR")}건</span>
+              <span className="badge">좌표 준비중 {categoryCounts.restaurantCoordinatePendingCount.toLocaleString("ko-KR")}건</span>
             </div>
             <h1 className="mt-5 text-4xl font-black tracking-tight text-[#161310] sm:text-[3.4rem]">리스트가 아니라, 지도를 중심으로 반려동물 동반 식당을 찾습니다.</h1>
             <p className="mt-5 max-w-2xl text-sm leading-7 text-[#60554d] sm:text-base">댕냥지도는 외부 원천을 다시 호출하지 않고 내부 DB에 저장된 식당 데이터만으로 지도 탐색 경험을 만듭니다. 좌표가 있는 식당만 핀으로 올리고, 좌표가 없는 식당은 리스트에서 좌표 준비중 상태를 정확히 보여줍니다.</p>
@@ -243,8 +207,8 @@ export default async function MapPage({
             </div>
             <div className="rounded-[1.6rem] border border-[rgba(28,28,28,0.08)] bg-[#eef8f5] p-4">
               <p className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8f7f73]">데이터 기준</p>
-              <p className="mt-2 text-2xl font-black text-[#1f1915]">내부 DB</p>
-              <p className="mt-2 text-sm leading-6 text-[#665950]">지도 리스트와 핀은 모두 저장된 데이터만 사용</p>
+              <p className="mt-2 text-2xl font-black text-[#1f1915]">정적 JSON</p>
+              <p className="mt-2 text-sm leading-6 text-[#665950]">public/data 스냅샷 기반으로 즉시 렌더링</p>
             </div>
           </div>
         </div>
@@ -275,7 +239,7 @@ export default async function MapPage({
             <select name="type" defaultValue={normalized.type} className="input min-h-11 px-5 py-3 text-sm font-bold" disabled={!isRestaurantView}>
               <option value="">전체 업종</option>
               {businessTypeOptions.map((option) => (
-                <option key={option.businessType} value={option.businessType}>{option.businessType}</option>
+                <option key={option} value={option}>{option}</option>
               ))}
             </select>
           </label>

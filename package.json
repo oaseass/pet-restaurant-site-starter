@@ -11,8 +11,10 @@
     "prisma:migrate": "prisma migrate deploy",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "export:public-data": "tsx scripts/export-public-data.ts",
     "sync:local": "tsx scripts/sync-local.ts",
     "sync:local:force": "tsx scripts/sync-local.ts --force",
+    "geocode:restaurants": "tsx scripts/geocode-restaurants.ts",
     "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {
