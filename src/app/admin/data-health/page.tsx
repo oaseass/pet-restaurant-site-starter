@@ -3,7 +3,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import type { ClaimStatus, LostPetStatus, ReportStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { buildAdminLoginPath, canPerformAdminAction, requireAdminPageAccess } from "@/lib/admin-auth";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 
 export const metadata: Metadata = {
@@ -51,9 +51,6 @@ type DataHealthSearchParams = {
 export default async function DataHealthPage({ searchParams }: { searchParams: Promise<DataHealthSearchParams> }) {
   const resolvedSearchParams = await searchParams;
   const secret = resolvedSearchParams.secret;
-  if (!isAdminAuthorized(secret)) {
-    return <main className="mx-auto max-w-3xl px-5 py-10"><div className="card rounded-[2rem] p-6 text-sm leading-7 text-[#665950]">관리자 인증이 필요합니다. query string으로 secret을 전달해 주세요.</div></main>;
-  }
 
   const query = String(resolvedSearchParams.q ?? "").trim();
   const lostPetStatusFilter = getFilterValue(resolvedSearchParams.lostPetStatus, LOST_PET_FILTERS, "PENDING");
@@ -67,6 +64,12 @@ export default async function DataHealthPage({ searchParams }: { searchParams: P
     reportStatus: reportStatusFilter,
   });
 
+  await requireAdminPageAccess({
+    secret,
+    requiredRoles: ["SUPER_ADMIN", "REVIEWER", "OPERATIONS_ADMIN"],
+    returnTo,
+  });
+
   async function reviewLostPet(formData: FormData) {
     "use server";
 
@@ -74,8 +77,8 @@ export default async function DataHealthPage({ searchParams }: { searchParams: P
     const lostPetId = String(formData.get("lostPetId") ?? "");
     const action = String(formData.get("action") ?? "");
     const safeReturnTo = getSafeReturnTo(String(formData.get("returnTo") ?? ""), submittedSecret);
-    if (!isAdminAuthorized(submittedSecret) || !lostPetId) {
-      redirect("/admin/data-health");
+    if (!lostPetId || !(await canPerformAdminAction({ secret: submittedSecret, requiredRoles: ["SUPER_ADMIN", "REVIEWER", "OPERATIONS_ADMIN"] }))) {
+      redirect(buildAdminLoginPath(safeReturnTo));
     }
 
     if (action === "approve") {
@@ -108,8 +111,8 @@ export default async function DataHealthPage({ searchParams }: { searchParams: P
     const claimId = String(formData.get("claimId") ?? "");
     const action = String(formData.get("action") ?? "");
     const safeReturnTo = getSafeReturnTo(String(formData.get("returnTo") ?? ""), submittedSecret);
-    if (!isAdminAuthorized(submittedSecret) || !claimId) {
-      redirect("/admin/data-health");
+    if (!claimId || !(await canPerformAdminAction({ secret: submittedSecret, requiredRoles: ["SUPER_ADMIN", "REVIEWER", "OPERATIONS_ADMIN"] }))) {
+      redirect(buildAdminLoginPath(safeReturnTo));
     }
 
     const claim = await prisma.businessClaim.findUnique({ where: { id: claimId } });
@@ -149,8 +152,8 @@ export default async function DataHealthPage({ searchParams }: { searchParams: P
     const reportId = String(formData.get("reportId") ?? "");
     const action = String(formData.get("action") ?? "");
     const safeReturnTo = getSafeReturnTo(String(formData.get("returnTo") ?? ""), submittedSecret);
-    if (!isAdminAuthorized(submittedSecret) || !reportId) {
-      redirect("/admin/data-health");
+    if (!reportId || !(await canPerformAdminAction({ secret: submittedSecret, requiredRoles: ["SUPER_ADMIN", "REVIEWER", "OPERATIONS_ADMIN"] }))) {
+      redirect(buildAdminLoginPath(safeReturnTo));
     }
 
     const report = await prisma.priceReport.findUnique({ where: { id: reportId } });

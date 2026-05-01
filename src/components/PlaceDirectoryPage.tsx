@@ -33,6 +33,21 @@ function shouldShowLegalDisclaimer(category: PlaceCategory) {
   return category === "FUNERAL";
 }
 
+function getCategoryReadinessCopy(category: PlaceCategory, count: number) {
+  const label = PLACE_CATEGORY_LABELS[category];
+  if (count === 0) {
+    return {
+      title: `${label} 공식 데이터 연동 준비 중`,
+      description: `${label} 카테고리는 아직 공개 데이터 연동과 운영 검수 체계를 준비 중입니다. 업체 등록과 사용자 제보 흐름을 정리한 뒤 순차적으로 공개합니다.`,
+    };
+  }
+
+  return {
+    title: `${label} 데이터 운영 안내`,
+    description: `${label} 카테고리는 식당과 달리 공식 일일 동기화 대신 관리자 검수와 수동 등록을 우선 적용하고 있습니다. 방문 전 최신 운영 여부를 업소에 다시 확인해 주세요.`,
+  };
+}
+
 export async function PlaceDirectoryPage({
   categorySlug,
   title,
@@ -153,8 +168,8 @@ export async function PlaceDirectoryPage({
                 ))
               ) : (
                 <EmptyState
-                  title="아직 공개 가능한 디렉터리가 준비 중입니다."
-                  description="공식 데이터 배치와 업체 등록, 사용자 제보를 분리해서 안전하게 확장하고 있습니다."
+                  title={getCategoryReadinessCopy(category, count).title}
+                  description={getCategoryReadinessCopy(category, count).description}
                   character={categoryInfo?.character ?? "puppy-front-white"}
                 />
               )}
@@ -166,7 +181,22 @@ export async function PlaceDirectoryPage({
       <AdSlot label={`${pageTitle} 광고 영역`} />
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <OfficialDataNotice />
+        {isRestaurant ? (
+          <OfficialDataNotice />
+        ) : (
+          <section className="card rounded-[2rem] p-5 sm:p-6">
+            <p className="eyebrow">Category Note</p>
+            <h2 className="mt-4 text-xl font-black tracking-tight">{getCategoryReadinessCopy(category, count).title}</h2>
+            <div className="mt-5 flex flex-wrap gap-2">
+              <span className="badge bg-[rgba(56,41,29,0.08)] text-[#5f5550]">식당 전용 식품안전나라 안내 미노출</span>
+              <span className="badge">등록 {count.toLocaleString("ko-KR")}건</span>
+              <span className="badge">공식 데이터 연동 준비 중</span>
+            </div>
+            <p className="mt-4 text-sm leading-7 text-[#5e544d] sm:text-[15px]">
+              {getCategoryReadinessCopy(category, count).description}
+            </p>
+          </section>
+        )}
         {shouldShowMedicalDisclaimer(category) ? <MedicalDisclaimer /> : shouldShowLegalDisclaimer(category) ? <LegalDisclaimer /> : shouldShowPriceNote(category) ? <PriceNote /> : <PriceNote />}
       </div>
     </main>

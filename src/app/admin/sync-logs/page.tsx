@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
-import { isAdminAuthorized } from "@/lib/admin-auth";
+import { requireAdminPageAccess } from "@/lib/admin-auth";
 import { SyncStatusBadge } from "@/components/SyncStatusBadge";
 
 export const metadata: Metadata = {
@@ -12,9 +12,11 @@ export const dynamic = "force-dynamic";
 
 export default async function SyncLogsPage({ searchParams }: { searchParams: Promise<{ secret?: string }> }) {
   const { secret } = await searchParams;
-  if (!isAdminAuthorized(secret)) {
-    return <main className="mx-auto max-w-3xl px-5 py-10"><div className="card rounded-[2rem] p-6 text-sm leading-7 text-[#665950]">관리자 인증이 필요합니다. query string으로 secret을 전달해 주세요.</div></main>;
-  }
+  await requireAdminPageAccess({
+    secret,
+    requiredRoles: ["SUPER_ADMIN", "ANALYST", "OPERATIONS_ADMIN"],
+    returnTo: secret ? `/admin/sync-logs?secret=${encodeURIComponent(secret)}` : "/admin/sync-logs",
+  });
 
   const logs = await prisma.syncLog.findMany({ orderBy: { startedAt: "desc" }, take: 50 });
 

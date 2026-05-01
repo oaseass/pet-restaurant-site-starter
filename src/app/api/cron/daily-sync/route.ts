@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { handleCronRequest } from "@/lib/cron";
+import { getExternalSyncDisabledReason, isExternalSyncDisabled } from "@/lib/external-sync";
 import { syncPetRestaurants } from "@/lib/foodsafety/sync";
 import { syncAnimalHospitals } from "@/lib/sources/localdata/animal-hospitals";
 import { syncAnimalBusinesses } from "@/lib/sources/localdata/animal-businesses";
@@ -12,6 +13,21 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   return handleCronRequest(request, async ({ force }) => {
     const restaurant = await syncPetRestaurants({ force });
+
+    if (isExternalSyncDisabled()) {
+      const reason = getExternalSyncDisabledReason();
+      return {
+        skipped: false,
+        results: {
+          restaurant,
+          hospitals: { skipped: true, reason },
+          businesses: { skipped: true, reason },
+          clinicFees: { skipped: true, reason },
+          travel: { skipped: true, reason },
+        },
+      };
+    }
+
     const hospitals = await syncAnimalHospitals({ force });
     const businesses = await syncAnimalBusinesses({ force });
     const clinicFees = await syncClinicFeeReference({ force });
