@@ -66,18 +66,18 @@ export const PLACE_CATEGORY_LABELS: Record<PlaceCategory, string> = {
 };
 
 export const PRIMARY_NAV = [
+  { href: "/map", label: "지도" },
   { href: "/restaurants", label: "식당" },
   { href: "/hospitals", label: "병원" },
   { href: "/grooming", label: "미용" },
   { href: "/daycare", label: "유치원" },
-  { href: "/guide/travel", label: "여행" },
   { href: "/lost-pets", label: "찾아요" },
   { href: "/guide", label: "가이드" },
 ] as const;
 
 export const MOBILE_NAV = [
   { href: "/", label: "홈" },
-  { href: "/places", label: "지도" },
+  { href: "/map", label: "지도" },
   { href: "/lost-pets", label: "찾아요" },
   { href: "/guide", label: "가이드" },
   { href: "/business", label: "마이" },
@@ -89,8 +89,8 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     category: "PET_RESTAURANT",
     title: "반려동물 동반 식당",
     shortLabel: "식당",
-    description: "기존 1,849건 식당 데이터를 지역과 업소명 기준으로 바로 찾습니다.",
-    href: "/restaurants",
+    description: "기존 식당 데이터를 지도 중심으로 탐색하고 상세 정보까지 바로 이어집니다.",
+    href: "/map",
     character: "dog-hoodie",
   },
   {
@@ -255,10 +255,10 @@ export const TODAY_GUIDES = [
 ];
 
 export const AROUND_ME_ITEMS = [
-  { title: "내 주변 식당", href: "/places/pet-restaurant", description: "식당 데이터 1,849건 기반" },
-  { title: "내 주변 병원", href: "/places/animal-hospital", description: "공식 데이터 + 내부 검수 예정" },
-  { title: "내 주변 미용", href: "/places/grooming", description: "위생미용과 예약 링크 분리" },
-  { title: "내 주변 유치원", href: "/places/daycare", description: "위탁관리와 호텔 정보를 함께" },
+  { title: "내 주변 식당", href: "/map", description: "식당 데이터 지도 탐색" },
+  { title: "내 주변 병원", href: "/map?category=hospitals", description: "준비중 카테고리 구조 미리 보기" },
+  { title: "내 주변 미용", href: "/map?category=grooming", description: "준비중 상태로 지도 UX 확인" },
+  { title: "내 주변 유치원", href: "/map?category=daycare", description: "유치원 카테고리 준비중" },
 ];
 
 export const POLICY_LINKS = [

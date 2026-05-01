@@ -13,14 +13,16 @@ import { BRAND_NAME, BRAND_SUBTITLE, BRAND_TAGLINE } from "@/lib/brand";
 import { AROUND_ME_ITEMS, QUICK_CATEGORIES, TODAY_GUIDES } from "@/lib/platform-content";
 
 export default async function HomePage() {
-  const [restaurantCount, placeCount, lostPetCount, recentRestaurants, recentLostPets, lastSync] = await Promise.all([
+  const [restaurantCount, restaurantMapReadyCount, placeCount, lostPetCount, recentRestaurants, recentLostPets, lastSync] = await Promise.all([
     prisma.restaurant.count({ where: { status: "ACTIVE" } }),
+    prisma.restaurant.count({ where: { status: "ACTIVE", lat: { not: null }, lng: { not: null } } }),
     prisma.place.count({ where: { isActive: true } }),
     prisma.lostPet.count({ where: { status: { in: ["APPROVED", "FOUND"] } } }),
     prisma.restaurant.findMany({ where: { status: "ACTIVE" }, orderBy: { updatedAt: "desc" }, take: 6 }),
     prisma.lostPet.findMany({ where: { status: { in: ["APPROVED", "FOUND"] } }, orderBy: { createdAt: "desc" }, take: 3 }),
     prisma.syncLog.findFirst({ where: { status: "SUCCESS" }, orderBy: { finishedAt: "desc" } }),
   ]);
+  const restaurantCoordinatePendingCount = Math.max(restaurantCount - restaurantMapReadyCount, 0);
 
   return (
     <main className="mx-auto max-w-6xl px-5 pb-10">
@@ -31,13 +33,14 @@ export default async function HomePage() {
           </div>
           <div className="relative z-10 max-w-2xl">
             <p className="eyebrow">{BRAND_NAME}</p>
-            <h1 className="mt-5 display-title">{BRAND_TAGLINE}</h1>
+            <h1 className="mt-5 display-title">지도에서 바로 고르는 반려생활 탐색</h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-[#655a53] sm:text-lg">
-              {BRAND_SUBTITLE} 검색은 내부 DB만 사용하고, 공식 원천은 서버 배치에서만 접근합니다. 원본 사이트를 사용자 요청마다 다시 호출하지 않습니다.
+              {BRAND_SUBTITLE} 이제 식당 탐색의 중심은 카드 모음이 아니라 지도입니다. 검색과 지도 리스트는 내부 DB만 사용하고, 공식 원천은 서버 배치에서만 접근합니다.
             </p>
             <div className="mt-8 max-w-3xl"><SearchBox /></div>
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/places" className="btn-secondary">내 주변 카테고리 보기</Link>
+              <Link href="/map" className="btn-primary">지도에서 바로 탐색</Link>
+              <Link href="/restaurants" className="btn-secondary">리스트로 전체 보기</Link>
               <Link href="/guide" className="btn-secondary">생활 가이드 보기</Link>
             </div>
             <p className="mt-6 text-sm font-bold text-[#85786d]">
@@ -52,31 +55,34 @@ export default async function HomePage() {
             <CharacterImage asset="dog-hoodie" className="h-full w-full mascot-drift" imageClassName="object-contain" />
           </div>
           <div className="relative z-10 rounded-[1.9rem] bg-[#162320] p-6 text-white">
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e7c694]">Daily Policy</p>
-            <h2 className="mt-3 text-3xl font-black tracking-tight">데이터는 내부에 저장하고, 검색은 내부에서 끝냅니다.</h2>
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#e7c694]">Map First</p>
+            <h2 className="mt-3 text-3xl font-black tracking-tight">핀은 정확한 좌표만 쓰고, 나머지는 리스트에서 숨기지 않습니다.</h2>
             <ul className="mt-5 space-y-3 text-sm leading-6 text-[#d4cdc8]">
-              <li>1. 사용자 검색 시 원본 사이트 호출 금지</li>
-              <li>2. 공식/공공 데이터는 서버 배치로만 접근</li>
-              <li>3. 공식 데이터 업데이트는 하루 1회 이하 유지</li>
+              <li>1. 좌표가 있는 식당만 지도 핀으로 표시</li>
+              <li>2. 좌표가 없는 식당은 좌표 준비중 상태로 유지</li>
+              <li>3. 지도와 검색은 내부 DB만 사용</li>
             </ul>
           </div>
           <div className="relative z-10 mt-4 grid grid-cols-2 gap-3">
             <div className="stat-tile">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">식당</p>
-              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{restaurantCount.toLocaleString("ko-KR")}</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">핀 가능 식당</p>
+              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{restaurantMapReadyCount.toLocaleString("ko-KR")}</p>
             </div>
             <div className="stat-tile">
-              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">장소</p>
-              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{placeCount.toLocaleString("ko-KR")}</p>
+              <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">좌표 준비중</p>
+              <p className="mt-2 text-2xl font-black text-[var(--ink)]">{restaurantCoordinatePendingCount.toLocaleString("ko-KR")}</p>
             </div>
           </div>
           <div className="relative z-10 mt-4 rounded-[1.6rem] border border-[rgba(56,41,29,0.08)] bg-white/72 p-4">
-            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">오늘 많이 찾는 카테고리</p>
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-[#9d8e82]">오늘 많이 여는 지도 진입</p>
             <div className="mt-3 flex flex-wrap gap-2">
               {AROUND_ME_ITEMS.map((item) => (
                 <Link key={item.href} href={item.href} className="badge">{item.title}</Link>
               ))}
             </div>
+            <Link href="/map" className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-[#1a463f] px-4 py-2 text-sm font-black text-white">
+              지도 메인 열기
+            </Link>
           </div>
         </div>
       </section>

@@ -32,8 +32,8 @@ export function Header() {
               ))}
             </nav>
 
-            <Link href="/categories" className="hidden rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white md:inline-flex">
-              카테고리 전체
+            <Link href="/map" className="hidden rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white md:inline-flex">
+              지도 바로 열기
             </Link>
           </div>
 
