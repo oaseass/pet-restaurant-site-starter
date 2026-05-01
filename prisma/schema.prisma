@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum RestaurantStatus {
+  ACTIVE
+  REMOVED_FROM_SOURCE
+}
+
+enum SyncStatus {
+  SUCCESS
+  SKIPPED
+  FAILED
+}
+
+model Restaurant {
+  id                 String           @id @default(cuid())
+  sourceKey          String           @unique
+  name               String
+  businessType       String
+  sido               String
+  sigungu            String?
+  eupmyeondong       String?
+  address            String
+  normalizedAddress  String
+  lat                Float?
+  lng                Float?
+  officialRegistered Boolean          @default(true)
+  status             RestaurantStatus @default(ACTIVE)
+  sourceUrl          String
+  dataUpdatedAt      DateTime
+  firstSeenAt        DateTime         @default(now())
+  lastSeenAt         DateTime         @default(now())
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@index([sido])
+  @@index([sigungu])
+  @@index([businessType])
+  @@index([status])
+  @@index([name])
+}
+
+model SyncLog {
+  id           String     @id @default(cuid())
+  source       String
+  status       SyncStatus
+  startedAt    DateTime   @default(now())
+  finishedAt   DateTime?
+  totalCount   Int        @default(0)
+  addedCount   Int        @default(0)
+  updatedCount Int        @default(0)
+  removedCount Int        @default(0)
+  message      String?
+
+  @@index([source, status, finishedAt])
+}
