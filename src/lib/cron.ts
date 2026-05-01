@@ -7,7 +7,7 @@ export function isCronAuthorized(request: NextRequest) {
 }
 
 export function isForceSyncEnabled() {
-  return process.env.ENABLE_FORCE_SYNC === "true";
+  return process.env.ENABLE_FORCE_SYNC?.trim() === "true";
 }
 
 export async function handleCronRequest(
