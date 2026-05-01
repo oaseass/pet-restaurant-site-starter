@@ -1,5 +1,135 @@
 [
   {
+    "id": "05ecbbee-6eee-40c9-8481-973e61513f2e",
+    "name": "모토이시원주무실점",
+    "businessType": "일반음식점",
+    "sido": "강원",
+    "sigungu": "원주시",
+    "eupmyeondong": "무실동",
+    "address": "강원특별자치도 원주시 만대공원길 7(1층 무실동)",
+    "lat": 37.3371190919289,
+    "lng": 127.928243474815,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:49.230Z"
+  },
+  {
+    "id": "0598776f-5b0d-42e8-92db-4fc66efcd83a",
+    "name": "씨앤브리즈(Sea&Breeze)",
+    "businessType": "휴게음식점",
+    "sido": "경남",
+    "sigungu": "거제시",
+    "eupmyeondong": "남부면",
+    "address": "경상남도 거제시 남부면 여차길 16(2층)",
+    "lat": 34.7142242991664,
+    "lng": 128.627168526012,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:48.985Z"
+  },
+  {
+    "id": "04b5da8f-cdd4-4076-a17d-4bd9ceb9d372",
+    "name": "송이",
+    "businessType": "일반음식점",
+    "sido": "강원",
+    "sigungu": "양양군",
+    "eupmyeondong": "손양면",
+    "address": "강원특별자치도 양양군 손양면 선사유적로 678",
+    "lat": 38.0882317882525,
+    "lng": 128.666280393724,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:48.746Z"
+  },
+  {
+    "id": "04658f26-89e9-4e74-abac-7e2eeca3357a",
+    "name": "샌치180",
+    "businessType": "일반음식점",
+    "sido": "강원",
+    "sigungu": "원주시",
+    "eupmyeondong": "관설동",
+    "address": "강원특별자치도 원주시 라옹정길 13(1층 101호 관설동)",
+    "lat": 37.318580358381,
+    "lng": 127.963987129128,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:48.501Z"
+  },
+  {
+    "id": "02090421-266e-4f6c-8b8a-7ef5df5a0867",
+    "name": "소탐돼실",
+    "businessType": "일반음식점",
+    "sido": "경남",
+    "sigungu": "거제시",
+    "eupmyeondong": "장목면",
+    "address": "경상남도 거제시 장목면 임호1길 8(1층)",
+    "lat": 35.0097829668421,
+    "lng": 128.706081061184,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:48.266Z"
+  },
+  {
+    "id": "01ec88f4-d158-468a-92cd-ac347e7899ec",
+    "name": "인디언썸머",
+    "businessType": "일반음식점",
+    "sido": "제주",
+    "sigungu": "제주시",
+    "eupmyeondong": "애월읍",
+    "address": "제주특별자치도 제주시 애월읍 애월로4길 9(1층)",
+    "lat": 33.4633387425565,
+    "lng": 126.315200836039,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:48.022Z"
+  },
+  {
+    "id": "01c5f41a-af47-4014-946a-2ce29c6ba7bd",
+    "name": "핀스",
+    "businessType": "일반음식점",
+    "sido": "제주",
+    "sigungu": "서귀포시",
+    "eupmyeondong": "대정읍",
+    "address": "제주특별자치도 서귀포시 대정읍 노을해안로532번길 8",
+    "lat": 33.2635820339272,
+    "lng": 126.182214297132,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:47.795Z"
+  },
+  {
+    "id": "01beb2e4-f015-4f15-8e33-d2a8751cde4e",
+    "name": "카페 틈",
+    "businessType": "휴게음식점",
+    "sido": "경기",
+    "sigungu": "부천시",
+    "eupmyeondong": "상동",
+    "address": "경기도 부천시 원미구 소향로 11(코오롱파크뷰 1층 102호, 103호 상동)",
+    "lat": 37.5043968777033,
+    "lng": 126.748773282776,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:47.565Z"
+  },
+  {
+    "id": "00cca18e-961f-4f2f-8a87-7072cd8f7691",
+    "name": "어서,이곳",
+    "businessType": "휴게음식점",
+    "sido": "경남",
+    "sigungu": "밀양시",
+    "eupmyeondong": "산내면",
+    "address": "경상남도 밀양시 산내면 산내용전1길 22-13",
+    "lat": 35.5660158189989,
+    "lng": 128.860193757052,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:47.344Z"
+  },
+  {
+    "id": "0065eab5-4580-472d-8c48-9e01baa5c584",
+    "name": "빅버드(BIG BIRD)",
+    "businessType": "일반음식점",
+    "sido": "경남",
+    "sigungu": "거제시",
+    "eupmyeondong": "고현동",
+    "address": "경상남도 거제시 중곡로1길 23(2층 고현동)",
+    "lat": 34.892746430835,
+    "lng": 128.628101957649,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T09:34:47.042Z"
+  },
+  {
     "id": "3eb359e3-309e-4321-ad69-65a4439e7077",
     "name": "(주)교원프라퍼티 키녹",
     "businessType": "일반음식점",
@@ -2353,19 +2483,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomez2ka00glwe8km5svl2v4",
-    "name": "그리너리 바스켓",
-    "businessType": "휴게음식점",
-    "sido": "인천",
-    "sigungu": "중구",
-    "eupmyeondong": "1동",
-    "address": "인천광역시 중구 백운로 510(1동 지1층 운북동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomez2g100gkwe8k1wfchvkd",
     "name": "그리너리 바스켓",
     "businessType": "휴게음식점",
@@ -2373,6 +2490,19 @@
     "sigungu": "중구",
     "eupmyeondong": "2동",
     "address": "인천광역시 중구 백운로 510(2동 1,2층 운북동)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomez2ka00glwe8km5svl2v4",
+    "name": "그리너리 바스켓",
+    "businessType": "휴게음식점",
+    "sido": "인천",
+    "sigungu": "중구",
+    "eupmyeondong": "1동",
+    "address": "인천광역시 중구 백운로 510(1동 지1층 운북동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -7800,19 +7930,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "05ecbbee-6eee-40c9-8481-973e61513f2e",
-    "name": "모토이시원주무실점",
-    "businessType": "일반음식점",
-    "sido": "강원",
-    "sigungu": "원주시",
-    "eupmyeondong": "무실동",
-    "address": "강원특별자치도 원주시 만대공원길 7(1층 무실동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "5ee0c20f-057b-4b89-bec3-19513addfca9",
     "name": "모티",
     "businessType": "일반음식점",
@@ -9971,19 +10088,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "0065eab5-4580-472d-8c48-9e01baa5c584",
-    "name": "빅버드(BIG BIRD)",
-    "businessType": "일반음식점",
-    "sido": "경남",
-    "sigungu": "거제시",
-    "eupmyeondong": "고현동",
-    "address": "경상남도 거제시 중곡로1길 23(2층 고현동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomf0u3400v9we8kmn92gipq",
     "name": "빈슈에뜨",
     "businessType": "휴게음식점",
@@ -10654,19 +10758,6 @@
     "sigungu": "안양시",
     "eupmyeondong": null,
     "address": "경기도 안양시 만안구 안양로329번길 28(안양동, 지상1층)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
-    "id": "04658f26-89e9-4e74-abac-7e2eeca3357a",
-    "name": "샌치180",
-    "businessType": "일반음식점",
-    "sido": "강원",
-    "sigungu": "원주시",
-    "eupmyeondong": "관설동",
-    "address": "강원특별자치도 원주시 라옹정길 13(1층 101호 관설동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -11453,19 +11544,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "02090421-266e-4f6c-8b8a-7ef5df5a0867",
-    "name": "소탐돼실",
-    "businessType": "일반음식점",
-    "sido": "경남",
-    "sigungu": "거제시",
-    "eupmyeondong": "장목면",
-    "address": "경상남도 거제시 장목면 임호1길 8(1층)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "9f4e6b6e-f449-4cb2-bb13-2af8f8a1de53",
     "name": "소풍",
     "businessType": "일반음식점",
@@ -11648,19 +11726,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "04b5da8f-cdd4-4076-a17d-4bd9ceb9d372",
-    "name": "송이",
-    "businessType": "일반음식점",
-    "sido": "강원",
-    "sigungu": "양양군",
-    "eupmyeondong": "손양면",
-    "address": "강원특별자치도 양양군 손양면 선사유적로 678",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomexj13003nwe8kmth7ygs3",
     "name": "송주불냉면 영등포점",
     "businessType": "일반음식점",
@@ -11817,9 +11882,9 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeyp7z00dhwe8kaz91ieal",
+    "id": "cmomeyubp00eowe8ktf27zdih",
     "name": "수평적관계",
-    "businessType": "일반음식점",
+    "businessType": "제과점영업",
     "sido": "대구",
     "sigungu": "중구",
     "eupmyeondong": null,
@@ -11830,9 +11895,9 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeyubp00eowe8ktf27zdih",
+    "id": "cmomeyp7z00dhwe8kaz91ieal",
     "name": "수평적관계",
-    "businessType": "제과점영업",
+    "businessType": "일반음식점",
     "sido": "대구",
     "sigungu": "중구",
     "eupmyeondong": null,
@@ -12799,19 +12864,6 @@
     "sigungu": "서구",
     "eupmyeondong": "암남동",
     "address": "부산광역시 서구 송도해변로 27(1층 암남동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
-    "id": "0598776f-5b0d-42e8-92db-4fc66efcd83a",
-    "name": "씨앤브리즈(Sea&Breeze)",
-    "businessType": "휴게음식점",
-    "sido": "경남",
-    "sigungu": "거제시",
-    "eupmyeondong": "남부면",
-    "address": "경상남도 거제시 남부면 여차길 16(2층)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -13839,19 +13891,6 @@
     "sigungu": "광명시",
     "eupmyeondong": "소하동",
     "address": "경기도 광명시 소하로 81(8층 전부호 소하동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
-    "id": "00cca18e-961f-4f2f-8a87-7072cd8f7691",
-    "name": "어서,이곳",
-    "businessType": "휴게음식점",
-    "sido": "경남",
-    "sigungu": "밀양시",
-    "eupmyeondong": "산내면",
-    "address": "경상남도 밀양시 산내면 산내용전1길 22-13",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -15015,19 +15054,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeypgg00djwe8kqcuaowpa",
-    "name": "오퐁드부아",
-    "businessType": "일반음식점",
-    "sido": "대구",
-    "sigungu": "달성군",
-    "eupmyeondong": "가창면",
-    "address": "대구광역시 달성군 가창면 주리2길 104",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomeyt0x00edwe8k2g9zql70",
     "name": "오퐁드부아",
     "businessType": "휴게음식점",
@@ -15035,6 +15061,19 @@
     "sigungu": "달성군",
     "eupmyeondong": "가창면",
     "address": "대구광역시 달성군 가창면 주리2길 104(2동 1층)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomeypgg00djwe8kqcuaowpa",
+    "name": "오퐁드부아",
+    "businessType": "일반음식점",
+    "sido": "대구",
+    "sigungu": "달성군",
+    "eupmyeondong": "가창면",
+    "address": "대구광역시 달성군 가창면 주리2길 104",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -16406,19 +16445,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "01ec88f4-d158-468a-92cd-ac347e7899ec",
-    "name": "인디언썸머",
-    "businessType": "일반음식점",
-    "sido": "제주",
-    "sigungu": "제주시",
-    "eupmyeondong": "애월읍",
-    "address": "제주특별자치도 제주시 애월읍 애월로4길 9(1층)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "785a34ba-2c2f-4007-8c32-a4fe8e3ad6e9",
     "name": "인솔커피",
     "businessType": "휴게음식점",
@@ -16835,19 +16861,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeyhkz00bpwe8kw393vbps",
-    "name": "정담",
-    "businessType": "일반음식점",
-    "sido": "부산",
-    "sigungu": "기장군",
-    "eupmyeondong": "일광읍",
-    "address": "부산광역시 기장군 일광읍 문오성길 317-4(1,2층)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "57e2197f-7383-46f8-8efe-261eaa0735fa",
     "name": "정담",
     "businessType": "일반음식점",
@@ -16855,6 +16868,19 @@
     "sigungu": "김해시",
     "eupmyeondong": "관동동",
     "address": "경상남도 김해시 반룡산로 22(2,3층 관동동)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomeyhkz00bpwe8kw393vbps",
+    "name": "정담",
+    "businessType": "일반음식점",
+    "sido": "부산",
+    "sigungu": "기장군",
+    "eupmyeondong": "일광읍",
+    "address": "부산광역시 기장군 일광읍 문오성길 317-4(1,2층)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -18395,19 +18421,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "78d689b3-01f0-471c-a40b-5740315d1c08",
-    "name": "카페 케렌시아",
-    "businessType": "일반음식점",
-    "sido": "경북",
-    "sigungu": "경주시",
-    "eupmyeondong": "아동",
-    "address": "경상북도 경주시 엑스포로 45(The-K HOTEL 경주 아동 2층 신평동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "b1224b7b-0ef4-4f9d-a3e1-91b83184a991",
     "name": "카페 케렌시아",
     "businessType": "제과점영업",
@@ -18421,13 +18434,13 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "01beb2e4-f015-4f15-8e33-d2a8751cde4e",
-    "name": "카페 틈",
-    "businessType": "휴게음식점",
-    "sido": "경기",
-    "sigungu": "부천시",
-    "eupmyeondong": "상동",
-    "address": "경기도 부천시 원미구 소향로 11(코오롱파크뷰 1층 102호, 103호 상동)",
+    "id": "78d689b3-01f0-471c-a40b-5740315d1c08",
+    "name": "카페 케렌시아",
+    "businessType": "일반음식점",
+    "sido": "경북",
+    "sigungu": "경주시",
+    "eupmyeondong": "아동",
+    "address": "경상북도 경주시 엑스포로 45(The-K HOTEL 경주 아동 2층 신평동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -18668,19 +18681,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "6ee0b0de-069b-4fa8-8dd1-3d37110e6331",
-    "name": "카페드220볼트",
-    "businessType": "휴게음식점",
-    "sido": "강원",
-    "sigungu": "춘천시",
-    "eupmyeondong": "동내면",
-    "address": "강원특별자치도 춘천시 동내면 금촌로 107-27(지하1,지상1~2층)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "29fc5b02-7c73-4625-b269-112d23ce65c3",
     "name": "카페드220볼트",
     "businessType": "제과점영업",
@@ -18688,6 +18688,19 @@
     "sigungu": "춘천시",
     "eupmyeondong": "동내면",
     "address": "강원특별자치도 춘천시 동내면 금촌로 107-27(지하1층)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "6ee0b0de-069b-4fa8-8dd1-3d37110e6331",
+    "name": "카페드220볼트",
+    "businessType": "휴게음식점",
+    "sido": "강원",
+    "sigungu": "춘천시",
+    "eupmyeondong": "동내면",
+    "address": "강원특별자치도 춘천시 동내면 금촌로 107-27(지하1,지상1~2층)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -19487,19 +19500,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "ee11384d-e142-41fd-9029-ac7fdb9e1301",
-    "name": "커들",
-    "businessType": "일반음식점",
-    "sido": "경북",
-    "sigungu": "구미시",
-    "eupmyeondong": "신동",
-    "address": "경상북도 구미시 인동가산로 473-16(1층 신동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "480c2f71-68e4-43dc-b481-4420878d4ecb",
     "name": "커들",
     "businessType": "휴게음식점",
@@ -19507,6 +19507,19 @@
     "sigungu": "화성시",
     "eupmyeondong": "정남면",
     "address": "경기도 화성시 효행구 정남면 만년로 639-25(1층 전부호)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "ee11384d-e142-41fd-9029-ac7fdb9e1301",
+    "name": "커들",
+    "businessType": "일반음식점",
+    "sido": "경북",
+    "sigungu": "구미시",
+    "eupmyeondong": "신동",
+    "address": "경상북도 구미시 인동가산로 473-16(1층 신동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -19877,19 +19890,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomext9r0061we8kewl1bwgs",
-    "name": "코모레비",
-    "businessType": "일반음식점",
-    "sido": "서울",
-    "sigungu": "강서구",
-    "eupmyeondong": "마곡동",
-    "address": "서울특별시 강서구 마곡서로 101(동익드미라벨복합빌딩 1층 152호 마곡동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomez6kx00hjwe8kkivxvf0p",
     "name": "코모레비",
     "businessType": "일반음식점",
@@ -19897,6 +19897,19 @@
     "sigungu": "동구",
     "eupmyeondong": "동명동",
     "address": "광주광역시 동구 동계천로95번길 30(1층 동명동)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomext9r0061we8kewl1bwgs",
+    "name": "코모레비",
+    "businessType": "일반음식점",
+    "sido": "서울",
+    "sigungu": "강서구",
+    "eupmyeondong": "마곡동",
+    "address": "서울특별시 강서구 마곡서로 101(동익드미라벨복합빌딩 1층 152호 마곡동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -21177,19 +21190,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeyqei00drwe8k64xatpj0",
-    "name": "파이널나인",
-    "businessType": "일반음식점",
-    "sido": "대구",
-    "sigungu": "달서구",
-    "eupmyeondong": "상인동",
-    "address": "대구광역시 달서구 월곡로51길 9(지상2층 상인동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomeyqa700dqwe8kwclyhu78",
     "name": "파이널나인",
     "businessType": "일반음식점",
@@ -21197,6 +21197,19 @@
     "sigungu": "중구",
     "eupmyeondong": null,
     "address": "대구광역시 중구 동성로4길 57(삼덕동1가)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomeyqei00drwe8k64xatpj0",
+    "name": "파이널나인",
+    "businessType": "일반음식점",
+    "sido": "대구",
+    "sigungu": "달서구",
+    "eupmyeondong": "상인동",
+    "address": "대구광역시 달서구 월곡로51길 9(지상2층 상인동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -22178,19 +22191,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomexwu5006vwe8kziw48gcw",
-    "name": "플루이드(FLUID)",
-    "businessType": "일반음식점",
-    "sido": "서울",
-    "sigungu": "강서구",
-    "eupmyeondong": "염창동",
-    "address": "서울특별시 강서구 공항대로65길 82(1층 염창동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomf0l2300t5we8kmzj65hi0",
     "name": "플루이드(FLUID)",
     "businessType": "일반음식점",
@@ -22198,6 +22198,19 @@
     "sigungu": "김포시",
     "eupmyeondong": "1동",
     "address": "경기도 김포시 김포한강3로237번길 10(1동 1층 장기동)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomexwu5006vwe8kziw48gcw",
+    "name": "플루이드(FLUID)",
+    "businessType": "일반음식점",
+    "sido": "서울",
+    "sigungu": "강서구",
+    "eupmyeondong": "염창동",
+    "address": "서울특별시 강서구 공항대로65길 82(1층 염창동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -22477,19 +22490,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "01c5f41a-af47-4014-946a-2ce29c6ba7bd",
-    "name": "핀스",
-    "businessType": "일반음식점",
-    "sido": "제주",
-    "sigungu": "서귀포시",
-    "eupmyeondong": "대정읍",
-    "address": "제주특별자치도 서귀포시 대정읍 노을해안로532번길 8",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "84c4ab98-8f3a-4620-9f21-ed4149beafad",
     "name": "필그린커피로스터스",
     "businessType": "일반음식점",
@@ -22568,19 +22568,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomf0lj200t9we8kn26n04rf",
-    "name": "하루엔소쿠",
-    "businessType": "일반음식점",
-    "sido": "경기",
-    "sigungu": "양평군",
-    "eupmyeondong": "양서면",
-    "address": "경기도 양평군 양서면 두물머리길20번길 7(2층)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "97ddc945-305e-425c-9b04-79c0897f39e0",
     "name": "하루엔소쿠",
     "businessType": "일반음식점",
@@ -22588,6 +22575,19 @@
     "sigungu": "홍천군",
     "eupmyeondong": "서면",
     "address": "강원특별자치도 홍천군 서면 한치골길 262(오크동지하1층 BOOTH4)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomf0lj200t9we8kn26n04rf",
+    "name": "하루엔소쿠",
+    "businessType": "일반음식점",
+    "sido": "경기",
+    "sigungu": "양평군",
+    "eupmyeondong": "양서면",
+    "address": "경기도 양평군 양서면 두물머리길20번길 7(2층)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,

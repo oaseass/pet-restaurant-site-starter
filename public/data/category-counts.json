@@ -1,8 +1,8 @@
 {
   "restaurantCount": 1849,
-  "restaurantCoordinateReadyCount": 0,
-  "restaurantCoordinatePendingCount": 1849,
+  "restaurantCoordinateReadyCount": 10,
+  "restaurantCoordinatePendingCount": 1839,
   "placeCount": 1849,
   "lostPetCount": 0,
-  "lastUpdatedAt": "2026-05-01T04:39:57.672Z"
+  "lastUpdatedAt": "2026-05-01T09:34:49.230Z"
 }
