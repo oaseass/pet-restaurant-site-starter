@@ -1,7 +1,11 @@
-import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
+import { CategoryInfoPage } from "@/components/CategoryInfoPage";
+import { CATEGORY_CONTENT } from "@/lib/category-info-content";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "유치원·호텔·위탁관리 | 댕냥지도",
+  description: "반려동물 유치원, 호텔, 위탁관리 서비스 안내. 맡기기 전 체크리스트와 주의사항을 확인하세요.",
+};
 
 export default function DaycarePage() {
-  return <PlaceDirectoryPage categorySlug="daycare" title="유치원·호텔·위탁관리" description="돌봄과 위탁관리 정보는 지역 기반으로 묶어 보고, 가격은 참고값으로만 안내합니다." />;
+  return <CategoryInfoPage data={CATEGORY_CONTENT.daycare} />;
 }

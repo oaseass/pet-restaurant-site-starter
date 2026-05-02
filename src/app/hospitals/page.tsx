@@ -1,7 +1,11 @@
-import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
+import { CategoryInfoPage } from "@/components/CategoryInfoPage";
+import { CATEGORY_CONTENT } from "@/lib/category-info-content";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "동물병원 찾기 | 댕냥지도",
+  description: "가까운 동물병원과 24시 응급병원 정보 안내. 방문 전 체크리스트와 진료비 공개 항목을 확인하세요.",
+};
 
 export default function HospitalsPage() {
-  return <PlaceDirectoryPage categorySlug="animal-hospital" title="동물병원" description="동물병원 정보는 공식 배치 데이터와 관리자 검수 정책을 구분해 단계적으로 확장합니다." />;
+  return <CategoryInfoPage data={CATEGORY_CONTENT.hospital} />;
 }

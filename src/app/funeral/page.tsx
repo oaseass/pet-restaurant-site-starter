@@ -1,7 +1,11 @@
-import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
+import { CategoryInfoPage } from "@/components/CategoryInfoPage";
+import { CATEGORY_CONTENT } from "@/lib/category-info-content";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "반려동물 장례 | 댕냥지도",
+  description: "반려동물 장례 절차와 합법 장묘업체 확인 방법 안내. 사망 신고 방법과 화장·봉안·수목장 차이를 확인하세요.",
+};
 
 export default function FuneralPage() {
-  return <PlaceDirectoryPage categorySlug="funeral" title="장례" description="합법 장묘업체와 절차 가이드를 함께 확인할 수 있도록 차분한 정보 구조로 제공합니다." />;
+  return <CategoryInfoPage data={CATEGORY_CONTENT.funeral} />;
 }

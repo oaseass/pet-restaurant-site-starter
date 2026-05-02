@@ -1,7 +1,11 @@
-import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
+import { CategoryInfoPage } from "@/components/CategoryInfoPage";
+import { CATEGORY_CONTENT } from "@/lib/category-info-content";
 
-export const dynamic = "force-dynamic";
+export const metadata = {
+  title: "반려동물 미용 | 댕냥지도",
+  description: "반려동물 미용 종류, 가격 기준, 위생 확인 포인트 안내. 방문 전 체크리스트를 확인하세요.",
+};
 
 export default function GroomingPage() {
-  return <PlaceDirectoryPage categorySlug="grooming" title="반려동물 미용" description="위생미용과 전체미용, 업체 등록, 가격 참고 정보를 한 화면에서 봅니다." />;
+  return <CategoryInfoPage data={CATEGORY_CONTENT.grooming} />;
 }
