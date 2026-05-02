@@ -8,7 +8,7 @@ interface Props {
 export function CategoryInfoPage({ data }: Props) {
   return (
     <div style={{ padding: "0 0 40px" }}>
-      {/* ?곷떒 ?ㅻ뜑 */}
+      {/* 상단 헤더 */}
       <div className="portal-section-header">
         <div>
           <h1 style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>
@@ -36,17 +36,17 @@ export function CategoryInfoPage({ data }: Props) {
         </div>
       </div>
 
-      {/* ?뚭컻 臾멸뎄 */}
+      {/* 본문 설명 */}
       <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--line)", background: "#fafdf9" }}>
         <p style={{ fontSize: "13px", color: "#555", lineHeight: 1.65, margin: 0 }}>
           {data.description}
         </p>
       </div>
 
-      {/* ?뺣낫 移대뱶 */}
+      {/* 정보 카드 */}
       <div style={{ padding: "14px 16px 0" }}>
         <p style={{ fontSize: "11px", fontWeight: 800, color: "#888", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "10px" }}>
-          ?뚯븘?먮㈃ ?꾩????섎뒗 ?뺣낫
+          알아두면 좋은 정보
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: "8px" }}>
           {data.cards.map((card) => (
@@ -73,10 +73,10 @@ export function CategoryInfoPage({ data }: Props) {
         </div>
       </div>
 
-      {/* 泥댄겕由ъ뒪??*/}
+      {/* 체크리스트 */}
       <div style={{ padding: "14px 16px 0" }}>
         <p style={{ fontSize: "11px", fontWeight: 800, color: "#888", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "10px" }}>
-          諛⑸Ц ??泥댄겕由ъ뒪??
+          방문 전 체크리스트
         </p>
         <div style={{ border: "1px solid var(--line)", borderRadius: "8px", background: "var(--surface)", padding: "12px 14px" }}>
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -93,7 +93,7 @@ export function CategoryInfoPage({ data }: Props) {
       {/* FAQ */}
       <div style={{ padding: "14px 16px 0" }}>
         <p style={{ fontSize: "11px", fontWeight: 800, color: "#888", letterSpacing: "0.04em", textTransform: "uppercase", marginBottom: "10px" }}>
-          ?먯＜ 臾삳뒗 吏덈Ц
+          자주 묻는 질문
         </p>
         <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
           {data.faq.map((item) => (
@@ -109,7 +109,7 @@ export function CategoryInfoPage({ data }: Props) {
         </div>
       </div>
 
-      {/* 異쒖쿂 ?명듃 */}
+      {/* 출처 노트 */}
       <div style={{ padding: "14px 16px 0" }}>
         <p style={{ fontSize: "11px", color: "var(--muted)", lineHeight: 1.6, padding: "10px 12px", background: "var(--surface)", border: "1px solid var(--line)", borderRadius: "8px" }}>
           {data.sourceNote}

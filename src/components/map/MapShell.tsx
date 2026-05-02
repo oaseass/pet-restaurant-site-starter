@@ -94,10 +94,10 @@ function buildMapAreaCopy({
   mapStatus: "not-requested" | "unavailable" | "loading" | "ready" | "error";
   mappableCount: number;
 }) {
-  if (activeCategory !== "restaurants") {
+  if (activeCategory === "lost-pets") {
     return {
-      title: `${activeCategoryLabel} 지도 준비 중`,
-      description: `${activeCategoryLabel} 지도는 곧 준비됩니다. 지금은 식당 지도를 먼저 이용하실 수 있어요.`,
+      title: "찾아요는 지도를 지원하지 않습니다.",
+      description: "보호동물 공고와 실종 제보는 찾아요 페이지에서 확인하세요.",
     };
   }
 
@@ -286,7 +286,7 @@ export function MapShell({
     mappableCount: mappableItems.length,
   });
   const shouldUseFallback =
-    activeCategory !== "restaurants" ||
+    activeCategory === "lost-pets" ||
     mapStatus === "error" ||
     mapStatus === "unavailable";
   // mapStatus === "loading": 스켈레톤 표시 (실제 지도 div 유지)

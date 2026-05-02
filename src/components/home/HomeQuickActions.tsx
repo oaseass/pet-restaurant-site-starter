@@ -18,10 +18,10 @@ const QUICK_ACTIONS = [
   },
   {
     icon: AlertTriangle,
-    title: "실종 제보",
-    desc: "실종된 반려동물 제보 등록",
-    href: "/lost-pets",
-    cta: "제보 보기",
+    title: "보호동물 공고",
+    desc: "지자체·보호소 공개 보호동물 목록",
+    href: "/lost-pets?tab=shelter",
+    cta: "공고 보기",
   },
   {
     icon: Plus,

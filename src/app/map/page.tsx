@@ -49,18 +49,31 @@ const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants">, Pre
   },
 };
 
+const MAP_CATEGORY_ALIASES: Record<string, MapCategoryKey> = {
+  restaurants: "restaurants",
+  restaurant: "restaurants",
+  hospitals: "hospitals",
+  hospital: "hospitals",
+  animal_hospital: "hospitals",
+  animal_hospitals: "hospitals",
+  pharmacy: "pharmacy",
+  pharmacies: "pharmacy",
+  animal_pharmacy: "pharmacy",
+  grooming: "grooming",
+  pet_grooming: "grooming",
+  daycare: "daycare",
+  boarding: "daycare",
+  hotel: "daycare",
+  training: "daycare",
+  funeral: "funeral",
+  cremation: "funeral",
+  "lost-pets": "lost-pets",
+  lost_pets: "lost-pets",
+};
+
 function resolveMapCategory(input?: string): MapCategoryKey {
-  switch (input) {
-    case "hospitals":
-    case "grooming":
-    case "daycare":
-    case "funeral":
-    case "pharmacy":
-    case "lost-pets":
-      return input;
-    default:
-      return "restaurants";
-  }
+  if (!input) return "restaurants";
+  return MAP_CATEGORY_ALIASES[input.toLowerCase().replace(/-/g, "_")] ?? "restaurants";
 }
 
 function buildCategoryHref(category: MapCategoryKey, params: { q: string; sido: string; type: string }) {
@@ -247,10 +260,10 @@ export default async function MapPage({
     {
       key: "lost-pets",
       label: "찾아요",
-      description: "준비중",
-      href: buildCategoryHref("lost-pets", normalized),
-      status: "coming-soon",
-      countLabel: "준비중",
+      description: "보호동물 공고",
+      href: "/lost-pets?tab=shelter",
+      status: "active",
+      countLabel: "공고",
     },
   ];
 
@@ -353,7 +366,7 @@ export default async function MapPage({
 
       <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
         <Compass size={14} />
-        <span>{isRestaurantView ? `${filteredCount.toLocaleString("ko-KR")}건 중 최대 120건 표시` : `${MAP_CATEGORY_LABELS[activeCategory]} 지도는 순차적으로 준비 중입니다`}</span>
+        <span>{`${filteredCount.toLocaleString("ko-KR")}건 중 최대 120건 표시`}</span>
       </div>
 
       <MapShell

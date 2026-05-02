@@ -71,6 +71,7 @@ export const PRIMARY_NAV = [
   { href: "/map", label: "지도" },
   { href: "/restaurants", label: "식당" },
   { href: "/hospitals", label: "병원" },
+  { href: "/pharmacy", label: "약국" },
   { href: "/grooming", label: "미용" },
   { href: "/daycare", label: "유치원" },
   { href: "/lost-pets", label: "찾아요" },

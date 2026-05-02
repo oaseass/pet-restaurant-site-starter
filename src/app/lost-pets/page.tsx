@@ -43,7 +43,7 @@ function AnimalNoticeCard({ notice }: { notice: PublicAnimalNotice }) {
 
 export default async function LostPetsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
   const { tab } = await searchParams;
-  const isShelterTab = tab === "shelter";
+  const isShelterTab = !tab || tab === "shelter";
 
   const [items, counts, notices] = await Promise.all([
     prisma.lostPet.findMany({
@@ -84,7 +84,7 @@ export default async function LostPetsPage({ searchParams }: { searchParams: Pro
       {/* 탭 */}
       <div style={{ display: "flex", borderBottom: "1px solid #e5e7eb", padding: "0 14px" }}>
         <Link
-          href="/lost-pets"
+          href="/lost-pets?tab=pets"
           style={{
             padding: "8px 14px", fontSize: "12px", fontWeight: isShelterTab ? 500 : 700,
             color: isShelterTab ? "#6b7280" : "#c2410c",
@@ -95,7 +95,7 @@ export default async function LostPetsPage({ searchParams }: { searchParams: Pro
           실종 제보
         </Link>
         <Link
-          href="/lost-pets?tab=shelter"
+          href="/lost-pets"
           style={{
             padding: "8px 14px", fontSize: "12px", fontWeight: isShelterTab ? 700 : 500,
             color: isShelterTab ? "#2563eb" : "#6b7280",
