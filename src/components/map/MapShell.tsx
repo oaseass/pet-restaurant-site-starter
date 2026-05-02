@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Crosshair, MapPinned } from "lucide-react";
+import { Crosshair, MapPin, MapPinned } from "lucide-react";
 import { MapBottomSheet } from "@/components/map/MapBottomSheet";
 import { MapFallback } from "@/components/map/MapFallback";
 import { MapListPanel } from "@/components/map/MapListPanel";
@@ -18,11 +18,17 @@ type UserLocation = {
   lng: number;
 };
 
-function useKakaoMapSdk() {
+function useKakaoMapSdk(enabled: boolean) {
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY?.trim();
-  const [status, setStatus] = useState<"unavailable" | "loading" | "ready" | "error">(appKey ? "loading" : "unavailable");
+  const [status, setStatus] = useState<"not-requested" | "unavailable" | "loading" | "ready" | "error">(
+    !enabled ? "not-requested" : appKey ? "loading" : "unavailable",
+  );
 
   useEffect(() => {
+    if (!enabled) {
+      setStatus("not-requested");
+      return;
+    }
     if (!appKey) {
       setStatus("unavailable");
       return;
@@ -67,7 +73,7 @@ function useKakaoMapSdk() {
       script.removeEventListener("load", onReady);
       script.removeEventListener("error", onError);
     };
-  }, [appKey]);
+  }, [appKey, enabled]);
 
   return status;
 }
@@ -85,7 +91,7 @@ function buildMapAreaCopy({
 }: {
   activeCategoryLabel: string;
   activeCategory: MapCategoryKey;
-  mapStatus: "unavailable" | "loading" | "ready" | "error";
+  mapStatus: "not-requested" | "unavailable" | "loading" | "ready" | "error";
   mappableCount: number;
 }) {
   if (activeCategory !== "restaurants") {
@@ -111,14 +117,14 @@ function buildMapAreaCopy({
 
   if (mappableCount === 0) {
     return {
-      title: "현재 지도에 표시할 좌표를 준비 중입니다.",
-      description: "아래 리스트에서 먼저 식당을 확인해 주세요.",
+      title: "식당 지도",
+      description: "목록에서 식당을 선택하면 위치를 확인할 수 있습니다.",
     };
   }
 
   return {
     title: "식당 지도",
-    description: "좌표가 준비된 식당은 지도에 바로 표시됩니다.",
+    description: "지도에 마커가 표시된 식당을 목록에서 선택하세요.",
   };
 }
 
@@ -130,6 +136,7 @@ export function MapShell({
   visibleCount,
   coordinateReadyCount,
   coordinatePendingCount,
+  shouldLoadMap,
   preparedState,
   emptyState,
 }: {
@@ -140,10 +147,11 @@ export function MapShell({
   visibleCount: number;
   coordinateReadyCount: number;
   coordinatePendingCount: number;
+  shouldLoadMap?: boolean;
   preparedState?: PreparedCategoryState;
   emptyState?: { title: string; description: string; href: string; hrefLabel: string };
 }) {
-  const mapStatus = useKakaoMapSdk();
+  const mapStatus = useKakaoMapSdk(shouldLoadMap ?? true);
   const desktopMapRef = useRef<HTMLDivElement | null>(null);
   const mobileMapRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<any>(null);
@@ -333,13 +341,22 @@ export function MapShell({
 
           <div className="relative z-10 mt-5 flex flex-wrap gap-2">
             <span className="badge">{activeCategoryLabel}</span>
-            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">핀 가능 {coordinateReadyCount.toLocaleString("ko-KR")}건</span>
-            <span className="badge bg-[var(--accent-soft)] text-[#b9632e]">좌표 준비중 {coordinatePendingCount.toLocaleString("ko-KR")}건</span>
+            {coordinateReadyCount > 0 && (
+              <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">지도 {coordinateReadyCount.toLocaleString("ko-KR")}건</span>
+            )}
           </div>
 
           <div className="relative z-10 mt-5 overflow-hidden rounded-[1.125rem] border border-[var(--line)] bg-white shadow-[0_8px_24px_rgba(23,23,23,0.06)]">
             <div className="h-[620px] w-full">
-              {shouldUseFallback ? (
+              {mapStatus === "not-requested" ? (
+                <div className="flex h-full flex-col items-center justify-center gap-3 bg-[#f6faf7] p-8">
+                  <MapPin size={32} color="var(--brand)" />
+                  <p className="text-center text-[16px] font-black text-[var(--ink)]">지도 검색</p>
+                  <p className="text-center text-sm leading-6 text-[var(--muted)]">
+                    검색어나 지역을 입력하면<br />지도가 열립니다.
+                  </p>
+                </div>
+              ) : shouldUseFallback ? (
                 <MapFallback
                   items={items}
                   selectedItem={selectedItem}
@@ -387,14 +404,23 @@ export function MapShell({
           </div>
 
           <div className="relative z-10 mt-4 flex gap-2 overflow-x-auto pb-1">
-            <span className="shrink-0 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-black text-[var(--brand)]">핀 {coordinateReadyCount.toLocaleString("ko-KR")}</span>
-            <span className="shrink-0 rounded-full bg-[var(--accent-soft)] px-3 py-1.5 text-xs font-black text-[#b9632e]">좌표 준비중 {coordinatePendingCount.toLocaleString("ko-KR")}</span>
-            <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-black text-[var(--muted)]">표시 {visibleCount.toLocaleString("ko-KR")}건</span>
+            {coordinateReadyCount > 0 && (
+              <span className="shrink-0 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-black text-[var(--brand)]">지도 {coordinateReadyCount.toLocaleString("ko-KR")}건</span>
+            )}
+            <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-black text-[var(--muted)]">목록 {visibleCount.toLocaleString("ko-KR")}건</span>
           </div>
 
           <div className="relative z-10 mt-4 overflow-hidden rounded-[1rem] border border-[var(--line)] bg-white shadow-[0_8px_24px_rgba(23,23,23,0.06)]">
             <div className="h-[42vh] min-h-[320px] w-full">
-              {shouldUseFallback ? (
+              {mapStatus === "not-requested" ? (
+                <div className="flex h-full flex-col items-center justify-center gap-3 bg-[#f6faf7] p-6">
+                  <MapPin size={28} color="var(--brand)" />
+                  <p className="text-center text-[15px] font-black text-[var(--ink)]">지도 검색</p>
+                  <p className="text-center text-sm leading-6 text-[var(--muted)]">
+                    검색어나 지역을 입력하면 지도가 열립니다.
+                  </p>
+                </div>
+              ) : shouldUseFallback ? (
                 <MapFallback
                   items={items}
                   selectedItem={selectedItem}

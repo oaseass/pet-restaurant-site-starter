@@ -168,22 +168,20 @@ export function SearchResultsList({ restaurants, guides, keyword }: SearchResult
 
               {/* 액션 버튼 */}
               <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                {r.lat !== null && (
-                  <Link
-                    href={`/map?q=${encodeURIComponent(r.name)}`}
-                    style={{
-                      fontSize: "11px",
-                      fontWeight: 700,
-                      color: "var(--brand)",
-                      textDecoration: "none",
-                      padding: "3px 7px",
-                      border: "1px solid var(--brand)",
-                      borderRadius: "5px",
-                    }}
-                  >
-                    지도
-                  </Link>
-                )}
+                <Link
+                  href={`/map?q=${encodeURIComponent(r.name)}`}
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "var(--brand)",
+                    textDecoration: "none",
+                    padding: "3px 7px",
+                    background: "var(--brand-soft)",
+                    borderRadius: "5px",
+                  }}
+                >
+                  지도
+                </Link>
                 <Link
                   href={`/restaurants/${r.id}`}
                   style={{
@@ -192,7 +190,7 @@ export function SearchResultsList({ restaurants, guides, keyword }: SearchResult
                     color: "#555",
                     textDecoration: "none",
                     padding: "3px 7px",
-                    border: "1px solid var(--line)",
+                    background: "#f3f4f6",
                     borderRadius: "5px",
                   }}
                 >

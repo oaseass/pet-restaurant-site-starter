@@ -69,9 +69,8 @@ export function MapFallback({
               <p className="mt-3 max-w-lg text-sm leading-7 text-[var(--muted)]">{description}</p>
           </div>
             <div className="rounded-[1rem] border border-[var(--line)] bg-white p-4 text-sm shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
-              <p className="text-[11px] font-black text-[var(--muted)]">표시 가능</p>
+              <p className="text-[11px] font-black text-[var(--muted)]">지도 표시</p>
               <p className="mt-2 text-2xl font-black text-[var(--ink)]">{coordinateReadyCount.toLocaleString("ko-KR")}</p>
-              <p className="mt-2 text-xs font-bold text-[var(--muted)]">좌표 준비중 {coordinatePendingCount.toLocaleString("ko-KR")}곳</p>
           </div>
         </div>
 
@@ -91,10 +90,6 @@ export function MapFallback({
             <div className="rounded-[1rem] border border-[var(--line)] bg-white p-4 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
               <p className="text-[11px] font-black text-[var(--muted)]">카테고리</p>
               <p className="mt-3 text-lg font-black text-[var(--ink)]">{activeCategoryLabel}</p>
-              <div className="mt-3 flex items-start gap-2 text-sm leading-6 text-[var(--muted)]">
-              <MapPin className="mt-1 shrink-0" size={16} />
-                <p>좌표가 준비된 식당부터 지도에 표시하고, 나머지 식당은 목록에서 함께 확인할 수 있습니다.</p>
-            </div>
           </div>
         </div>
       </div>

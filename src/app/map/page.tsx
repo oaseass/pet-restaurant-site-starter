@@ -69,11 +69,12 @@ function buildCategoryHref(category: MapCategoryKey, params: { q: string; sido: 
 export default async function MapPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sido?: string; type?: string; category?: string }>;
+  searchParams: Promise<{ q?: string; sido?: string; type?: string; category?: string; lat?: string; lng?: string }>;
 }) {
   const params = await searchParams;
   const activeCategory = resolveMapCategory(params.category);
   const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
+  const shouldLoadMap = !!(params.q || params.sido || params.type || params.lat || params.lng || params.category);
   const [categoryCounts, restaurantsLight] = await Promise.all([getCategoryCountsSnapshot(), getRestaurantsLightSnapshot()]);
 
   const isRestaurantView = activeCategory === "restaurants";
@@ -168,9 +169,7 @@ export default async function MapPage({
         <div>
           <h1 style={{ fontSize: "17px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>반려동물 동반 식당 지도</h1>
           <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0, marginTop: "2px" }}>
-            {isRestaurantView
-              ? `지도 표시 가능 ${categoryCounts.restaurantCoordinateReadyCount.toLocaleString("ko-KR")}건 포함 · 전체 ${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`
-              : "병원, 미용, 유치원, 장례, 찾아요는 순차적으로 준비 중입니다"}
+            전체 {categoryCounts.restaurantCount.toLocaleString("ko-KR")}건 등록
           </p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
@@ -241,6 +240,7 @@ export default async function MapPage({
         visibleCount={listItems.length}
         coordinateReadyCount={coordinateReadyCount}
         coordinatePendingCount={coordinatePendingCount}
+        shouldLoadMap={shouldLoadMap}
         preparedState={preparedState}
         emptyState={emptyState}
       />

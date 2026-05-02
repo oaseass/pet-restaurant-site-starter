@@ -36,10 +36,9 @@ export function MapListPanel({
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{subtitle}</p>
       </div>
 
-      <div className="relative z-10 mt-5 grid grid-cols-3 gap-3">
+      <div className="relative z-10 mt-5 grid grid-cols-2 gap-3">
         <Metric label="검색 결과" value={filteredCount.toLocaleString("ko-KR")} />
-        <Metric label="핀 가능" value={coordinateReadyCount.toLocaleString("ko-KR")} tone="mint" />
-        <Metric label="좌표 준비중" value={coordinatePendingCount.toLocaleString("ko-KR")} tone="orange" />
+        <Metric label="지도" value={coordinateReadyCount.toLocaleString("ko-KR")} tone="mint" />
       </div>
 
       {preparedState ? (
