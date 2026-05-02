@@ -22,42 +22,35 @@ export function RightRail({ restaurantCount, lastUpdatedAt }: RightRailProps) {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-      {/* 지도 카드 */}
+      {/* 지도 CTA 카드 */}
       <Link
         href="/map"
-        className="map-preview-card"
-        style={{ textDecoration: "none", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}
+        style={{
+          textDecoration: "none",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "10px",
+          padding: "20px 14px",
+          background: "var(--brand)",
+          borderRadius: "10px",
+          color: "white",
+        }}
       >
-        {/* 지도 격자 배경 */}
-        <svg
-          aria-hidden
-          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.18 }}
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <defs>
-            <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
-              <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#1f6b5b" strokeWidth="0.8" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
-        </svg>
-        {/* 핀 아이콘 */}
-        <div style={{ position: "relative", zIndex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-          <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "var(--brand)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <MapPin size={20} color="#fff" />
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "13px", fontWeight: 800, color: "#1a1a1b" }}>지도에서 보기</div>
-            {restaurantCount !== undefined && (
-              <div style={{ fontSize: "11px", color: "#555", marginTop: "2px" }}>
-                식당 {restaurantCount.toLocaleString("ko-KR")}곳 등록
-              </div>
-            )}
-          </div>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "var(--brand)", color: "#fff", fontSize: "11px", fontWeight: 700, borderRadius: "999px", padding: "4px 12px" }}>
-            <MapPin size={10} />
-            지도 열기
-          </div>
+        <div style={{ width: "44px", height: "44px", borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <MapPin size={22} color="#fff" />
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "14px", fontWeight: 800, color: "white" }}>지도에서 검색</div>
+          {restaurantCount !== undefined && (
+            <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", marginTop: "3px" }}>
+              식당 {restaurantCount.toLocaleString("ko-KR")}건 등록
+            </div>
+          )}
+        </div>
+        <div style={{ fontSize: "12px", fontWeight: 700, color: "white", background: "rgba(255,255,255,0.2)", borderRadius: "999px", padding: "5px 14px" }}>
+          지도 열기 →
         </div>
       </Link>
 
