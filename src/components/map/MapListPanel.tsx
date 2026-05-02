@@ -85,6 +85,9 @@ export function MapListPanel({
                   >
                     <button type="button" onClick={() => onSelect(item.id)} className="block w-full text-left">
                       <div className="flex flex-wrap gap-2">
+                        {item.categoryLabel && (
+                          <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-black text-[#2563eb]">{item.categoryLabel}</span>
+                        )}
                         {item.officialRegistered ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[#ecf8f3] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
                             <ShieldCheck size={13} />

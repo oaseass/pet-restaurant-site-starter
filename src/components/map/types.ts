@@ -1,4 +1,4 @@
-export type MapCategoryKey = "restaurants" | "hospitals" | "grooming" | "daycare" | "funeral" | "pharmacy" | "lost-pets";
+export type MapCategoryKey = "all" | "restaurants" | "hospitals" | "grooming" | "daycare" | "funeral" | "pharmacy" | "lost-pets";
 
 export type MapCategoryOption = {
   key: MapCategoryKey;
@@ -14,6 +14,8 @@ export type MapRestaurantListItem = {
   name: string;
   address: string;
   businessType: string;
+  /** "all" 카테고리에서 카테고리 배지로 표시할 레이블 (예: 병원, 약국) */
+  categoryLabel?: string;
   regionLabel: string;
   href: string;
   officialRegistered: boolean;

@@ -17,7 +17,7 @@ export function LocationSearchButton() {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         router.push(
-          `/map?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}`,
+          `/map?lat=${pos.coords.latitude.toFixed(6)}&lng=${pos.coords.longitude.toFixed(6)}&category=all`,
         );
       },
       () => {

@@ -7,6 +7,7 @@ import { REGION_OPTIONS } from "@/lib/platform-content";
 import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesLightSnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
 
 const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
+  all: "전체",
   restaurants: "식당",
   hospitals: "병원",
   grooming: "미용",
@@ -16,7 +17,15 @@ const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   "lost-pets": "찾아요",
 };
 
-const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants">, PreparedCategoryState> = {
+const PLACE_CATEGORY_LABEL: Record<string, string> = {
+  ANIMAL_HOSPITAL: "병원",
+  GROOMING: "미용",
+  DAYCARE: "유치원",
+  FUNERAL: "장례",
+  PHARMACY: "약국",
+};
+
+const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants" | "all">, PreparedCategoryState> = {
   pharmacy: {
     title: "동물약국 지도는 준비 중입니다.",
     description: "동물약국 정보는 순차적으로 지도에서 볼 수 있도록 준비하고 있습니다.",
@@ -50,6 +59,7 @@ const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants">, Pre
 };
 
 const MAP_CATEGORY_ALIASES: Record<string, MapCategoryKey> = {
+  all: "all",
   restaurants: "restaurants",
   restaurant: "restaurants",
   hospitals: "hospitals",
@@ -71,18 +81,25 @@ const MAP_CATEGORY_ALIASES: Record<string, MapCategoryKey> = {
   lost_pets: "lost-pets",
 };
 
-function resolveMapCategory(input?: string): MapCategoryKey {
-  if (!input) return "restaurants";
+function resolveMapCategory(input: string | undefined, hasLocationIntent: boolean): MapCategoryKey {
+  if (!input) return hasLocationIntent ? "all" : "restaurants";
   return MAP_CATEGORY_ALIASES[input.toLowerCase().replace(/-/g, "_")] ?? "restaurants";
 }
 
-function buildCategoryHref(category: MapCategoryKey, params: { q: string; sido: string; type: string }) {
+function buildCategoryHref(
+  category: MapCategoryKey,
+  params: { q: string; sido: string; type: string },
+  location?: { lat: number; lng: number },
+) {
   const query = new URLSearchParams();
   if (category !== "restaurants") query.set("category", category);
   if (params.q) query.set("q", params.q);
   if (params.sido) query.set("sido", params.sido);
   if (params.type) query.set("type", params.type);
-
+  if (location) {
+    query.set("lat", location.lat.toFixed(6));
+    query.set("lng", location.lng.toFixed(6));
+  }
   return query.size > 0 ? `/map?${query.toString()}` : "/map";
 }
 
@@ -92,19 +109,24 @@ export default async function MapPage({
   searchParams: Promise<{ q?: string; sido?: string; type?: string; category?: string; lat?: string; lng?: string }>;
 }) {
   const params = await searchParams;
-  const activeCategory = resolveMapCategory(params.category);
-  const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
 
-  // 현재 위치 파싱 (한국 좌표 범위 검증)
-  const userLat = Number(params.lat);
-  const userLng = Number(params.lng);
+  // 현재 위치 파싱 (한국 좌표 범위 검증) — category 결정보다 먼저 계산
+  const userLatRaw = Number(params.lat);
+  const userLngRaw = Number(params.lng);
   const hasUserLocation =
-    Number.isFinite(userLat) &&
-    Number.isFinite(userLng) &&
-    userLat >= 33 &&
-    userLat <= 39 &&
-    userLng >= 124 &&
-    userLng <= 132;
+    Number.isFinite(userLatRaw) &&
+    Number.isFinite(userLngRaw) &&
+    userLatRaw >= 33 &&
+    userLatRaw <= 39 &&
+    userLngRaw >= 124 &&
+    userLngRaw <= 132;
+  const userLat = hasUserLocation ? userLatRaw : 0;
+  const userLng = hasUserLocation ? userLngRaw : 0;
+
+  const hasSearchIntent = Boolean(params.q);
+  const hasLocationIntent = hasUserLocation || hasSearchIntent;
+  const activeCategory = resolveMapCategory(params.category, hasLocationIntent);
+  const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
 
   const shouldLoadMap = !!(params.q || params.sido || params.type || hasUserLocation || params.category);
   const [categoryCounts, restaurantsLight, allPlaces] = await Promise.all([
@@ -119,10 +141,10 @@ export default async function MapPage({
   }
 
   const isRestaurantView = activeCategory === "restaurants";
+  const isAllView = activeCategory === "all";
 
   const businessTypeOptions = getRestaurantBusinessTypes(restaurantsLight);
 
-  // 현재 위치 기반 거리 정렬
   function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371;
     const dLat = ((lat2 - lat1) * Math.PI) / 180;
@@ -133,23 +155,6 @@ export default async function MapPage({
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
-  let restaurants = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized) : [];
-  if (hasUserLocation && isRestaurantView) {
-    restaurants = restaurants.sort((a, b) => {
-      const aHasCoord = a.lat !== null && a.lng !== null;
-      const bHasCoord = b.lat !== null && b.lng !== null;
-      if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
-      if (!aHasCoord || !bHasCoord) return 0;
-      return getDistanceKm(userLat, userLng, a.lat!, a.lng!) - getDistanceKm(userLat, userLng, b.lat!, b.lng!);
-    });
-  } else if (isRestaurantView) {
-    restaurants = sortRestaurantsLight(restaurants);
-  }
-  restaurants = restaurants.slice(0, 120);
-  const filteredRestaurantCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).length : 0;
-  const filteredCoordinateReadyCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).filter((restaurant) => restaurant.lat !== null && restaurant.lng !== null).length : 0;
-
-  // 비식당 카테고리 Place 데이터
   const CATEGORY_KEY_TO_PLACE: Record<string, string> = {
     hospitals: "ANIMAL_HOSPITAL",
     grooming: "GROOMING",
@@ -157,10 +162,32 @@ export default async function MapPage({
     funeral: "FUNERAL",
     pharmacy: "PHARMACY",
   };
+
+  // 식당 목록
+  let restaurantsFiltered = (isRestaurantView || isAllView) ? filterRestaurantsLight(restaurantsLight, normalized) : [];
+  if (hasUserLocation) {
+    restaurantsFiltered = restaurantsFiltered.sort((a, b) => {
+      const aHasCoord = a.lat !== null && a.lng !== null;
+      const bHasCoord = b.lat !== null && b.lng !== null;
+      if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
+      if (!aHasCoord || !bHasCoord) return 0;
+      return getDistanceKm(userLat, userLng, a.lat!, a.lng!) - getDistanceKm(userLat, userLng, b.lat!, b.lng!);
+    });
+  } else if (isRestaurantView || isAllView) {
+    restaurantsFiltered = sortRestaurantsLight(restaurantsFiltered);
+  }
+  const restaurants = isRestaurantView ? restaurantsFiltered.slice(0, 120) : restaurantsFiltered;
+  const filteredRestaurantCount = (isRestaurantView || isAllView) ? filterRestaurantsLight(restaurantsLight, normalized).length : 0;
+  const filteredCoordinateReadyCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).filter((r) => r.lat !== null && r.lng !== null).length : 0;
+
+  // 비식당 카테고리 Place 데이터
   const activePlaceCategory = CATEGORY_KEY_TO_PLACE[activeCategory];
-  let placesForCategory = activePlaceCategory
-    ? allPlaces.filter((p) => p.category === activePlaceCategory && (normalized.sido ? p.sido === normalized.sido : true))
-    : [];
+  const PLACE_CATEGORIES_ALL = ["ANIMAL_HOSPITAL", "PHARMACY", "GROOMING", "DAYCARE", "FUNERAL"];
+  let placesForCategory = isAllView
+    ? allPlaces.filter((p) => PLACE_CATEGORIES_ALL.includes(p.category) && (normalized.sido ? p.sido === normalized.sido : true))
+    : (activePlaceCategory
+      ? allPlaces.filter((p) => p.category === activePlaceCategory && (normalized.sido ? p.sido === normalized.sido : true))
+      : []);
   if (hasUserLocation) {
     placesForCategory = placesForCategory.sort((a, b) => {
       const aHasCoord = a.lat !== null && a.lng !== null;
@@ -170,9 +197,60 @@ export default async function MapPage({
       return getDistanceKm(userLat, userLng, a.lat!, a.lng!) - getDistanceKm(userLat, userLng, b.lat!, b.lng!);
     });
   }
-  placesForCategory = placesForCategory.slice(0, 120);
+  const placesForCategorySliced = isAllView ? placesForCategory : placesForCategory.slice(0, 120);
 
-  const listItems: MapRestaurantListItem[] = (isRestaurantView
+  // all 카테고리: 식당 + 전체 place 합산 후 거리순 정렬 → 120건 제한
+  const MAX_LIST = 120;
+  const MAX_MAP_POINTS = 500;
+
+  const listItems: MapRestaurantListItem[] = (isAllView
+    ? (() => {
+        const combined: MapRestaurantListItem[] = [
+          ...restaurantsFiltered.map((r) => ({
+            id: `r_${r.id}`,
+            name: r.name,
+            address: r.address,
+            businessType: r.businessType,
+            categoryLabel: "식당",
+            regionLabel: [r.sido, r.sigungu].filter(Boolean).join(" · "),
+            href: `/restaurants/${r.id}`,
+            officialRegistered: r.officialRegistered,
+            lat: r.lat,
+            lng: r.lng,
+            coordinateStatus: (r.lat !== null && r.lng !== null ? "ready" : "pending") as "ready" | "pending",
+            dataUpdatedLabel: new Date(r.updatedAt).toLocaleDateString("ko-KR"),
+            distanceKm: hasUserLocation && r.lat !== null && r.lng !== null
+              ? getDistanceKm(userLat, userLng, r.lat, r.lng)
+              : undefined,
+          })),
+          ...placesForCategorySliced.map((p) => ({
+            id: `p_${p.id}`,
+            name: p.name,
+            address: p.roadAddress ?? p.address ?? "",
+            businessType: p.businessStatus ?? "",
+            categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? p.category,
+            regionLabel: [p.sido, p.sigungu].filter(Boolean).join(" · "),
+            href: `/map?category=${Object.entries(CATEGORY_KEY_TO_PLACE).find(([, v]) => v === p.category)?.[0] ?? "restaurants"}&q=${encodeURIComponent(p.name)}`,
+            officialRegistered: false,
+            lat: p.lat,
+            lng: p.lng,
+            coordinateStatus: (p.lat !== null && p.lng !== null ? "ready" : "pending") as "ready" | "pending",
+            dataUpdatedLabel: new Date(p.updatedAt).toLocaleDateString("ko-KR"),
+            distanceKm: hasUserLocation && p.lat !== null && p.lng !== null
+              ? getDistanceKm(userLat, userLng, p.lat, p.lng)
+              : undefined,
+          })),
+        ];
+        if (hasUserLocation) {
+          combined.sort((a, b) => {
+            const aD = a.distanceKm ?? Infinity;
+            const bD = b.distanceKm ?? Infinity;
+            return aD - bD;
+          });
+        }
+        return combined.slice(0, MAX_LIST);
+      })()
+    : isRestaurantView
     ? restaurants.map((restaurant) => ({
         id: restaurant.id,
         name: restaurant.name,
@@ -208,12 +286,22 @@ export default async function MapPage({
             : undefined,
       }))) as MapRestaurantListItem[];
 
+  const locationForHref = hasUserLocation ? { lat: userLat, lng: userLng } : undefined;
+
   const categories: MapCategoryOption[] = [
+    {
+      key: "all",
+      label: "전체",
+      description: "전체 장소",
+      href: buildCategoryHref("all", normalized, locationForHref),
+      status: "active",
+      countLabel: "전체",
+    },
     {
       key: "restaurants",
       label: "식당",
       description: `${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`,
-      href: buildCategoryHref("restaurants", normalized),
+      href: buildCategoryHref("restaurants", normalized, locationForHref),
       status: "active",
       countLabel: `${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`,
     },
@@ -221,7 +309,7 @@ export default async function MapPage({
       key: "hospitals",
       label: "병원",
       description: placeCategoryMap.get("ANIMAL_HOSPITAL") ? `${(placeCategoryMap.get("ANIMAL_HOSPITAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
-      href: buildCategoryHref("hospitals", normalized),
+      href: buildCategoryHref("hospitals", normalized, locationForHref),
       status: placeCategoryMap.get("ANIMAL_HOSPITAL") ? "active" : "coming-soon",
       countLabel: placeCategoryMap.get("ANIMAL_HOSPITAL") ? `${(placeCategoryMap.get("ANIMAL_HOSPITAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
@@ -229,7 +317,7 @@ export default async function MapPage({
       key: "grooming",
       label: "미용",
       description: placeCategoryMap.get("GROOMING") ? `${(placeCategoryMap.get("GROOMING") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
-      href: buildCategoryHref("grooming", normalized),
+      href: buildCategoryHref("grooming", normalized, locationForHref),
       status: placeCategoryMap.get("GROOMING") ? "active" : "coming-soon",
       countLabel: placeCategoryMap.get("GROOMING") ? `${(placeCategoryMap.get("GROOMING") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
@@ -237,7 +325,7 @@ export default async function MapPage({
       key: "daycare",
       label: "유치원",
       description: placeCategoryMap.get("DAYCARE") ? `${(placeCategoryMap.get("DAYCARE") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
-      href: buildCategoryHref("daycare", normalized),
+      href: buildCategoryHref("daycare", normalized, locationForHref),
       status: placeCategoryMap.get("DAYCARE") ? "active" : "coming-soon",
       countLabel: placeCategoryMap.get("DAYCARE") ? `${(placeCategoryMap.get("DAYCARE") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
@@ -245,7 +333,7 @@ export default async function MapPage({
       key: "funeral",
       label: "장례",
       description: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
-      href: buildCategoryHref("funeral", normalized),
+      href: buildCategoryHref("funeral", normalized, locationForHref),
       status: placeCategoryMap.get("FUNERAL") ? "active" : "coming-soon",
       countLabel: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
@@ -253,7 +341,7 @@ export default async function MapPage({
       key: "pharmacy",
       label: "약국",
       description: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
-      href: buildCategoryHref("pharmacy", normalized),
+      href: buildCategoryHref("pharmacy", normalized, locationForHref),
       status: placeCategoryMap.get("PHARMACY") ? "active" : "coming-soon",
       countLabel: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
@@ -267,16 +355,22 @@ export default async function MapPage({
     },
   ];
 
-  const filteredCount = isRestaurantView ? filteredRestaurantCount : placesForCategory.length;
-  const coordinateReadyCount = isRestaurantView
-    ? filteredCoordinateReadyCount
-    : placesForCategory.filter((p) => p.lat !== null && p.lng !== null).length;
-  const coordinatePendingCount = Math.max(filteredCount - coordinateReadyCount, 0);
-  // preparedState: Place 데이터가 있으면 undefined (실제 목록 표시), 없으면 준비 중 안내
+  const filteredCount = isAllView
+    ? listItems.length
+    : isRestaurantView
+      ? filteredRestaurantCount
+      : placesForCategorySliced.length;
+  const coordinateReadyCount = isAllView
+    ? listItems.filter((item) => item.coordinateStatus === "ready").length
+    : isRestaurantView
+      ? filteredCoordinateReadyCount
+      : placesForCategorySliced.filter((p) => p.lat !== null && p.lng !== null).length;
+  const coordinatePendingCount = Math.max((isAllView ? listItems.length : filteredCount) - coordinateReadyCount, 0);
+  // preparedState: all이나 데이터 있는 카테고리면 undefined
   const preparedState =
-    isRestaurantView || (activePlaceCategory && (placeCategoryMap.get(activePlaceCategory) ?? 0) > 0)
+    isAllView || isRestaurantView || (activePlaceCategory && (placeCategoryMap.get(activePlaceCategory) ?? 0) > 0)
       ? undefined
-      : PREPARED_CATEGORY_COPY[activeCategory as Exclude<MapCategoryKey, "restaurants">];
+      : PREPARED_CATEGORY_COPY[activeCategory as Exclude<MapCategoryKey, "restaurants" | "all">];
   const emptyState = isRestaurantView && filteredCount === 0
     ? {
         title: "조건에 맞는 식당이 없습니다.",
@@ -291,9 +385,13 @@ export default async function MapPage({
       {/* 컴팩트 헤더 */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 10px", borderBottom: "1px solid var(--line)", marginBottom: "16px" }}>
         <div>
-          <h1 style={{ fontSize: "17px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>반려동물 동반 식당 지도</h1>
+          <h1 style={{ fontSize: "17px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>
+            {isAllView ? "내 주변 반려동물 장소" : isRestaurantView ? "반려동물 동반 식당 지도" : `${MAP_CATEGORY_LABELS[activeCategory]} 지도`}
+          </h1>
           <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0, marginTop: "2px" }}>
-            전체 {categoryCounts.restaurantCount.toLocaleString("ko-KR")}건 등록
+            {isAllView
+              ? "현재 위치를 기준으로 가까운 식당, 병원, 약국, 미용, 유치원·호텔, 장례 정보를 보여드립니다."
+              : `전체 ${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건 등록`}
           </p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
@@ -366,7 +464,11 @@ export default async function MapPage({
 
       <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
         <Compass size={14} />
-        <span>{`${filteredCount.toLocaleString("ko-KR")}건 중 최대 120건 표시`}</span>
+        <span>
+          {isAllView
+            ? `전체 장소 중 가까운 ${listItems.length.toLocaleString("ko-KR")}건 표시`
+            : `${filteredCount.toLocaleString("ko-KR")}건 중 최대 120건 표시`}
+        </span>
       </div>
 
       <MapShell

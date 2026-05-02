@@ -327,8 +327,12 @@ export function MapShell({
     <section className="mt-6">
       <div className="hidden gap-5 lg:grid lg:grid-cols-[380px_minmax(0,1fr)]">
         <MapListPanel
-          title="식당 목록"
-          subtitle="지도로 볼 수 있는 식당과 목록으로 먼저 확인할 식당을 함께 보여드립니다."
+          title={activeCategory === "all" ? "전체 장소" : `${activeCategoryLabel} 목록`}
+          subtitle={
+            activeCategory === "all"
+              ? "현재 위치 기준 식당, 병원, 약국, 미용, 유치원·호텔, 장례 정보를 함께 보여드립니다."
+              : `지도로 볼 수 있는 ${activeCategoryLabel}와 목록으로 먼저 확인할 ${activeCategoryLabel}을 함께 보여드립니다.`
+          }
           items={items}
           selectedId={selectedId}
           onSelect={setSelectedId}
@@ -397,7 +401,7 @@ export function MapShell({
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
               </div>
             ) : (
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">리스트에서 식당을 고르면 이 영역에 위치 정보가 표시됩니다.</p>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">리스트에서 장소를 고르면 이 영역에 위치 정보가 표시됩니다.</p>
             )}
           </div>
         </section>
