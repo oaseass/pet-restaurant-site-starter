@@ -1,44 +1,56 @@
 import Link from "next/link";
-import {
-  Home,
-  Map,
-  UtensilsCrossed,
-  Stethoscope,
-  Scissors,
-  Building2,
-  Heart,
-  Search,
-  BookOpenText,
-  PlusSquare,
-} from "lucide-react";
 
-const SIDEBAR_NAV = [
-  { href: "/", label: "홈", icon: Home },
-  { href: "/map", label: "지도", icon: Map },
-  { href: "/restaurants", label: "식당", icon: UtensilsCrossed },
-  { href: "/hospitals", label: "병원", icon: Stethoscope },
-  { href: "/grooming", label: "미용", icon: Scissors },
-  { href: "/daycare", label: "유치원·호텔", icon: Building2 },
-  { href: "/funeral", label: "장례", icon: Heart },
-  { href: "/lost-pets", label: "댕냥이 찾아요", icon: Search },
-  { href: "/guide", label: "생활 가이드", icon: BookOpenText },
-  { href: "/business", label: "업체 등록", icon: PlusSquare },
+const BOARD_MENUS = [
+  { href: "/", label: "전체" },
+  { href: "/restaurants", label: "식당" },
+  { href: "/hospitals", label: "병원" },
+  { href: "/grooming", label: "미용" },
+  { href: "/daycare", label: "유치원·호텔" },
+  { href: "/funeral", label: "장례" },
+  { href: "/lost-pets", label: "찾아요" },
+  { href: "/guide", label: "가이드" },
+  { href: "/business", label: "업체등록" },
 ] as const;
 
 export function AppSidebar() {
   return (
-    <nav>
-      {SIDEBAR_NAV.map(({ href, label, icon: Icon }) => (
-        <Link
-          key={href}
-          href={href}
-          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-bold text-[var(--ink)] transition-colors hover:bg-[var(--line)] mx-1"
-          style={{ minHeight: "38px" }}
-        >
-          <Icon size={16} className="shrink-0 text-[var(--muted)]" />
-          <span>{label}</span>
-        </Link>
-      ))}
-    </nav>
+    <div>
+      <div
+        style={{
+          padding: "8px 12px 6px",
+          fontSize: "10px",
+          fontWeight: 800,
+          color: "#aaa",
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          borderBottom: "1px solid #f0f0f0",
+          marginBottom: "2px",
+        }}
+      >
+        게시판
+      </div>
+      <nav>
+        {BOARD_MENUS.map(({ href, label }) => (
+          <Link
+            key={href}
+            href={href}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "0 14px",
+              height: "36px",
+              fontSize: "13px",
+              fontWeight: 600,
+              color: "#333",
+              textDecoration: "none",
+              transition: "background 0.1s",
+            }}
+            className="hover:bg-[#f3f3f3]"
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+    </div>
   );
 }
