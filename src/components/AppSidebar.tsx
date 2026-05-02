@@ -1,56 +1,71 @@
-import Link from "next/link";
+"use client";
 
-const BOARD_MENUS = [
-  { href: "/", label: "전체" },
-  { href: "/restaurants", label: "식당" },
-  { href: "/hospitals", label: "병원" },
-  { href: "/grooming", label: "미용" },
-  { href: "/daycare", label: "유치원·호텔" },
-  { href: "/funeral", label: "장례" },
-  { href: "/lost-pets", label: "찾아요" },
-  { href: "/guide", label: "가이드" },
-  { href: "/business", label: "업체등록" },
+import React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LayoutGrid,
+  MapPin,
+  Utensils,
+  Stethoscope,
+  Scissors,
+  Building2,
+  HeartHandshake,
+  Search,
+  BookOpen,
+  PlusCircle,
+} from "lucide-react";
+
+const NAV_ITEMS: Array<{
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; style?: React.CSSProperties }>;
+  exact?: boolean;
+}> = [
+  { href: "/", label: "전체", icon: LayoutGrid, exact: true },
+  { href: "/map", label: "지도", icon: MapPin },
+  { href: "/restaurants", label: "식당", icon: Utensils },
+  { href: "/hospitals", label: "병원", icon: Stethoscope },
+  { href: "/grooming", label: "미용", icon: Scissors },
+  { href: "/daycare", label: "유치원·호텔", icon: Building2 },
+  { href: "/funeral", label: "장례", icon: HeartHandshake },
+  { href: "/lost-pets", label: "찾아요", icon: Search },
+  { href: "/guide", label: "가이드", icon: BookOpen },
+  { href: "/business", label: "업체 등록", icon: PlusCircle },
 ] as const;
 
 export function AppSidebar() {
+  const pathname = usePathname();
+
   return (
-    <div>
-      <div
-        style={{
-          padding: "8px 12px 6px",
-          fontSize: "10px",
-          fontWeight: 800,
-          color: "#aaa",
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          borderBottom: "1px solid #f0f0f0",
-          marginBottom: "2px",
-        }}
-      >
-        게시판
-      </div>
-      <nav>
-        {BOARD_MENUS.map(({ href, label }) => (
+    <nav>
+      {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
+        const isActive = exact ? pathname === href : pathname.startsWith(href);
+        return (
           <Link
             key={href}
             href={href}
             style={{
               display: "flex",
               alignItems: "center",
+              gap: "9px",
               padding: "0 14px",
-              height: "36px",
-              fontSize: "13px",
-              fontWeight: 600,
-              color: "#333",
+              height: "40px",
+              fontSize: "14px",
+              fontWeight: isActive ? 700 : 500,
+              color: isActive ? "var(--brand)" : "#444",
+              background: isActive ? "var(--brand-soft)" : "transparent",
               textDecoration: "none",
-              transition: "background 0.1s",
+              transition: "background 0.1s, color 0.1s",
+              borderLeft: isActive ? "2px solid var(--brand)" : "2px solid transparent",
             }}
-            className="hover:bg-[#f3f3f3]"
+            className={!isActive ? "hover:bg-[#f3f4f5]" : ""}
           >
+            <Icon size={15} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.6 }} />
             {label}
           </Link>
-        ))}
-      </nav>
-    </div>
+        );
+      })}
+    </nav>
   );
 }

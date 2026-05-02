@@ -101,7 +101,7 @@ export default async function MapPage({
     {
       key: "restaurants",
       label: "식당",
-      description: "실제 DB 데이터 운영 중",
+      description: `${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`,
       href: buildCategoryHref("restaurants", normalized),
       status: "active",
       countLabel: `${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`,
@@ -162,27 +162,23 @@ export default async function MapPage({
     : undefined;
 
   return (
-    <main className="mx-auto max-w-[1400px] px-4 pb-10 sm:px-5 lg:px-6">
-      <section className="section-shell px-6 py-6 sm:px-8 sm:py-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-          <div className="max-w-3xl">
-            <p className="eyebrow">지도 중심</p>
-            <h1 className="mt-5 text-4xl font-black tracking-tight text-[var(--ink)] sm:text-[3.25rem]">우리 동네 반려동물 동반 식당 지도</h1>
-            <p className="mt-5 max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">좌표가 준비된 식당은 지도에서 바로 보고, 아직 준비 중인 식당은 리스트에서 함께 확인하세요.</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/restaurants" className="btn-secondary">전체 식당 보기</Link>
-              <Link href="/search" className="btn-secondary">통합 검색</Link>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-2 lg:max-w-sm lg:justify-end">
-            <span className="badge">등록 식당 {categoryCounts.restaurantCount.toLocaleString("ko-KR")}건</span>
-            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">핀 가능 {categoryCounts.restaurantCoordinateReadyCount.toLocaleString("ko-KR")}건</span>
-            <span className="badge bg-[var(--accent-soft)] text-[#b9632e]">좌표 준비중 {categoryCounts.restaurantCoordinatePendingCount.toLocaleString("ko-KR")}건</span>
-          </div>
+    <main className="mx-auto max-w-[1440px] px-4 pb-10 sm:px-5 lg:px-6">
+      {/* 컴팩트 헤더 */}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 10px", borderBottom: "1px solid var(--line)", marginBottom: "16px" }}>
+        <div>
+          <h1 style={{ fontSize: "17px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>반려동물 동반 식당 지도</h1>
+          <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0, marginTop: "2px" }}>
+            {isRestaurantView
+              ? `지도 표시 가능 ${categoryCounts.restaurantCoordinateReadyCount.toLocaleString("ko-KR")}건 포함 · 전체 ${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`
+              : "병원, 미용, 유치원, 장례, 찾아요는 순차적으로 준비 중입니다"}
+          </p>
         </div>
-      </section>
+        <div style={{ display: "flex", gap: "6px" }}>
+          <Link href="/restaurants" className="btn-secondary" style={{ minHeight: "34px", padding: "0 12px", fontSize: "12px" }}>전체 목록</Link>
+        </div>
+      </div>
 
-      <section className="sticky top-[72px] z-30 mt-5 rounded-[1.125rem] border border-[var(--line)] bg-[rgba(255,255,255,0.94)] p-3 shadow-[0_10px_26px_rgba(23,23,23,0.06)] backdrop-blur-sm lg:static lg:p-4">
+      <section className="sticky top-[56px] z-30 rounded-xl border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-3 backdrop-blur-sm lg:static lg:p-4">
         <form action="/map" className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_220px_auto] lg:items-center">
           <input type="hidden" name="category" value={activeCategory} />
           <label className="relative block">
@@ -232,9 +228,9 @@ export default async function MapPage({
         </div>
       </section>
 
-      <div className="mt-5 flex items-center gap-2 text-sm font-bold text-[var(--muted)]">
-        <Compass size={16} />
-        <span>{isRestaurantView ? `필터 결과 ${filteredCount.toLocaleString("ko-KR")}건 중 지도와 함께 보기 좋은 120건을 먼저 보여드립니다.` : `${MAP_CATEGORY_LABELS[activeCategory]} 지도는 준비 중입니다.`}</span>
+      <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
+        <Compass size={14} />
+        <span>{isRestaurantView ? `${filteredCount.toLocaleString("ko-KR")}건 중 최대 120건 표시` : `${MAP_CATEGORY_LABELS[activeCategory]} 지도는 순차적으로 준비 중입니다`}</span>
       </div>
 
       <MapShell

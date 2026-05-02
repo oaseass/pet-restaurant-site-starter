@@ -1,11 +1,18 @@
 import { CategoryInfoPage } from "@/components/CategoryInfoPage";
+import { PublicPageShell } from "@/components/PublicPageShell";
 import { CATEGORY_CONTENT } from "@/lib/category-info-content";
+import { getCategoryCountsSnapshot } from "@/lib/public-data";
 
 export const metadata = {
   title: "반려동물 미용 | 댕냥지도",
   description: "반려동물 미용 종류, 가격 기준, 위생 확인 포인트 안내. 방문 전 체크리스트를 확인하세요.",
 };
 
-export default function GroomingPage() {
-  return <CategoryInfoPage data={CATEGORY_CONTENT.grooming} />;
+export default async function GroomingPage() {
+  const counts = await getCategoryCountsSnapshot();
+  return (
+    <PublicPageShell restaurantCount={counts.restaurantCount} lastUpdatedAt={counts.lastUpdatedAt}>
+      <CategoryInfoPage data={CATEGORY_CONTENT.grooming} />
+    </PublicPageShell>
+  );
 }

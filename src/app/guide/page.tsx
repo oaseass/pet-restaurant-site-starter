@@ -1,54 +1,51 @@
-import { GuideCard } from "@/components/GuideCard";
-import { LegalDisclaimer } from "@/components/LegalDisclaimer";
-import { MedicalDisclaimer } from "@/components/MedicalDisclaimer";
-import { OfficialDataNotice } from "@/components/OfficialDataNotice";
-import { PriceNote } from "@/components/PriceNote";
-import { AdSlot } from "@/components/AdSlot";
-import { CALCULATOR_CARDS, GUIDE_DOCS, QUICK_CATEGORIES } from "@/lib/platform-content";
+﻿import Link from "next/link";
+import { PublicPageShell } from "@/components/PublicPageShell";
+import { getCategoryCountsSnapshot } from "@/lib/public-data";
+import { GUIDE_DOCS } from "@/lib/platform-content";
 
-export default function GuidePage() {
+export default async function GuidePage() {
+  const counts = await getCategoryCountsSnapshot();
+
   return (
-    <main className="mx-auto max-w-6xl px-5 py-8 sm:py-10">
-      <section className="section-shell px-6 py-6 sm:px-8 sm:py-8">
-        <div className="relative z-10 max-w-3xl">
-          <p className="eyebrow">생활 가이드</p>
-          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">생활 가이드 허브</h1>
-          <p className="mt-4 text-sm leading-8 text-[var(--muted)] sm:text-base">여행, 접종, 등록, 수술, 훈련, 미용, 급여, 장례까지 반려생활에서 자주 확인하는 정보를 한곳에 모았습니다.</p>
+    <PublicPageShell restaurantCount={counts.restaurantCount} lastUpdatedAt={counts.lastUpdatedAt}>
+      {/* 상단 헤더 */}
+      <div className="portal-section-header">
+        <div>
+          <h1 style={{ fontSize: "15px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>
+            생활 가이드
+          </h1>
+          <p style={{ fontSize: "11px", color: "var(--muted)", margin: 0, marginTop: "2px" }}>
+            반려생활 필수 정보 모음
+          </p>
         </div>
-      </section>
+      </div>
 
-      <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      {/* 통계 바 */}
+      <div className="portal-notice-bar">
+        <span style={{ fontSize: "12px", color: "#777" }}>
+          가이드 <strong style={{ color: "#222" }}>{GUIDE_DOCS.length}</strong>건
+        </span>
+      </div>
+
+      {/* 가이드 목록 */}
+      <div>
         {GUIDE_DOCS.map((guide) => (
-          <GuideCard
+          <Link
             key={guide.slug}
-            title={guide.title}
-            description={guide.summary}
             href={`/guide/${guide.slug}`}
-            character={QUICK_CATEGORIES.find((item) => item.category === guide.category)?.character ?? "cat-waving"}
-          />
+            className="pl-row"
+          >
+            <span className="pl-badge" style={{ background: "#f0fdf4", color: "#166534" }}>
+              가이드
+            </span>
+            <span className="pl-title">{guide.title}</span>
+            <span className="pl-region" style={{ width: "auto", fontSize: "11px", color: "#999" }}>
+              {guide.category}
+            </span>
+            <span className="pl-action">보기 →</span>
+          </Link>
         ))}
-      </section>
-
-      <section className="mt-8 grid gap-4 md:grid-cols-3">
-        {CALCULATOR_CARDS.map((card) => (
-          <article key={card.href} className="card rounded-[1rem] p-5">
-            <p className="text-[11px] font-black text-[var(--brand)]">계산기</p>
-            <h2 className="mt-3 text-xl font-black text-[var(--ink)]">{card.title}</h2>
-            <p className="mt-3 leading-7 text-[var(--muted)]">{card.description}</p>
-            <a href={card.href} className="mt-4 inline-flex text-sm font-black text-[var(--brand)]">바로 계산하기</a>
-          </article>
-        ))}
-      </section>
-
-      <AdSlot label="가이드 페이지 광고 영역" />
-
-      <section className="mt-5 grid gap-4 lg:grid-cols-3">
-        <OfficialDataNotice />
-        <MedicalDisclaimer />
-        <LegalDisclaimer />
-      </section>
-
-      <div className="mt-4"><PriceNote /></div>
-    </main>
+      </div>
+    </PublicPageShell>
   );
 }
