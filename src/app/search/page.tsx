@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot, getPlacesLightSnapshot } from "@/lib/public-data";
 import { searchRestaurantsSnapshot, searchGuidesStatic, searchPlacesSnapshot, getRecentRestaurants } from "@/lib/public-search";
@@ -38,6 +39,9 @@ export default async function SearchPage({
   const guideResults = keyword ? searchGuidesStatic(keyword) : [];
   const recentRestaurants = keyword ? [] : getRecentRestaurants(restaurants, 10);
 
+  const SHELTER_KEYWORDS = ["유기견", "유기묘", "유기동물", "보호소", "보호동물", "구조동물", "입양", "보호중"];
+  const showShelterBanner = keyword ? SHELTER_KEYWORDS.some((kw) => keyword.includes(kw)) : false;
+
   return (
     <PublicPageShell
       restaurantCount={counts.restaurantCount}
@@ -72,12 +76,33 @@ export default async function SearchPage({
 
       {/* 검색 결과 또는 추천 화면 */}
       {keyword ? (
-        <SearchResultsList
-          restaurants={restaurantResults}
-          places={placeResults}
-          guides={guideResults}
-          keyword={keyword}
-        />
+        <>
+          {showShelterBanner && (
+            <Link
+              href="/lost-pets?tab=shelter"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "10px 14px",
+                background: "#eff6ff",
+                borderBottom: "1px solid #bfdbfe",
+                textDecoration: "none",
+              }}
+            >
+              <span style={{ fontSize: "12px", color: "#1d4ed8", fontWeight: 600 }}>
+                🐾 보호동물 공고 보기 → 보호중 4,700+건
+              </span>
+              <span style={{ fontSize: "11px", color: "#3b82f6", fontWeight: 700 }}>보러가기 →</span>
+            </Link>
+          )}
+          <SearchResultsList
+            restaurants={restaurantResults}
+            places={placeResults}
+            guides={guideResults}
+            keyword={keyword}
+          />
+        </>
       ) : (
         <SearchSuggestionPanel recentRestaurants={recentRestaurants} />
       )}

@@ -19,6 +19,7 @@ interface ApiNoticeItem {
   happenDt?: string;
   happenPlace?: string;
   kindCd?: string;
+  kindNm?: string;
   colorCd?: string;
   age?: string;
   weight?: string;
@@ -29,7 +30,8 @@ interface ApiNoticeItem {
   careTel?: string;
   careAddr?: string;
   orgNm?: string;
-  popfile?: string;
+  popfile1?: string;
+  popfile2?: string;
   processState?: string;
 }
 
@@ -61,6 +63,7 @@ async function main() {
   const allItems: ApiNoticeItem[] = [...firstPageItems];
   for (let page = 2; page <= totalPages; page++) {
     console.log(`[fetch-animal-notices] 페이지 ${page}/${totalPages} 요청 중...`);
+    await new Promise((resolve) => setTimeout(resolve, 200));
     const { items } = await fetchPage(bgnde, endde, page);
     allItems.push(...items);
   }
@@ -72,7 +75,7 @@ async function main() {
     noticeEdt: item.noticeEdt ?? "",
     happenDt: item.happenDt ?? "",
     happenPlace: item.happenPlace ?? "",
-    kindCd: item.kindCd ?? "",
+    kindCd: item.kindNm ?? item.kindCd ?? "",
     colorCd: item.colorCd ?? "",
     age: item.age ?? "",
     weight: item.weight ?? "",
@@ -83,7 +86,7 @@ async function main() {
     careTel: item.careTel ?? "",
     careAddr: item.careAddr ?? "",
     orgNm: item.orgNm ?? "",
-    popfile: item.popfile ?? "",
+    popfile: item.popfile1 ?? "",
     processState: item.processState ?? "",
   }));
 
