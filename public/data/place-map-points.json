@@ -1,1 +1,82 @@
-[]
+[
+  {
+    "id": "c0fee731-cd17-4084-9d66-777ec20ef1f6",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "24시강남동물의료센터",
+    "lat": 37.497,
+    "lng": 127.0276,
+    "phone": "02-555-7777"
+  },
+  {
+    "id": "4342b51e-4f24-4c36-858d-eb2074d1fb2f",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "광주광역시동물병원",
+    "lat": 35.1545,
+    "lng": 126.8516,
+    "phone": "062-382-8888"
+  },
+  {
+    "id": "d96905d1-f37c-4d23-b2d6-367c14dd214a",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "대구중앙동물병원",
+    "lat": 35.8714,
+    "lng": 128.5936,
+    "phone": "053-421-6666"
+  },
+  {
+    "id": "52d1b971-7dee-4e8f-99e1-9bf87e384cfb",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "대전동물병원",
+    "lat": 36.3504,
+    "lng": 127.3845,
+    "phone": "042-481-0000"
+  },
+  {
+    "id": "6dfebf1d-09f1-4606-aa75-437f7d625f0c",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "댕냥동물병원",
+    "lat": 37.5808,
+    "lng": 126.8892,
+    "phone": "02-1234-5678"
+  },
+  {
+    "id": "d685bff3-ef17-49c3-9816-a2f3b7056480",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "부산해운대동물병원",
+    "lat": 35.1628,
+    "lng": 129.16,
+    "phone": "051-740-3333"
+  },
+  {
+    "id": "1836e96c-b190-4644-96ba-315585e4605f",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "솔빛동물병원",
+    "lat": 37.3595,
+    "lng": 127.1052,
+    "phone": "031-711-2222"
+  },
+  {
+    "id": "ef7d06b0-2a74-49ee-b3bf-acca7217e716",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "인천동물병원",
+    "lat": 37.4489,
+    "lng": 126.7312,
+    "phone": "032-444-1111"
+  },
+  {
+    "id": "d87de8d4-6eb7-4fdd-94c1-3b4d8791f145",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "제주동물병원",
+    "lat": 33.5001,
+    "lng": 126.5312,
+    "phone": "064-745-9999"
+  },
+  {
+    "id": "a50caddf-3685-4a83-a9f6-9956c2b118ec",
+    "category": "ANIMAL_HOSPITAL",
+    "name": "해피팜동물병원",
+    "lat": 37.5001,
+    "lng": 127.0366,
+    "phone": "02-9876-5432"
+  }
+]
