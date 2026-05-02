@@ -85,6 +85,7 @@ export type PublicPlaceLight = {
   lng: number | null;
   sourceName: string | null;
   businessStatus: string | null;
+  tags?: string[];
   updatedAt: string;
 };
 
@@ -161,3 +162,42 @@ export function toRestaurantCardItem(restaurant: PublicRestaurantLight) {
     dataUpdatedAt: new Date(restaurant.updatedAt),
   };
 }
+
+// ─── 보호동물 공고 스냅샷 ──────────────────────────────────────────────────
+
+export type PublicAnimalNotice = {
+  desertionNo: string;
+  noticeNo: string;
+  noticeSdt: string;
+  noticeEdt: string;
+  happenDt: string;
+  happenPlace: string;
+  kindCd: string;
+  colorCd: string;
+  age: string;
+  weight: string;
+  sexCd: string;
+  neuterYn: string;
+  specialMark: string;
+  careNm: string;
+  careTel: string;
+  careAddr: string;
+  orgNm: string;
+  popfile: string;
+  processState: string;
+};
+
+export type PublicAnimalNoticeCounts = {
+  total: number;
+  byState: Array<{ state: string; count: number }>;
+  fetchedAt: string;
+};
+
+const EMPTY_ANIMAL_NOTICE_COUNTS: PublicAnimalNoticeCounts = {
+  total: 0,
+  byState: [],
+  fetchedAt: new Date(0).toISOString(),
+};
+
+export const getAnimalNoticesSnapshot = cache(async () => readPublicJsonFile<PublicAnimalNotice[]>("animal-notices.json", []));
+export const getAnimalNoticeCountsSnapshot = cache(async () => readPublicJsonFile<PublicAnimalNoticeCounts>("animal-notice-counts.json", EMPTY_ANIMAL_NOTICE_COUNTS));

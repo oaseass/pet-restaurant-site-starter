@@ -1,6 +1,6 @@
 import { PublicPageShell } from "@/components/PublicPageShell";
-import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot } from "@/lib/public-data";
-import { searchRestaurantsSnapshot, searchGuidesStatic, getRecentRestaurants } from "@/lib/public-search";
+import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot, getPlacesLightSnapshot } from "@/lib/public-data";
+import { searchRestaurantsSnapshot, searchGuidesStatic, searchPlacesSnapshot, getRecentRestaurants } from "@/lib/public-search";
 import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 import { SearchFilterTabs } from "@/components/search/SearchFilterTabs";
 import { SearchResultsList } from "@/components/search/SearchResultsList";
@@ -17,15 +17,22 @@ export default async function SearchPage({
   const keyword = params.q?.trim() ?? "";
   const category = params.category ?? "all";
 
-  const [counts, restaurants] = await Promise.all([
+  const [counts, restaurants, places] = await Promise.all([
     getCategoryCountsSnapshot(),
     getRestaurantsLightSnapshot(),
+    getPlacesLightSnapshot(),
   ]);
 
   const restaurantResults = searchRestaurantsSnapshot(restaurants, {
     q: keyword,
     sido: params.sido,
     limit: 50,
+  });
+
+  const placeResults = searchPlacesSnapshot(places, {
+    q: keyword,
+    sido: params.sido,
+    limit: 30,
   });
 
   const guideResults = keyword ? searchGuidesStatic(keyword) : [];
@@ -67,6 +74,7 @@ export default async function SearchPage({
       {keyword ? (
         <SearchResultsList
           restaurants={restaurantResults}
+          places={placeResults}
           guides={guideResults}
           keyword={keyword}
         />

@@ -1,16 +1,25 @@
 import Link from "next/link";
 import { MapPin } from "lucide-react";
-import type { SearchRestaurantResult } from "@/lib/public-search";
+import type { SearchRestaurantResult, SearchPlaceResult } from "@/lib/public-search";
 import type { GuideDoc } from "@/lib/platform-content";
+
+const PLACE_CATEGORY_LABELS: Record<string, string> = {
+  ANIMAL_HOSPITAL: "동물병원",
+  PHARMACY: "동물약국",
+  GROOMING: "미용",
+  DAYCARE: "유치원·호텔",
+  FUNERAL: "장례",
+};
 
 interface SearchResultsListProps {
   restaurants: SearchRestaurantResult[];
+  places?: SearchPlaceResult[];
   guides: GuideDoc[];
   keyword: string;
 }
 
-export function SearchResultsList({ restaurants, guides, keyword }: SearchResultsListProps) {
-  const total = restaurants.length + guides.length;
+export function SearchResultsList({ restaurants, places = [], guides, keyword }: SearchResultsListProps) {
+  const total = restaurants.length + places.length + guides.length;
 
   return (
     <div>
@@ -30,12 +39,9 @@ export function SearchResultsList({ restaurants, guides, keyword }: SearchResult
             <span style={{ color: "#aaa" }}>결과 없음</span>
           ) : (
             <>
-              식당 <strong style={{ color: "#222" }}>{restaurants.length}</strong>건
-              {guides.length > 0 && (
-                <>
-                  {" · "}가이드 <strong style={{ color: "#222" }}>{guides.length}</strong>건
-                </>
-              )}
+              {restaurants.length > 0 && <>식당 <strong style={{ color: "#222" }}>{restaurants.length}</strong>건</>}
+              {places.length > 0 && <>{restaurants.length > 0 ? " · " : ""}시설 <strong style={{ color: "#222" }}>{places.length}</strong>건</>}
+              {guides.length > 0 && <>{(restaurants.length > 0 || places.length > 0) ? " · " : ""}가이드 <strong style={{ color: "#222" }}>{guides.length}</strong>건</>}
             </>
           )}
         </span>
@@ -197,6 +203,88 @@ export function SearchResultsList({ restaurants, guides, keyword }: SearchResult
                   상세
                 </Link>
               </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* 시설 결과 (병원·약국·미용·위탁·장례) */}
+      {places.length > 0 && (
+        <div style={{ marginTop: restaurants.length > 0 ? "8px" : 0 }}>
+          <div
+            style={{
+              padding: "6px 14px 4px",
+              fontSize: "11px",
+              fontWeight: 800,
+              color: "#888",
+              borderBottom: "1px solid var(--line)",
+              background: "var(--bg)",
+            }}
+          >
+            시설
+          </div>
+          {places.map((p) => (
+            <div
+              key={p.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "9px 14px",
+                borderBottom: "1px solid var(--line)",
+                minHeight: "48px",
+              }}
+              className="hover:bg-[var(--bg)]"
+            >
+              <span
+                style={{
+                  width: "34px",
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  color: "#0369a1",
+                  background: "#e0f2fe",
+                  borderRadius: "4px",
+                  padding: "2px 3px",
+                  flexShrink: 0,
+                  textAlign: "center",
+                }}
+              >
+                {PLACE_CATEGORY_LABELS[p.category] ?? p.category}
+              </span>
+              <span
+                style={{
+                  flex: 1,
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  color: "var(--ink)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {p.name}
+              </span>
+              <span style={{ fontSize: "11px", color: "#888", flexShrink: 0, display: "flex", alignItems: "center", gap: "2px" }}>
+                <MapPin size={9} />
+                {p.sido} {p.sigungu ?? ""}
+              </span>
+              {p.lat !== null && (
+                <Link
+                  href={`/map?q=${encodeURIComponent(p.name)}&category=${p.category.toLowerCase()}`}
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    color: "var(--brand)",
+                    textDecoration: "none",
+                    padding: "3px 7px",
+                    background: "var(--brand-soft)",
+                    borderRadius: "5px",
+                    flexShrink: 0,
+                  }}
+                >
+                  지도
+                </Link>
+              )}
             </div>
           ))}
         </div>

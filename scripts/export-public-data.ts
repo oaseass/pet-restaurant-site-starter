@@ -30,7 +30,7 @@ async function main() {
     prisma.place.findMany({
       where: {
         isActive: true,
-        category: { in: ["ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL"] },
+        category: { in: ["ANIMAL_HOSPITAL", "PHARMACY", "GROOMING", "DAYCARE", "FUNERAL"] },
       },
       select: {
         id: true,
@@ -112,6 +112,17 @@ async function main() {
   const outputDirectory = path.join(process.cwd(), "public", "data");
   await fs.mkdir(outputDirectory, { recursive: true });
 
+  const TRAINING_KEYWORDS = ["훈련", "트레이닝", "교육", "스쿨", "아카데미", "행동교정", "반려견학교", "애견훈련"];
+  const HOTEL_KEYWORDS = ["호텔", "유치원", "데이케어", "놀이방", "위탁", "돌봄", "보호"];
+
+  function getDaycareTags(name: string): string[] {
+    const lower = name.toLowerCase();
+    const tags: string[] = [];
+    if (TRAINING_KEYWORDS.some((kw) => lower.includes(kw))) tags.push("training");
+    if (HOTEL_KEYWORDS.some((kw) => lower.includes(kw))) tags.push("hotel");
+    return tags;
+  }
+
   const placesLight = nonRestaurantPlaces.map((place) => ({
     id: place.id,
     category: place.category,
@@ -125,6 +136,7 @@ async function main() {
     lng: place.lng,
     sourceName: place.sourceName,
     businessStatus: place.businessStatus,
+    tags: place.category === "DAYCARE" ? getDaycareTags(place.name) : undefined,
     updatedAt: place.updatedAt.toISOString(),
   }));
 
