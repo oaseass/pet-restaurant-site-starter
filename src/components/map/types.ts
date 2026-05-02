@@ -21,6 +21,7 @@ export type MapRestaurantListItem = {
   lng: number | null;
   coordinateStatus: "ready" | "pending";
   dataUpdatedLabel: string;
+  distanceKm?: number;
 };
 
 export type PreparedCategoryState = {

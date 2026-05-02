@@ -74,13 +74,49 @@ export default async function MapPage({
   const params = await searchParams;
   const activeCategory = resolveMapCategory(params.category);
   const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
-  const shouldLoadMap = !!(params.q || params.sido || params.type || params.lat || params.lng || params.category);
+
+  // 현재 위치 파싱 (한국 좌표 범위 검증)
+  const userLat = Number(params.lat);
+  const userLng = Number(params.lng);
+  const hasUserLocation =
+    Number.isFinite(userLat) &&
+    Number.isFinite(userLng) &&
+    userLat >= 33 &&
+    userLat <= 39 &&
+    userLng >= 124 &&
+    userLng <= 132;
+
+  const shouldLoadMap = !!(params.q || params.sido || params.type || hasUserLocation || params.category);
   const [categoryCounts, restaurantsLight] = await Promise.all([getCategoryCountsSnapshot(), getRestaurantsLightSnapshot()]);
 
   const isRestaurantView = activeCategory === "restaurants";
 
   const businessTypeOptions = getRestaurantBusinessTypes(restaurantsLight);
-  const restaurants = isRestaurantView ? sortRestaurantsLight(filterRestaurantsLight(restaurantsLight, normalized)).slice(0, 120) : [];
+
+  // 현재 위치 기반 거리 정렬
+  function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLng = ((lng2 - lng1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  let restaurants = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized) : [];
+  if (hasUserLocation && isRestaurantView) {
+    restaurants = restaurants.sort((a, b) => {
+      const aHasCoord = a.lat !== null && a.lng !== null;
+      const bHasCoord = b.lat !== null && b.lng !== null;
+      if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
+      if (!aHasCoord || !bHasCoord) return 0;
+      return getDistanceKm(userLat, userLng, a.lat!, a.lng!) - getDistanceKm(userLat, userLng, b.lat!, b.lng!);
+    });
+  } else if (isRestaurantView) {
+    restaurants = sortRestaurantsLight(restaurants);
+  }
+  restaurants = restaurants.slice(0, 120);
   const filteredRestaurantCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).length : 0;
   const filteredCoordinateReadyCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).filter((restaurant) => restaurant.lat !== null && restaurant.lng !== null).length : 0;
 
@@ -96,6 +132,10 @@ export default async function MapPage({
     lng: restaurant.lng,
     coordinateStatus: restaurant.lat !== null && restaurant.lng !== null ? "ready" : "pending",
     dataUpdatedLabel: new Date(restaurant.updatedAt).toLocaleDateString("ko-KR"),
+    distanceKm:
+      hasUserLocation && restaurant.lat !== null && restaurant.lng !== null
+        ? getDistanceKm(userLat, userLng, restaurant.lat, restaurant.lng)
+        : undefined,
   }));
 
   const categories: MapCategoryOption[] = [
@@ -243,6 +283,7 @@ export default async function MapPage({
         shouldLoadMap={shouldLoadMap}
         preparedState={preparedState}
         emptyState={emptyState}
+        initialUserLocation={hasUserLocation ? { lat: userLat, lng: userLng } : undefined}
       />
     </main>
   );

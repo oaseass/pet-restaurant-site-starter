@@ -139,6 +139,7 @@ export function MapShell({
   shouldLoadMap,
   preparedState,
   emptyState,
+  initialUserLocation,
 }: {
   items: MapRestaurantListItem[];
   activeCategory: MapCategoryKey;
@@ -150,6 +151,7 @@ export function MapShell({
   shouldLoadMap?: boolean;
   preparedState?: PreparedCategoryState;
   emptyState?: { title: string; description: string; href: string; hrefLabel: string };
+  initialUserLocation?: { lat: number; lng: number };
 }) {
   const mapStatus = useKakaoMapSdk(shouldLoadMap ?? true);
   const desktopMapRef = useRef<HTMLDivElement | null>(null);
@@ -159,8 +161,8 @@ export function MapShell({
   const userMarkerRef = useRef<any>(null);
   const [selectedId, setSelectedId] = useState<string | null>(items.find((item) => item.coordinateStatus === "ready")?.id ?? items[0]?.id ?? null);
   const [bottomSheetOpen, setBottomSheetOpen] = useState(true);
-  const [userLocation, setUserLocation] = useState<UserLocation | null>(null);
-  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "ready" | "error" | "unsupported">("idle");
+  const [userLocation, setUserLocation] = useState<UserLocation | null>(initialUserLocation ?? null);
+  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "ready" | "error" | "unsupported">(initialUserLocation ? "ready" : "idle");
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
   const mappableItems = useMemo(
@@ -190,10 +192,15 @@ export function MapShell({
     if (mapStatus !== "ready" || !activeMapElement || !window.kakao?.maps) return;
 
     const kakao = window.kakao;
-    const center = new kakao.maps.LatLng(36.35, 127.9);
+    // 현재 위치가 있으면 그 좌표로 center, 없으면 한국 중심
+    const initialCenter = userLocation
+      ? new kakao.maps.LatLng(userLocation.lat, userLocation.lng)
+      : new kakao.maps.LatLng(36.35, 127.9);
+    const initialLevel = userLocation ? 8 : 12;
+
     const map = new kakao.maps.Map(activeMapElement, {
-      center,
-      level: 12,
+      center: initialCenter,
+      level: initialLevel,
       draggable: true,
       scrollwheel: true,
     });
@@ -278,7 +285,13 @@ export function MapShell({
     mapStatus,
     mappableCount: mappableItems.length,
   });
-  const shouldUseFallback = activeCategory !== "restaurants" || mapStatus !== "ready" || mappableItems.length === 0;
+  const shouldUseFallback =
+    activeCategory !== "restaurants" ||
+    mapStatus === "error" ||
+    mapStatus === "unavailable";
+  // mapStatus === "loading": 스켈레톤 표시 (실제 지도 div 유지)
+  // mapStatus === "ready": 실제 카카오맵 표시
+  // error/unavailable만 fallback
 
   const locationButtonLabel = locationStatus === "loading"
     ? "위치 확인 중"

@@ -102,7 +102,14 @@ export function MapListPanel({
                         </span>
                       </div>
                       <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
-                      <p className="mt-2 text-sm font-bold text-[var(--muted)]">{item.regionLabel}</p>
+                      <p className="mt-2 text-sm font-bold text-[var(--muted)]">
+                        {item.regionLabel}
+                        {item.distanceKm !== undefined && (
+                          <span className="ml-2 text-[var(--brand)]">
+                            · {item.distanceKm < 1 ? `${Math.round(item.distanceKm * 1000)}m` : `${item.distanceKm.toFixed(1)}km`}
+                          </span>
+                        )}
+                      </p>
                       <p className="mt-2 flex gap-2 text-sm leading-6 text-[var(--muted)]">
                         <MapPin className="mt-0.5 shrink-0" size={15} />
                         <span>{item.address}</span>
