@@ -95,7 +95,7 @@ export async function HomeFeed() {
       </div>
 
       {/* Feed items */}
-      <div className="flex flex-col gap-2">
+      <div>
         {feedItems.map((item) => (
           <FeedCard key={item.id} item={item} />
         ))}

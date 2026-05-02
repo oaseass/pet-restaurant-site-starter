@@ -203,3 +203,109 @@ a { color: inherit; text-decoration: none; }
     line-height: 1.08;
   }
 }
+
+/* ── Home App Shell ─────────────────────────────────── */
+.home-app-shell {
+  height: calc(100vh - 56px);
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 300px;
+  max-width: 1296px;
+  margin: 0 auto;
+  gap: 0 16px;
+  padding: 0 16px;
+  overflow: hidden;
+}
+
+.home-left-rail {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 0 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.home-right-rail {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 0 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.home-feed-shell {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 10px 0 0;
+}
+
+.home-feed-top {
+  flex: 0 0 auto;
+}
+
+.home-feed-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 24px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+.home-left-rail::-webkit-scrollbar,
+.home-right-rail::-webkit-scrollbar,
+.home-feed-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.home-left-rail::-webkit-scrollbar-track,
+.home-right-rail::-webkit-scrollbar-track,
+.home-feed-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.home-left-rail::-webkit-scrollbar-thumb,
+.home-right-rail::-webkit-scrollbar-thumb,
+.home-feed-scroll::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 999px;
+}
+
+@media (max-width: 1279px) {
+  .home-app-shell {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .home-right-rail {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .home-app-shell {
+    display: block;
+    height: auto;
+    overflow: visible;
+    padding: 8px 12px 80px;
+    max-width: 100%;
+  }
+
+  .home-left-rail {
+    display: none;
+  }
+
+  .home-right-rail {
+    display: none;
+  }
+
+  .home-feed-shell {
+    overflow: visible;
+    padding-top: 0;
+  }
+
+  .home-feed-scroll {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+}
