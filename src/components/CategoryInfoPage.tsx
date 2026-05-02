@@ -13,21 +13,21 @@ export function CategoryInfoPage({ data }: Props) {
         style={{
           borderBottom: "1px solid var(--line)",
           background: "var(--surface)",
-          padding: "3rem 1.5rem 2.5rem",
+          padding: "2rem 1.5rem 1.75rem",
         }}
       >
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <span className="eyebrow" style={{ marginBottom: "1rem" }}>
+          <p className="eyebrow" style={{ marginBottom: "0.75rem" }}>
             {data.subtitle}
-          </span>
+          </p>
           <h1
             style={{
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+              fontSize: "clamp(1.5rem, 4vw, 2rem)",
               fontWeight: 900,
-              letterSpacing: "-0.03em",
-              lineHeight: 1.1,
-              marginTop: "0.75rem",
-              marginBottom: "1rem",
+              letterSpacing: "-0.02em",
+              lineHeight: 1.2,
+              marginTop: "0.5rem",
+              marginBottom: "0.75rem",
               color: "var(--ink)",
             }}
           >
@@ -35,16 +35,16 @@ export function CategoryInfoPage({ data }: Props) {
           </h1>
           <p
             style={{
-              fontSize: "1rem",
+              fontSize: "0.9375rem",
               color: "var(--muted)",
-              lineHeight: 1.75,
+              lineHeight: 1.7,
               maxWidth: "600px",
-              marginBottom: "1.75rem",
+              marginBottom: "1.25rem",
             }}
           >
             {data.description}
           </p>
-          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
             <Link href={data.ctaPrimary.href} className="btn-primary">
               {data.ctaPrimary.label}
             </Link>
@@ -56,14 +56,14 @@ export function CategoryInfoPage({ data }: Props) {
       </section>
 
       {/* Info Cards */}
-      <section style={{ padding: "2.5rem 1.5rem" }}>
+      <section style={{ padding: "1.5rem" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <h2
             style={{
-              fontSize: "1.125rem",
+              fontSize: "0.875rem",
               fontWeight: 800,
-              letterSpacing: "-0.02em",
-              marginBottom: "1.25rem",
+              letterSpacing: "-0.01em",
+              marginBottom: "0.875rem",
               color: "var(--ink)",
             }}
           >
@@ -72,44 +72,31 @@ export function CategoryInfoPage({ data }: Props) {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "1rem",
+              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+              gap: "0.75rem",
             }}
           >
             {data.cards.map((card) => (
               <div
                 key={card.title}
                 className="card"
-                style={{ padding: "1.25rem 1.5rem" }}
+                style={{ padding: "1rem 1.25rem" }}
               >
-                <div
-                  style={{
-                    fontSize: "1.5rem",
-                    lineHeight: 1,
-                    marginBottom: "0.75rem",
-                  }}
-                >
+                <div style={{ fontSize: "1.25rem", lineHeight: 1, marginBottom: "0.625rem" }}>
                   {card.icon}
                 </div>
                 <h3
                   style={{
-                    fontSize: "0.9375rem",
+                    fontSize: "0.875rem",
                     fontWeight: 800,
-                    marginBottom: "0.5rem",
+                    marginBottom: "0.375rem",
                     color: "var(--ink)",
                     letterSpacing: "-0.01em",
                   }}
                 >
                   {card.title}
                 </h3>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--muted)",
-                    lineHeight: 1.7,
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontSize: "0.8125rem", color: "var(--muted)", lineHeight: 1.65, margin: 0 }}>
                   {card.body}
                 </p>
               </div>
@@ -119,22 +106,15 @@ export function CategoryInfoPage({ data }: Props) {
       </section>
 
       {/* Checklist */}
-      <section
-        style={{
-          padding: "0 1.5rem 2.5rem",
-        }}
-      >
+      <section style={{ padding: "0 1.5rem 1.5rem" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
-          <div
-            className="section-shell"
-            style={{ padding: "1.5rem 1.75rem" }}
-          >
+          <div className="section-shell" style={{ padding: "1.25rem 1.5rem" }}>
             <h2
               style={{
-                fontSize: "1rem",
+                fontSize: "0.875rem",
                 fontWeight: 800,
                 letterSpacing: "-0.01em",
-                marginBottom: "1rem",
+                marginBottom: "0.875rem",
                 color: "var(--ink)",
               }}
             >
@@ -147,7 +127,7 @@ export function CategoryInfoPage({ data }: Props) {
                 padding: 0,
                 display: "flex",
                 flexDirection: "column",
-                gap: "0.625rem",
+                gap: "0.5rem",
               }}
             >
               {data.checklist.map((item) => (
@@ -156,18 +136,18 @@ export function CategoryInfoPage({ data }: Props) {
                   style={{
                     display: "flex",
                     alignItems: "flex-start",
-                    gap: "0.625rem",
-                    fontSize: "0.9375rem",
+                    gap: "0.5rem",
+                    fontSize: "0.875rem",
                     color: "var(--ink)",
-                    lineHeight: 1.55,
+                    lineHeight: 1.5,
                   }}
                 >
                   <span
                     style={{
                       flexShrink: 0,
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "5px",
+                      width: "16px",
+                      height: "16px",
+                      borderRadius: "3px",
                       border: "1.5px solid var(--line-strong)",
                       background: "var(--surface)",
                       display: "inline-block",
@@ -183,45 +163,34 @@ export function CategoryInfoPage({ data }: Props) {
       </section>
 
       {/* FAQ */}
-      <section style={{ padding: "0 1.5rem 2.5rem" }}>
+      <section style={{ padding: "0 1.5rem 1.5rem" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <h2
             style={{
-              fontSize: "1.125rem",
+              fontSize: "0.875rem",
               fontWeight: 800,
-              letterSpacing: "-0.02em",
-              marginBottom: "1.25rem",
+              letterSpacing: "-0.01em",
+              marginBottom: "0.875rem",
               color: "var(--ink)",
             }}
           >
             자주 묻는 질문
           </h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
             {data.faq.map((item) => (
-              <div
-                key={item.q}
-                className="card"
-                style={{ padding: "1.25rem 1.5rem" }}
-              >
+              <div key={item.q} className="card" style={{ padding: "1rem 1.25rem" }}>
                 <p
                   style={{
-                    fontSize: "0.9375rem",
+                    fontSize: "0.875rem",
                     fontWeight: 800,
                     color: "var(--brand)",
-                    marginBottom: "0.5rem",
+                    marginBottom: "0.375rem",
                     letterSpacing: "-0.01em",
                   }}
                 >
                   Q. {item.q}
                 </p>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "var(--muted)",
-                    lineHeight: 1.75,
-                    margin: 0,
-                  }}
-                >
+                <p style={{ fontSize: "0.8125rem", color: "var(--muted)", lineHeight: 1.65, margin: 0 }}>
                   {item.a}
                 </p>
               </div>
@@ -231,17 +200,17 @@ export function CategoryInfoPage({ data }: Props) {
       </section>
 
       {/* Source Note */}
-      <section style={{ padding: "0 1.5rem 3rem" }}>
+      <section style={{ padding: "0 1.5rem 2.5rem" }}>
         <div style={{ maxWidth: "720px", margin: "0 auto" }}>
           <p
             style={{
-              fontSize: "0.8125rem",
+              fontSize: "0.75rem",
               color: "var(--muted)",
               lineHeight: 1.65,
-              padding: "1rem 1.25rem",
-              background: "#fffaf5",
+              padding: "0.875rem 1rem",
+              background: "var(--surface)",
               border: "1px solid var(--line)",
-              borderRadius: "0.75rem",
+              borderRadius: "0.5rem",
             }}
           >
             {data.sourceNote}
