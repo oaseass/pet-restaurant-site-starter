@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Compass, Search, SlidersHorizontal } from "lucide-react";
+import { Compass, Search } from "lucide-react";
 import { MapCategoryChips } from "@/components/map/MapCategoryChips";
 import { MapShell } from "@/components/map/MapShell";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
@@ -217,52 +217,65 @@ export default async function MapPage({
         </div>
       </div>
 
-      <section className="sticky top-[56px] z-30 rounded-xl border border-[var(--line)] bg-[rgba(255,255,255,0.96)] p-3 backdrop-blur-sm lg:static lg:p-4">
-        <form action="/map" className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_180px_220px_auto] lg:items-center">
+      <section className="rounded-xl border border-[var(--line)] bg-white" style={{ padding: "10px 12px" }}>
+        <form action="/map" className="flex flex-wrap items-center gap-2">
           <input type="hidden" name="category" value={activeCategory} />
-          <label className="relative block">
-            <span className="pointer-events-none absolute left-4 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-[#fff1e6] text-[#b9632e]">
-              <Search size={18} />
-            </span>
-            <input name="q" defaultValue={normalized.q} className="input min-h-11 pl-14" placeholder="식당명, 주소, 지역으로 지도 검색" />
-          </label>
 
-          <label className="block">
-            <span className="sr-only">지역 필터</span>
-            <select name="sido" defaultValue={normalized.sido} className="input min-h-11 px-5 py-3 text-sm font-bold">
-              <option value="">전체 지역</option>
-              {REGION_OPTIONS.map((region) => (
-                <option key={region} value={region}>{region}</option>
-              ))}
-            </select>
-          </label>
-
-          <label className="block">
-            <span className="sr-only">업종 필터</span>
-            <select name="type" defaultValue={normalized.type} className="input min-h-11 px-5 py-3 text-sm font-bold" disabled={!isRestaurantView}>
-              <option value="">전체 업종</option>
-              {businessTypeOptions.map((option) => (
-                <option key={option} value={option}>{option}</option>
-              ))}
-            </select>
-          </label>
-
-          <div className="flex gap-2">
-            <button className="btn-primary min-h-11 flex-1 sm:flex-none" type="submit">
-              필터 적용
-            </button>
-            <Link href={activeCategory === "restaurants" ? "/map" : `/map?category=${activeCategory}`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-black text-[var(--ink)]">
-              초기화
-            </Link>
+          {/* 검색 입력 — 모바일: 전체 폭, 데스크톱: flex grow */}
+          <div className="relative w-full flex-none sm:w-auto sm:flex-1 sm:min-w-0">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted)]" size={15} />
+            <input
+              name="q"
+              defaultValue={normalized.q}
+              style={{ height: "42px", borderRadius: "10px", fontSize: "14px", paddingLeft: "34px" }}
+              className="w-full border border-[var(--line)] bg-white pr-3 font-bold placeholder:font-normal placeholder:text-[var(--muted)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
+              placeholder="식당명, 지역, 주소 검색"
+            />
           </div>
+
+          <select
+            name="sido"
+            defaultValue={normalized.sido}
+            style={{ height: "42px", borderRadius: "10px", fontSize: "13px" }}
+            className="border border-[var(--line)] bg-white px-3 font-bold focus:outline-none"
+          >
+            <option value="">전체 지역</option>
+            {REGION_OPTIONS.map((region) => (
+              <option key={region} value={region}>{region}</option>
+            ))}
+          </select>
+
+          <select
+            name="type"
+            defaultValue={normalized.type}
+            disabled={!isRestaurantView}
+            style={{ height: "42px", borderRadius: "10px", fontSize: "13px" }}
+            className="border border-[var(--line)] bg-white px-3 font-bold focus:outline-none disabled:opacity-40"
+          >
+            <option value="">전체 업종</option>
+            {businessTypeOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+
+          <button
+            type="submit"
+            style={{ height: "42px", borderRadius: "10px", fontSize: "13px" }}
+            className="bg-[var(--brand)] px-4 font-black text-white"
+          >
+            검색
+          </button>
+
+          <Link
+            href={activeCategory === "restaurants" ? "/map" : `/map?category=${activeCategory}`}
+            style={{ height: "42px", borderRadius: "10px", fontSize: "13px" }}
+            className="flex items-center border border-[var(--line)] bg-white px-3 font-bold text-[var(--ink)]"
+          >
+            전체
+          </Link>
         </form>
 
-        <div className="mt-3 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
-          <SlidersHorizontal size={14} />
-          <span>병원, 미용, 유치원, 장례, 찾아요 카테고리는 순차적으로 준비하고 있습니다.</span>
-        </div>
-
-        <div className="mt-4">
+        <div className="mt-2">
           <MapCategoryChips categories={categories} activeCategory={activeCategory} />
         </div>
       </section>

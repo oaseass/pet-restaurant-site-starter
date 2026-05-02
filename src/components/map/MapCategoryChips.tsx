@@ -10,7 +10,7 @@ export function MapCategoryChips({
   activeCategory: MapCategoryKey;
 }) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1">
+    <div className="flex gap-1.5 overflow-x-auto pb-0.5">
       {categories.map((category) => {
         const isActive = category.key === activeCategory;
 
@@ -19,25 +19,25 @@ export function MapCategoryChips({
             key={category.key}
             href={category.href}
             className={clsx(
-              "flex min-h-11 shrink-0 items-center gap-3 rounded-full border px-4 py-2.5 text-sm font-black transition",
+              "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition",
               isActive
                 ? "border-[var(--brand)] bg-[var(--brand)] text-white"
-                : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[rgba(31,107,91,0.22)] hover:bg-[#fcfbf9]",
+                : "border-[var(--line)] bg-white text-[var(--ink)] hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]",
             )}
           >
             <span>{category.label}</span>
-            <span
-              className={clsx(
-                "rounded-full px-2.5 py-1 text-[11px] font-black",
-                isActive
-                  ? "bg-white/16 text-white"
-                  : category.status === "active"
-                    ? "bg-[var(--brand-soft)] text-[var(--brand)]"
-                    : "bg-[var(--accent-soft)] text-[#b9632e]",
-              )}
-            >
-              {category.countLabel}
-            </span>
+            {category.status === "active" ? (
+              <span
+                className={clsx(
+                  "text-[11px] font-black",
+                  isActive ? "text-white/80" : "text-[var(--brand)]",
+                )}
+              >
+                {category.countLabel}
+              </span>
+            ) : (
+              <span className="text-[10px] text-[var(--muted)] opacity-70">준비</span>
+            )}
           </Link>
         );
       })}
