@@ -53,18 +53,20 @@ type PreviewPayload = {
   approvalToken: string;
 };
 
-const CATEGORY_OPTIONS = ["", "ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL"] as const;
+const CATEGORY_OPTIONS = ["", "PET_RESTAURANT", "ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL"] as const;
 
 export function AdminImportWorkbench({
   previewEndpoint,
   applyEndpoint,
   templateHref,
+  defaultCategory,
 }: {
   previewEndpoint: string;
   applyEndpoint: string;
   templateHref: string;
+  defaultCategory?: (typeof CATEGORY_OPTIONS)[number];
 }) {
-  const [targetCategory, setTargetCategory] = useState<(typeof CATEGORY_OPTIONS)[number]>("");
+  const [targetCategory, setTargetCategory] = useState<(typeof CATEGORY_OPTIONS)[number]>(defaultCategory ?? "");
   const [preview, setPreview] = useState<PreviewPayload | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -151,6 +153,7 @@ export function AdminImportWorkbench({
               className="mt-2 block w-full rounded-[1.2rem] border border-[rgba(56,41,29,0.12)] bg-white px-4 py-3 text-sm"
             >
               <option value="">파일 기준 자동 판별</option>
+              <option value="PET_RESTAURANT">PET_RESTAURANT</option>
               <option value="ANIMAL_HOSPITAL">ANIMAL_HOSPITAL</option>
               <option value="GROOMING">GROOMING</option>
               <option value="DAYCARE">DAYCARE</option>

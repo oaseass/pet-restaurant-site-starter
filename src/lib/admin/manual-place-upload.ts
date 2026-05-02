@@ -8,7 +8,7 @@ const SHEET_NAME = "places_upload";
 const TEMPLATE_FILE_NAME = "daengnyang-manual-place-upload-template.xlsx";
 
 export const MANUAL_PLACE_TEMPLATE_FILE_NAME = TEMPLATE_FILE_NAME;
-export const MANUAL_IMPORT_SUPPORTED_CATEGORIES = ["ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL"] as const satisfies readonly PlaceCategory[];
+export const MANUAL_IMPORT_SUPPORTED_CATEGORIES = ["PET_RESTAURANT", "ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL"] as const satisfies readonly PlaceCategory[];
 
 export const MANUAL_PLACE_TEMPLATE_COLUMNS = [
   { key: "sourceId", label: "고정 식별자", required: "권장", description: "같은 업소를 다시 업데이트할 때 동일한 값을 유지합니다. 비우면 category+name+address 기준으로 자동 생성됩니다." },
