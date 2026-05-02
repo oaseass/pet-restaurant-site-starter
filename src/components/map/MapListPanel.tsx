@@ -95,14 +95,11 @@ export function MapListPanel({
                           </span>
                         ) : null}
                         <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.businessType}</span>
-                        <span
-                          className={clsx(
-                            "rounded-full px-2.5 py-1 text-[11px] font-black",
-                            item.coordinateStatus === "ready" ? "bg-[#dff3ec] text-[#1a463f]" : "bg-[#fff0e3] text-[#b9632e]",
-                          )}
-                        >
-                          {item.coordinateStatus === "ready" ? "핀 표시" : "좌표 준비중"}
-                        </span>
+                        {item.coordinateStatus === "ready" && (
+                          <span className="rounded-full bg-[#dff3ec] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
+                            \ud540 \ud45c\uc2dc
+                          </span>
+                        )}
                       </div>
                       <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
                       <p className="mt-2 text-sm font-bold text-[var(--muted)]">

@@ -78,18 +78,20 @@ function useKakaoMapSdk(enabled: boolean) {
   return status;
 }
 
-function createMarkerImage(color: string) {
-  const svg = `<svg width="42" height="54" viewBox="0 0 42 54" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 53C21 53 38 34.66 38 22.44C38 10.22 30.39 2 21 2C11.61 2 4 10.22 4 22.44C4 34.66 21 53 21 53Z" fill="${color}"/><circle cx="21" cy="22" r="8" fill="white"/><circle cx="21" cy="22" r="4" fill="${color}"/></svg>`;
+function createMarkerImage(color: string, size: "normal" | "large" = "normal") {
+  const w = size === "large" ? 36 : 26;
+  const h = size === "large" ? 46 : 33;
+  const svg = `<svg width="${w}" height="${h}" viewBox="0 0 42 54" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M21 53C21 53 38 34.66 38 22.44C38 10.22 30.39 2 21 2C11.61 2 4 10.22 4 22.44C4 34.66 21 53 21 53Z" fill="${color}"/><circle cx="21" cy="22" r="8" fill="white"/><circle cx="21" cy="22" r="4" fill="${color}"/></svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
 }
 
 function buildMapAreaCopy({
-  activeCategoryLabel,
+  mapTitle,
   activeCategory,
   mapStatus,
   mappableCount,
 }: {
-  activeCategoryLabel: string;
+  mapTitle: string;
   activeCategory: MapCategoryKey;
   mapStatus: "not-requested" | "unavailable" | "loading" | "ready" | "error";
   mappableCount: number;
@@ -104,27 +106,27 @@ function buildMapAreaCopy({
   if (mapStatus === "error") {
     return {
       title: "지도를 불러오지 못했습니다.",
-      description: "잠시 후 다시 시도하거나 아래 목록에서 먼저 식당을 확인해 주세요.",
+      description: "잠시 후 다시 시도하거나 아래 목록에서 먼저 확인해 주세요.",
     };
   }
 
   if (mapStatus === "unavailable") {
     return {
       title: "지도를 준비 중입니다.",
-      description: "아래 목록에서 먼저 식당을 확인해 주세요.",
+      description: "아래 목록에서 먼저 확인해 주세요.",
     };
   }
 
   if (mappableCount === 0) {
     return {
-      title: "식당 지도",
-      description: "목록에서 식당을 선택하면 위치를 확인할 수 있습니다.",
+      title: mapTitle,
+      description: "목록에서 장소를 선택하면 위치를 확인할 수 있습니다.",
     };
   }
 
   return {
-    title: "식당 지도",
-    description: "지도에 마커가 표시된 식당을 목록에서 선택하세요.",
+    title: mapTitle,
+    description: "지도에 마커가 표시된 장소를 목록에서 선택하세요.",
   };
 }
 
@@ -132,6 +134,9 @@ export function MapShell({
   items,
   activeCategory,
   activeCategoryLabel,
+  listTitle,
+  listSubtitle,
+  mapTitle,
   filteredCount,
   visibleCount,
   coordinateReadyCount,
@@ -144,6 +149,9 @@ export function MapShell({
   items: MapRestaurantListItem[];
   activeCategory: MapCategoryKey;
   activeCategoryLabel: string;
+  listTitle: string;
+  listSubtitle: string;
+  mapTitle: string;
   filteredCount: number;
   visibleCount: number;
   coordinateReadyCount: number;
@@ -239,8 +247,8 @@ export function MapShell({
       const position = new kakao.maps.LatLng(item.lat, item.lng);
       const marker = new kakao.maps.Marker({
         position,
-        image: new kakao.maps.MarkerImage(createMarkerImage("#1a463f"), new kakao.maps.Size(42, 54), {
-          offset: new kakao.maps.Point(21, 54),
+        image: new kakao.maps.MarkerImage(createMarkerImage("#1a463f", "normal"), new kakao.maps.Size(26, 33), {
+          offset: new kakao.maps.Point(13, 33),
         }),
       });
 
@@ -260,8 +268,8 @@ export function MapShell({
       const position = new kakao.maps.LatLng(userLocation.lat, userLocation.lng);
       userMarkerRef.current = new kakao.maps.Marker({
         position,
-        image: new kakao.maps.MarkerImage(createMarkerImage("#ff9248"), new kakao.maps.Size(42, 54), {
-          offset: new kakao.maps.Point(21, 54),
+        image: new kakao.maps.MarkerImage(createMarkerImage("#ff9248", "large"), new kakao.maps.Size(36, 46), {
+          offset: new kakao.maps.Point(18, 46),
         }),
       });
       userMarkerRef.current.setMap(map);
@@ -280,7 +288,7 @@ export function MapShell({
   }, [mapStatus, selectedItem]);
 
   const mapAreaCopy = buildMapAreaCopy({
-    activeCategoryLabel,
+    mapTitle,
     activeCategory,
     mapStatus,
     mappableCount: mappableItems.length,
@@ -327,12 +335,8 @@ export function MapShell({
     <section className="mt-6">
       <div className="hidden gap-5 lg:grid lg:grid-cols-[380px_minmax(0,1fr)]">
         <MapListPanel
-          title={activeCategory === "all" ? "전체 장소" : `${activeCategoryLabel} 목록`}
-          subtitle={
-            activeCategory === "all"
-              ? "현재 위치 기준 식당, 병원, 약국, 미용, 유치원·호텔, 장례 정보를 함께 보여드립니다."
-              : `지도로 볼 수 있는 ${activeCategoryLabel}와 목록으로 먼저 확인할 ${activeCategoryLabel}을 함께 보여드립니다.`
-          }
+          title={listTitle}
+          subtitle={listSubtitle}
           items={items}
           selectedId={selectedId}
           onSelect={setSelectedId}
@@ -348,7 +352,7 @@ export function MapShell({
           <div className="relative z-10 flex items-center justify-between gap-4">
             <div>
               <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">지도</p>
-              <h2 className="mt-3 text-[1.85rem] font-black tracking-tight text-[var(--ink)]">{activeCategoryLabel} 지도</h2>
+              <h2 className="mt-3 text-[1.85rem] font-black tracking-tight text-[var(--ink)]">{mapTitle}</h2>
             </div>
             <button type="button" onClick={requestUserLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-black text-[var(--ink)]">
               <Crosshair size={16} />
@@ -412,7 +416,7 @@ export function MapShell({
           <div className="relative z-10 flex items-center justify-between gap-4">
             <div>
               <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">지도</p>
-              <h2 className="mt-2 text-[1.6rem] font-black tracking-tight text-[var(--ink)]">{activeCategoryLabel} 지도</h2>
+              <h2 className="mt-2 text-[1.6rem] font-black tracking-tight text-[var(--ink)]">{mapTitle}</h2>
             </div>
             <button type="button" onClick={requestUserLocation} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-black text-[var(--ink)]">
               <Crosshair size={16} />
@@ -465,7 +469,7 @@ export function MapShell({
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
               </div>
             ) : (
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">지도를 누르거나 리스트에서 식당을 선택하면 이곳에 현재 선택이 표시됩니다.</p>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">지도를 누르거나 리스트에서 장소를 선택하면 이곳에 현재 선택이 표시됩니다.</p>
             )}
           </div>
         </section>

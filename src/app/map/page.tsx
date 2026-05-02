@@ -58,6 +58,76 @@ const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants" | "al
   },
 };
 
+const MAP_CATEGORY_META: Record<MapCategoryKey, { pageTitle: string; listTitle: string; listSubtitle: string; mapTitle: string }> = {
+  all: {
+    pageTitle: "내 주변 반려동물 장소",
+    listTitle: "전체 장소",
+    listSubtitle: "식당, 병원, 약국, 미용, 유치원·호텔, 장례 장소를 함께 보여드립니다.",
+    mapTitle: "전체 장소 지도",
+  },
+  restaurants: {
+    pageTitle: "반려동물 동반 식당 지도",
+    listTitle: "식당 목록",
+    listSubtitle: "반려동물 동반 가능 식당을 지도와 목록으로 확인하세요.",
+    mapTitle: "식당 지도",
+  },
+  hospitals: {
+    pageTitle: "동물병원 지도",
+    listTitle: "동물병원 목록",
+    listSubtitle: "동물병원 정보를 지도와 목록으로 확인하세요.",
+    mapTitle: "동물병원 지도",
+  },
+  grooming: {
+    pageTitle: "반려동물 미용 지도",
+    listTitle: "미용업소 목록",
+    listSubtitle: "반려동물 미용업소를 지도와 목록으로 확인하세요.",
+    mapTitle: "미용 지도",
+  },
+  daycare: {
+    pageTitle: "유치원·호텔 지도",
+    listTitle: "유치원·호텔 목록",
+    listSubtitle: "유치원, 호텔, 위탁관리, 훈련 관련 장소를 지도와 목록으로 확인하세요.",
+    mapTitle: "유치원·호텔 지도",
+  },
+  funeral: {
+    pageTitle: "반려동물 장례 지도",
+    listTitle: "장례업체 목록",
+    listSubtitle: "반려동물 장례업체 정보를 지도와 목록으로 확인하세요.",
+    mapTitle: "장례 지도",
+  },
+  pharmacy: {
+    pageTitle: "동물약국 지도",
+    listTitle: "동물약국 목록",
+    listSubtitle: "동물약국 정보를 지도와 목록으로 확인하세요.",
+    mapTitle: "동물약국 지도",
+  },
+  "lost-pets": {
+    pageTitle: "찾아요",
+    listTitle: "찾아요",
+    listSubtitle: "보호동물 공고와 실종 제보는 찾아요 페이지에서 확인하세요.",
+    mapTitle: "찾아요",
+  },
+};
+
+function sanitizePlaceName(name?: string | null): string {
+  const value = name?.trim();
+  if (!value) return "이름 미확인 업체";
+  if (value.startsWith("#")) return "이름 미확인 업체";
+  const BLOCKED_NAMES = new Set(["grooming", "daycare", "funeral", "pharmacy", "hospital", "restaurants", "restaurant"]);
+  if (BLOCKED_NAMES.has(value.toLowerCase())) return "이름 미확인 업체";
+  return value;
+}
+
+function formatPublicAddress(
+  item: { address?: string | null; roadAddress?: string | null; sido?: string | null; sigungu?: string | null },
+): string {
+  const addr = item.roadAddress ?? item.address ?? "";
+  if (addr.includes("*")) {
+    return [item.sido, item.sigungu].filter(Boolean).join(" ") || "주소 일부 비공개";
+  }
+  return addr;
+}
+
 const MAP_CATEGORY_ALIASES: Record<string, MapCategoryKey> = {
   all: "all",
   restaurants: "restaurants",
@@ -225,8 +295,8 @@ export default async function MapPage({
           })),
           ...placesForCategorySliced.map((p) => ({
             id: `p_${p.id}`,
-            name: p.name,
-            address: p.roadAddress ?? p.address ?? "",
+            name: sanitizePlaceName(p.name),
+            address: formatPublicAddress(p),
             businessType: p.businessStatus ?? "",
             categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? p.category,
             regionLabel: [p.sido, p.sigungu].filter(Boolean).join(" · "),
@@ -270,11 +340,11 @@ export default async function MapPage({
       }))
     : placesForCategory.map((place) => ({
         id: place.id,
-        name: place.name,
-        address: place.roadAddress ?? place.address ?? null,
+        name: sanitizePlaceName(place.name),
+        address: formatPublicAddress(place),
         businessType: place.businessStatus ?? "",
         regionLabel: [place.sido, place.sigungu].filter(Boolean).join(" · "),
-        href: `/map?category=${activeCategory}&q=${encodeURIComponent(place.name)}`,
+        href: `/map?category=${activeCategory}&q=${encodeURIComponent(sanitizePlaceName(place.name))}`,
         officialRegistered: false,
         lat: place.lat,
         lng: place.lng,
@@ -386,12 +456,10 @@ export default async function MapPage({
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 10px", borderBottom: "1px solid var(--line)", marginBottom: "16px" }}>
         <div>
           <h1 style={{ fontSize: "17px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>
-            {isAllView ? "내 주변 반려동물 장소" : isRestaurantView ? "반려동물 동반 식당 지도" : `${MAP_CATEGORY_LABELS[activeCategory]} 지도`}
+            {MAP_CATEGORY_META[activeCategory].pageTitle}
           </h1>
           <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0, marginTop: "2px" }}>
-            {isAllView
-              ? "현재 위치를 기준으로 가까운 식당, 병원, 약국, 미용, 유치원·호텔, 장례 정보를 보여드립니다."
-              : `전체 ${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건 등록`}
+            {MAP_CATEGORY_META[activeCategory].listSubtitle}
           </p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
@@ -466,8 +534,8 @@ export default async function MapPage({
         <Compass size={14} />
         <span>
           {isAllView
-            ? `전체 장소 중 가까운 ${listItems.length.toLocaleString("ko-KR")}건 표시`
-            : `${filteredCount.toLocaleString("ko-KR")}건 중 최대 120건 표시`}
+            ? `가까운 장소 ${listItems.length.toLocaleString("ko-KR")}곳 표시`
+            : `${MAP_CATEGORY_LABELS[activeCategory]} ${filteredCount.toLocaleString("ko-KR")}곳 표시`}
         </span>
       </div>
 
@@ -475,6 +543,9 @@ export default async function MapPage({
         items={listItems}
         activeCategory={activeCategory}
         activeCategoryLabel={MAP_CATEGORY_LABELS[activeCategory]}
+        listTitle={MAP_CATEGORY_META[activeCategory].listTitle}
+        listSubtitle={MAP_CATEGORY_META[activeCategory].listSubtitle}
+        mapTitle={MAP_CATEGORY_META[activeCategory].mapTitle}
         filteredCount={filteredCount}
         visibleCount={listItems.length}
         coordinateReadyCount={coordinateReadyCount}
