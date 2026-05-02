@@ -171,6 +171,7 @@ export default async function AdminConsolePage({ searchParams }: { searchParams:
             <AdminLinkCard title="검수센터" description="실종 제보, 업체 요청, 가격 제보 처리" href={withSecret("/admin/data-health", secret)} />
             <AdminLinkCard title="장소 관리" description="실제 장소 필드를 검색하고 바로 수정" href={withSecret("/admin/places", secret)} />
             <AdminLinkCard title="데이터 파이프라인" description="공식 동기화 → 좌표화 → 스냅샷 갱신" href={withSecret("/admin/data-pipeline", secret)} />
+            <AdminLinkCard title="비식당 장소 가져오기" description="병원·미용·유치원·장례 공공데이터 import" href={withSecret("/admin/import-places", secret)} />
             <AdminLinkCard title="수동 import" description="XLSX/CSV 업로드 후 preview 승인 반영" href={withSecret("/admin/import", secret)} />
             <AdminLinkCard title="동기화 로그" description="실패, skipped, 최근 배치 흐름 확인" href={withSecret("/admin/sync-logs", secret)} />
             <AdminLinkCard title="수동 업로드 양식" description="규격화된 xlsx 템플릿 즉시 다운로드" href={withSecret("/api/admin/manual-place-template", secret)} />

@@ -1,4 +1,4 @@
-import type { PublicRestaurantLight } from "@/lib/public-data";
+import type { PublicPlaceLight, PublicRestaurantLight } from "@/lib/public-data";
 import { GUIDE_DOCS, type GuideDoc } from "@/lib/platform-content";
 
 const SIDO_LIST = [
@@ -167,4 +167,69 @@ export function getSuggestions(
     lat: r.lat,
     lng: r.lng,
   }));
+}
+
+// ─── Place 검색 ───────────────────────────────────────────────────────────────
+
+const PLACE_CATEGORY_LABEL: Record<string, string> = {
+  ANIMAL_HOSPITAL: "동물병원",
+  GROOMING: "미용",
+  DAYCARE: "유치원·호텔",
+  FUNERAL: "장례",
+};
+
+export type SearchPlaceResult = PublicPlaceLight & { score: number; categoryLabel: string };
+
+/**
+ * places-light.json 스냅샷에서 키워드 검색.
+ * DB 조회 없음 — 순수 메모리 필터 + 스코어링.
+ */
+export function searchPlacesSnapshot(
+  places: PublicPlaceLight[],
+  params: { q: string; sido?: string; category?: string; limit?: number },
+): SearchPlaceResult[] {
+  const { q, sido, category, limit = 50 } = params;
+  const norm = normalizeSearchKeyword(q);
+
+  let pool = places;
+  if (sido) pool = pool.filter((p) => p.sido === sido);
+  if (category) pool = pool.filter((p) => p.category === category);
+
+  if (!norm) {
+    return pool
+      .slice()
+      .sort((a, b) => {
+        const aHasCoord = a.lat !== null;
+        const bHasCoord = b.lat !== null;
+        if (aHasCoord !== bHasCoord) return aHasCoord ? -1 : 1;
+        return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      })
+      .slice(0, limit)
+      .map((p) => ({ ...p, score: 1, categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? p.category }));
+  }
+
+  return pool
+    .map((p) => {
+      const name = normalizeSearchKeyword(p.name);
+      const address = normalizeSearchKeyword(p.address ?? "");
+      const sigungu = p.sigungu ? normalizeSearchKeyword(p.sigungu) : "";
+      const sidoN = p.sido ? normalizeSearchKeyword(p.sido) : "";
+      let score = 0;
+
+      if (name === norm) score += 100;
+      else if (name.startsWith(norm)) score += 60;
+      else if (name.includes(norm)) score += 40;
+
+      if (sigungu.includes(norm)) score += 20;
+      if (sidoN.includes(norm)) score += 15;
+      if (address.includes(norm)) score += 12;
+      if (p.lat !== null) score += 2;
+
+      return score > 0
+        ? ({ ...p, score, categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? p.category } as SearchPlaceResult)
+        : null;
+    })
+    .filter((p): p is SearchPlaceResult => p !== null)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
 }

@@ -70,6 +70,36 @@ export const getMapPointsSnapshot = cache(async () => readPublicJsonFile<PublicM
 export const getCategoryCountsSnapshot = cache(async () => readPublicJsonFile<PublicCategoryCounts>("category-counts.json", EMPTY_CATEGORY_COUNTS));
 export const getRegionsSnapshot = cache(async () => readPublicJsonFile<PublicRegions>("regions.json", EMPTY_REGIONS));
 
+// ─── Place 공개 스냅샷 타입 ───────────────────────────────────────────────
+
+export type PublicPlaceLight = {
+  id: string;
+  category: string;
+  name: string;
+  address: string | null;
+  roadAddress: string | null;
+  sido: string | null;
+  sigungu: string | null;
+  phone: string | null;
+  lat: number | null;
+  lng: number | null;
+  sourceName: string | null;
+  businessStatus: string | null;
+  updatedAt: string;
+};
+
+export type PublicPlaceMapPoint = {
+  id: string;
+  category: string;
+  name: string;
+  lat: number;
+  lng: number;
+  phone: string | null;
+};
+
+export const getPlacesLightSnapshot = cache(async () => readPublicJsonFile<PublicPlaceLight[]>("places-light.json", []));
+export const getPlaceMapPointsSnapshot = cache(async () => readPublicJsonFile<PublicPlaceMapPoint[]>("place-map-points.json", []));
+
 export function normalizePublicRestaurantSearchParams(params: { q?: string; sido?: string; type?: string }) {
   return {
     q: normalizeText(params.q ?? ""),

@@ -7,7 +7,7 @@ loadEnvConfig(process.cwd());
 async function main() {
   const { prisma } = await import("../src/lib/prisma");
 
-  const [restaurants, placeCount, lostPetCount] = await Promise.all([
+  const [restaurants, placeCount, lostPetCount, nonRestaurantPlaces] = await Promise.all([
     prisma.restaurant.findMany({
       where: { status: "ACTIVE" },
       select: {
@@ -27,6 +27,28 @@ async function main() {
     }),
     prisma.place.count({ where: { isActive: true } }),
     prisma.lostPet.count({ where: { status: { in: ["APPROVED", "FOUND"] } } }),
+    prisma.place.findMany({
+      where: {
+        isActive: true,
+        category: { in: ["ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL"] },
+      },
+      select: {
+        id: true,
+        category: true,
+        name: true,
+        address: true,
+        roadAddress: true,
+        sido: true,
+        sigungu: true,
+        phone: true,
+        lat: true,
+        lng: true,
+        sourceName: true,
+        businessStatus: true,
+        updatedAt: true,
+      },
+      orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+    }),
   ]);
 
   const restaurantsLight = restaurants.map((restaurant) => ({
@@ -90,16 +112,47 @@ async function main() {
   const outputDirectory = path.join(process.cwd(), "public", "data");
   await fs.mkdir(outputDirectory, { recursive: true });
 
+  const placesLight = nonRestaurantPlaces.map((place) => ({
+    id: place.id,
+    category: place.category,
+    name: place.name,
+    address: place.address,
+    roadAddress: place.roadAddress,
+    sido: place.sido,
+    sigungu: place.sigungu,
+    phone: place.phone,
+    lat: place.lat,
+    lng: place.lng,
+    sourceName: place.sourceName,
+    businessStatus: place.businessStatus,
+    updatedAt: place.updatedAt.toISOString(),
+  }));
+
+  const placeMapPoints = placesLight
+    .filter((place) => place.lat !== null && place.lng !== null)
+    .map((place) => ({
+      id: place.id,
+      category: place.category,
+      name: place.name,
+      lat: place.lat as number,
+      lng: place.lng as number,
+      phone: place.phone,
+    }));
+
   await Promise.all([
     fs.writeFile(path.join(outputDirectory, "restaurants-light.json"), JSON.stringify(restaurantsLight, null, 2)),
     fs.writeFile(path.join(outputDirectory, "map-points.json"), JSON.stringify(mapPoints, null, 2)),
     fs.writeFile(path.join(outputDirectory, "category-counts.json"), JSON.stringify(categoryCounts, null, 2)),
     fs.writeFile(path.join(outputDirectory, "regions.json"), JSON.stringify(regions, null, 2)),
+    fs.writeFile(path.join(outputDirectory, "places-light.json"), JSON.stringify(placesLight, null, 2)),
+    fs.writeFile(path.join(outputDirectory, "place-map-points.json"), JSON.stringify(placeMapPoints, null, 2)),
   ]);
 
   console.log(JSON.stringify({
     restaurantsLight: restaurantsLight.length,
     mapPoints: mapPoints.length,
+    placesLight: placesLight.length,
+    placeMapPoints: placeMapPoints.length,
     regionsBySido: regions.bySido.length,
     regionsBySigungu: regions.bySigungu.length,
     lastUpdatedAt: categoryCounts.lastUpdatedAt,

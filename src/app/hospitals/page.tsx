@@ -1,7 +1,8 @@
 import { CategoryInfoPage } from "@/components/CategoryInfoPage";
+import { PlaceListSection } from "@/components/PlaceListSection";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { CATEGORY_CONTENT } from "@/lib/category-info-content";
-import { getCategoryCountsSnapshot } from "@/lib/public-data";
+import { getCategoryCountsSnapshot, getPlacesLightSnapshot } from "@/lib/public-data";
 
 export const metadata = {
   title: "동물병원 찾기 | 댕냥지도",
@@ -9,9 +10,13 @@ export const metadata = {
 };
 
 export default async function HospitalsPage() {
-  const counts = await getCategoryCountsSnapshot();
+  const [counts, allPlaces] = await Promise.all([getCategoryCountsSnapshot(), getPlacesLightSnapshot()]);
+  const places = allPlaces.filter((p) => p.category === "ANIMAL_HOSPITAL");
   return (
     <PublicPageShell restaurantCount={counts.restaurantCount} lastUpdatedAt={counts.lastUpdatedAt}>
+      {places.length > 0 && (
+        <PlaceListSection places={places} categoryLabel="동물병원" mapHref="/map?category=hospitals" />
+      )}
       <CategoryInfoPage data={CATEGORY_CONTENT.hospital} />
     </PublicPageShell>
   );
