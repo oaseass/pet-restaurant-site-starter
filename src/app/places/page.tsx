@@ -27,7 +27,7 @@ export default async function PlacesPage() {
       </section>
 
       <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {QUICK_CATEGORIES.filter((item) => ["/restaurants", "/hospitals", "/hospitals/emergency", "/grooming", "/daycare", "/training", "/funeral"].includes(item.href)).map((category) => (
+        {QUICK_CATEGORIES.filter((item) => ["/restaurants", "/hospitals", "/hospitals/emergency", "/grooming", "/daycare", "/training", "/funeral", "/pharmacy"].includes(item.href)).map((category) => (
           <CategoryCard key={category.href} category={{ ...category, href: `/places/${getPlaceCategorySlug(category.category)}` }} />
         ))}
       </section>

@@ -58,7 +58,7 @@ export default async function ReportPage({ searchParams }: { searchParams: Promi
 
       <form action={submitReport} className="mt-6 grid gap-4 rounded-[2rem] card p-6 md:grid-cols-2">
         <label className="space-y-2 text-sm font-bold text-[#4b423c]">placeId<input name="placeId" className="input" placeholder="선택 입력" /></label>
-        <label className="space-y-2 text-sm font-bold text-[#4b423c]">카테고리<select name="category" className="input" defaultValue="SURGERY"><option value="SURGERY">수술·진료비</option><option value="GROOMING">미용</option><option value="DAYCARE">유치원</option><option value="FUNERAL">장례</option><option value="TRAINING">훈련</option></select></label>
+        <label className="space-y-2 text-sm font-bold text-[#4b423c]">카테고리<select name="category" className="input" defaultValue="SURGERY"><option value="SURGERY">수술·진료비</option><option value="GROOMING">미용</option><option value="DAYCARE">유치원</option><option value="FUNERAL">장례</option><option value="PHARMACY">약국</option><option value="TRAINING">훈련</option></select></label>
         <label className="space-y-2 text-sm font-bold text-[#4b423c]">항목명<input name="itemName" required className="input" placeholder="예: 중성화 수술" /></label>
         <label className="space-y-2 text-sm font-bold text-[#4b423c]">가격<input name="price" className="input" placeholder="예: 250000" /></label>
         <label className="space-y-2 text-sm font-bold text-[#4b423c]">출처 유형<select name="sourceType" className="input" defaultValue="USER_REPORT"><option value="USER_REPORT">사용자 제보</option><option value="OWNER_SUBMISSION">업체 등록</option><option value="ADMIN_VERIFIED">관리자 확인</option></select></label>

@@ -40,6 +40,12 @@ const CATEGORIES: CategoryCardItem[] = [
     cta: "정보 보기",
   },
   {
+    label: "약국",
+    desc: "동물약국 정보 안내",
+    href: "/pharmacy",
+    cta: "정보 보기",
+  },
+  {
     label: "찾아요",
     desc: "실종 제보 등록 및 확인",
     href: "/lost-pets",

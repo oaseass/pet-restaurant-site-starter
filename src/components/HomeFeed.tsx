@@ -45,6 +45,7 @@ export async function HomeFeed() {
     categoryFeedItem("grooming"),
     categoryFeedItem("daycare"),
     categoryFeedItem("funeral"),
+    categoryFeedItem("pharmacy"),
   ];
 
   const guideItems: FeedCardItem[] = TODAY_GUIDES.map((g, i) => ({

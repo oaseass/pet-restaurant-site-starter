@@ -48,7 +48,8 @@ export async function importPlacesFromRows(
 
   if (rows.length === 0) return result;
 
-  // 처리할 레코드 준비
+  // 처리할 레코드 준비 (배치 내 sourceId 중복 제거)
+  const seenSourceIds = new Set<string>();
   const records = rows
     .map((row, idx) => {
       if (!row.name || row.name.trim().length < 2) {
@@ -56,10 +57,18 @@ export async function importPlacesFromRows(
         return null;
       }
       const normalizedName = normalizeText(row.name).toLowerCase();
-      const sourceId = generateSourceId(syncSource, row.name, row.normalizedAddress);
+      const sourceId = row.sourceId ?? generateSourceId(syncSource, row.name, row.normalizedAddress);
       return { row, idx, normalizedName, sourceId };
     })
-    .filter((r): r is NonNullable<typeof r> => r !== null);
+    .filter((r): r is NonNullable<typeof r> => r !== null)
+    .filter((r) => {
+      if (seenSourceIds.has(r.sourceId)) {
+        result.skipped++;
+        return false;
+      }
+      seenSourceIds.add(r.sourceId);
+      return true;
+    });
 
   // 기존 Place 조회 (sourceType=OFFICIAL_DATA, sourceName=syncSource)
   const sourceIds = records.map((r) => r.sourceId);
@@ -94,7 +103,7 @@ export async function importPlacesFromRows(
       sourceName: syncSource as string,
       sourceUrl,
       sourceId,
-      sourceUpdatedAt: now.toISOString(),
+      sourceUpdatedAt: (row.sourceUpdatedAt ?? now).toISOString(),
       firstSeenAt: (existing?.firstSeenAt ?? now).toISOString(),
       lastSeenAt: now.toISOString(),
       ownerVerified: false,

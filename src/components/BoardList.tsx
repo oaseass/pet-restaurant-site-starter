@@ -80,6 +80,14 @@ export async function BoardList() {
       region: "전국",
       actionLabel: "보기",
     },
+    {
+      id: "cat-pharmacy",
+      badge: "약국",
+      title: CATEGORY_CONTENT["pharmacy"].title,
+      href: "/pharmacy",
+      region: "전국",
+      actionLabel: "보기",
+    },
   ];
   rows.push(...categoryGuides);
 

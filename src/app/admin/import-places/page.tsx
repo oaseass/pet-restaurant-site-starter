@@ -32,14 +32,14 @@ export default async function ImportPlacesPage({ searchParams }: { searchParams:
       by: ["category"],
       where: {
         isActive: true,
-        category: { in: ["ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL"] },
+        category: { in: ["ANIMAL_HOSPITAL", "GROOMING", "DAYCARE", "FUNERAL", "PHARMACY"] },
       },
       _count: { _all: true },
     }),
     prisma.syncLog.findMany({
       where: {
         source: {
-          in: ["LOCALDATA_ANIMAL_HOSPITAL", "LOCALDATA_GROOMING", "LOCALDATA_DAYCARE", "LOCALDATA_FUNERAL"],
+          in: ["LOCALDATA_ANIMAL_HOSPITAL", "LOCALDATA_GROOMING", "LOCALDATA_DAYCARE", "LOCALDATA_FUNERAL", "LOCALDATA_PHARMACY"],
         },
         status: "SUCCESS",
       },

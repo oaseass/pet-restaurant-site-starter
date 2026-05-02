@@ -17,6 +17,7 @@ const GUIDE_SHORTCUTS = [
   { label: "미용", href: "/grooming" },
   { label: "유치원", href: "/daycare" },
   { label: "장례", href: "/funeral" },
+  { label: "약국", href: "/pharmacy" },
   { label: "여행 가이드", href: "/guide/travel" },
   { label: "예방접종", href: "/guide/vaccination" },
   { label: "비행기", href: "/guide/flight" },

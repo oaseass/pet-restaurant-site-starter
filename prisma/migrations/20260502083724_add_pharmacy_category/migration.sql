@@ -1,0 +1,5 @@
+-- AlterEnum
+ALTER TYPE "PlaceCategory" ADD VALUE 'PHARMACY';
+
+-- AlterEnum
+ALTER TYPE "SyncSource" ADD VALUE 'LOCALDATA_PHARMACY';

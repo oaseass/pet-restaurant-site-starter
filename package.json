@@ -16,6 +16,8 @@
     "sync:local:force": "tsx scripts/sync-local.ts --force",
     "geocode:restaurants": "tsx scripts/geocode-restaurants.ts",
     "geocode:places": "tsx scripts/geocode-places.ts",
+    "import:places": "tsx scripts/import-places-from-file.ts",
+    "sync:places:api": "tsx scripts/sync-places-from-api.ts",
     "test": "tsx --test src/**/*.test.ts"
   },
   "dependencies": {

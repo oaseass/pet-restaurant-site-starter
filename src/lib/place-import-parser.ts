@@ -14,6 +14,10 @@ export type ParsedPlaceRow = {
   lat: number | null;
   lng: number | null;
   licenseDate: string | null;
+  /** API import 시 원천 고유 ID (MNG_NO 등). 없으면 sha256 자동 생성. */
+  sourceId?: string | null;
+  /** API import 시 원천 업데이트 시각 */
+  sourceUpdatedAt?: Date | null;
 };
 
 type RawRow = Record<string, unknown>;
@@ -214,7 +218,7 @@ function detectFormat(buffer: Buffer): "csv" | "xlsx" | "unknown" {
   return "unknown";
 }
 
-export function parsePlaceFile(buffer: Buffer, hintFormat?: "csv" | "xlsx"): ParsePlaceFileResult {
+export function parsePlaceFile(buffer: Buffer, hintFormat?: "csv" | "xlsx" | "json"): ParsePlaceFileResult {
   const format = hintFormat ?? detectFormat(buffer);
   let rawRows: RawRow[] = [];
 

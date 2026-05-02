@@ -12,10 +12,16 @@ const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   grooming: "미용",
   daycare: "유치원",
   funeral: "장례",
+  pharmacy: "약국",
   "lost-pets": "찾아요",
 };
 
 const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants">, PreparedCategoryState> = {
+  pharmacy: {
+    title: "동물약국 지도는 준비 중입니다.",
+    description: "동물약국 정보는 순차적으로 지도에서 볼 수 있도록 준비하고 있습니다.",
+    note: "지금은 식당 지도를 먼저 이용해 주세요.",
+  },
   hospitals: {
     title: "동물병원 지도는 준비 중입니다.",
     description: "병원 정보는 곧 지도에서 볼 수 있도록 준비하고 있습니다.",
@@ -49,6 +55,7 @@ function resolveMapCategory(input?: string): MapCategoryKey {
     case "grooming":
     case "daycare":
     case "funeral":
+    case "pharmacy":
     case "lost-pets":
       return input;
     default:
@@ -135,6 +142,7 @@ export default async function MapPage({
     grooming: "GROOMING",
     daycare: "DAYCARE",
     funeral: "FUNERAL",
+    pharmacy: "PHARMACY",
   };
   const activePlaceCategory = CATEGORY_KEY_TO_PLACE[activeCategory];
   let placesForCategory = activePlaceCategory
@@ -227,6 +235,14 @@ export default async function MapPage({
       href: buildCategoryHref("funeral", normalized),
       status: placeCategoryMap.get("FUNERAL") ? "active" : "coming-soon",
       countLabel: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+    },
+    {
+      key: "pharmacy",
+      label: "약국",
+      description: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      href: buildCategoryHref("pharmacy", normalized),
+      status: placeCategoryMap.get("PHARMACY") ? "active" : "coming-soon",
+      countLabel: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
     {
       key: "lost-pets",

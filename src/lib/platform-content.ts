@@ -38,6 +38,7 @@ export const PLACE_CATEGORY_SLUGS: Record<PlaceCategory, string> = {
   PET_SUPPLY: "pet-supply",
   PET_FOOD: "pet-food",
   FUNERAL: "funeral",
+  PHARMACY: "pharmacy",
   LOST_PET: "lost-pet",
   INSURANCE: "insurance",
   CHECKLIST: "checklist",
@@ -60,6 +61,7 @@ export const PLACE_CATEGORY_LABELS: Record<PlaceCategory, string> = {
   PET_SUPPLY: "용품",
   PET_FOOD: "밥·간식",
   FUNERAL: "장례",
+  PHARMACY: "동물약국",
   LOST_PET: "실종 제보",
   INSURANCE: "보험",
   CHECKLIST: "체크리스트",
@@ -189,8 +191,15 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     character: "puppy-front-white",
     tone: "calm",
   },
-  {
-    slug: "lost-pets",
+  {    slug: "pharmacy",
+    category: "PHARMACY",
+    title: "동물약국",
+    shortLabel: "약국",
+    description: "처방전 필요 의약품과 구입 가능한 약의 종류를 안내합니다.",
+    href: "/pharmacy",
+    character: "cat-waving",
+  },
+  {    slug: "lost-pets",
     category: "LOST_PET",
     title: "댕냥이 찾아요",
     shortLabel: "찾아요",
@@ -213,6 +222,7 @@ export const PLACE_DIRECTORY_CATEGORIES: PlaceCategory[] = [
   "HOTEL",
   "TRAINING",
   "FUNERAL",
+  "PHARMACY",
 ];
 
 export function getPlaceCategorySlug(category: PlaceCategory) {
