@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { MapPinned, Search } from "lucide-react";
+import { MapPinned } from "lucide-react";
 import { BRAND_NAME } from "@/lib/brand";
+import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 
 export function Header() {
   return (
@@ -14,18 +15,13 @@ export function Header() {
           <span className="hidden text-sm font-black sm:block">{BRAND_NAME}</span>
         </Link>
 
-        {/* Search bar */}
-        <form action="/search" className="flex flex-1 items-center">
-          <div className="flex h-9 w-full max-w-xl items-center gap-2 rounded-full border border-[var(--line)] bg-[var(--bg)] px-3 focus-within:border-[var(--line-strong)] focus-within:bg-white transition-colors">
-            <Search size={15} className="shrink-0 text-[var(--muted)]" />
-            <input
-              name="q"
-              type="text"
-              placeholder="식당, 병원, 미용, 실종 제보 검색"
-              className="h-full w-full bg-transparent text-sm text-[var(--ink)] placeholder:text-[var(--muted)] outline-none font-medium"
-            />
-          </div>
-        </form>
+        {/* 자동완성 검색창 */}
+        <div className="flex-1 max-w-xl">
+          <InstantSearchBox
+            placeholder="식당, 지역, 업종 검색"
+            compact
+          />
+        </div>
 
         {/* Right actions */}
         <div className="flex shrink-0 items-center gap-1.5">
