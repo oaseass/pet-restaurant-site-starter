@@ -207,8 +207,12 @@ export default async function MapPage({
   const activeCategory = resolveMapCategory(params.category);
   const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
 
-  const isDefaultEntrance = !params.q && !params.sido && !params.type && !hasUserLocation && !params.category;
-  const shouldLoadMap = !isDefaultEntrance;
+  // /map 또는 /map?category=all (추가 파라미터 없음) → 시작 화면, 데이터 로드 금지
+  const isDefaultMapEntrance =
+    !params.q && !params.sido && !params.type && !hasUserLocation &&
+    (!params.category || activeCategory === "all");
+  const isDefaultEntrance = isDefaultMapEntrance; // JSX 호환 유지
+  const shouldLoadMap = !isDefaultMapEntrance;
   const isRestaurantView = activeCategory === "restaurants";
   const isAllView = activeCategory === "all";
 
@@ -223,17 +227,19 @@ export default async function MapPage({
   const ALL_PLACE_DB_CATS: PlaceDbCat[] = ["ANIMAL_HOSPITAL", "PHARMACY", "GROOMING", "DAYCARE", "FUNERAL"];
 
   // 카테고리별 파일만 로드 — places-light.json 전체 52k 금지
+  // shouldLoadMap=false(기본 진입)이면 restaurants/places 데이터 로드 완전 차단
   const activePlaceCategory = CATEGORY_KEY_TO_PLACE[activeCategory] as PlaceDbCat | undefined;
-  const needsRestaurants = isRestaurantView || isAllView;
+  const needsRestaurants = shouldLoadMap && (isRestaurantView || isAllView);
+  const needsPlaces = shouldLoadMap && (isAllView || Boolean(activePlaceCategory));
 
   const [categoryCounts, restaurantsLight, categoryPlaces] = await Promise.all([
     getCategoryCountsSnapshot(),
     needsRestaurants ? getRestaurantsLightSnapshot() : Promise.resolve([]),
-    isAllView
-      ? Promise.all(ALL_PLACE_DB_CATS.map((c) => getPlacesByCategorySnapshot(c))).then((arrays) => arrays.flat())
-      : activePlaceCategory
-        ? getPlacesByCategorySnapshot(activePlaceCategory)
-        : Promise.resolve([]),
+    needsPlaces
+      ? (isAllView
+          ? Promise.all(ALL_PLACE_DB_CATS.map((c) => getPlacesByCategorySnapshot(c))).then((arrays) => arrays.flat())
+          : getPlacesByCategorySnapshot(activePlaceCategory!))
+      : Promise.resolve([]),
   ]);
 
   // 카테고리별 건수 — categoryCounts.placeCategoryCounts 우선, fallback은 0

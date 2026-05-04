@@ -120,21 +120,6 @@
     "updatedAt": "2026-05-02T09:39:29.445Z"
   },
   {
-    "id": "0197e1cd-dece-419f-be3c-eb798eb78b5c",
-    "category": "FUNERAL",
-    "name": "(주)젠틀펫",
-    "address": "경상북도 문경시 문경읍 진안리 350-4",
-    "roadAddress": "경상북도 문경시 문경읍 문경대로 2430",
-    "sido": "경상북도",
-    "sigungu": "문경시",
-    "phone": null,
-    "lat": 36.7446,
-    "lng": 128.0974,
-    "sourceName": "LOCALDATA_FUNERAL",
-    "businessStatus": "영업/정상",
-    "updatedAt": "2026-05-02T09:39:29.445Z"
-  },
-  {
     "id": "0daeaa2a-5dc0-4ee6-a027-8501aa2477a5",
     "category": "FUNERAL",
     "name": "(주)젠틀펫",
@@ -145,6 +130,21 @@
     "phone": null,
     "lat": 35.8189,
     "lng": 128.8246,
+    "sourceName": "LOCALDATA_FUNERAL",
+    "businessStatus": "영업/정상",
+    "updatedAt": "2026-05-02T09:39:29.445Z"
+  },
+  {
+    "id": "0197e1cd-dece-419f-be3c-eb798eb78b5c",
+    "category": "FUNERAL",
+    "name": "(주)젠틀펫",
+    "address": "경상북도 문경시 문경읍 진안리 350-4",
+    "roadAddress": "경상북도 문경시 문경읍 문경대로 2430",
+    "sido": "경상북도",
+    "sigungu": "문경시",
+    "phone": null,
+    "lat": 36.7446,
+    "lng": 128.0974,
     "sourceName": "LOCALDATA_FUNERAL",
     "businessStatus": "영업/정상",
     "updatedAt": "2026-05-02T09:39:29.445Z"
@@ -960,6 +960,21 @@
     "updatedAt": "2026-05-02T09:39:29.445Z"
   },
   {
+    "id": "fb857594-271e-4c38-87d7-e2d81064fb20",
+    "category": "FUNERAL",
+    "name": "주식회사 21그램그룹",
+    "address": "충청북도 청주시 상당구 남일면 가중리 309-1",
+    "roadAddress": "충청북도 청주시 상당구 남일면 신송서원길 120-30",
+    "sido": "충청북도",
+    "sigungu": "청주시",
+    "phone": "1688-1240",
+    "lat": 36.5639,
+    "lng": 127.4894,
+    "sourceName": "LOCALDATA_FUNERAL",
+    "businessStatus": "폐업",
+    "updatedAt": "2026-05-02T09:39:29.445Z"
+  },
+  {
     "id": "9ad5fdeb-56c7-4c16-8c69-db20251cbe1d",
     "category": "FUNERAL",
     "name": "주식회사 21그램그룹",
@@ -985,21 +1000,6 @@
     "phone": "02-1688-1240",
     "lat": 37.763,
     "lng": 126.8462,
-    "sourceName": "LOCALDATA_FUNERAL",
-    "businessStatus": "폐업",
-    "updatedAt": "2026-05-02T09:39:29.445Z"
-  },
-  {
-    "id": "fb857594-271e-4c38-87d7-e2d81064fb20",
-    "category": "FUNERAL",
-    "name": "주식회사 21그램그룹",
-    "address": "충청북도 청주시 상당구 남일면 가중리 309-1",
-    "roadAddress": "충청북도 청주시 상당구 남일면 신송서원길 120-30",
-    "sido": "충청북도",
-    "sigungu": "청주시",
-    "phone": "1688-1240",
-    "lat": 36.5639,
-    "lng": 127.4894,
     "sourceName": "LOCALDATA_FUNERAL",
     "businessStatus": "폐업",
     "updatedAt": "2026-05-02T09:39:29.445Z"

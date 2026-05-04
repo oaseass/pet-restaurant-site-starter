@@ -105,6 +105,11 @@ export type PublicPlaceMapPoint = {
 export const getPlacesLightSnapshot = cache(async () => readPublicJsonFile<PublicPlaceLight[]>("places-light.json", []));
 export const getPlaceMapPointsSnapshot = cache(async () => readPublicJsonFile<PublicPlaceMapPoint[]>("place-map-points.json", []));
 
+// id → category 매핑 인덱스 (상세 페이지 단건 조회 최적화)
+export const getPlaceDetailIndexSnapshot = cache(async () =>
+  readPublicJsonFile<Record<string, string>>("places/by-category/detail-index.json", {}),
+);
+
 // 카테고리별 경량 스냅샷 — places-light 전체 대신 카테고리 파일만 로드
 export const getPlacesByCategorySnapshot = cache(
   async (category: PlaceDbCategory): Promise<PublicPlaceLight[]> =>

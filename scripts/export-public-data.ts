@@ -169,6 +169,12 @@ async function main() {
     fs.mkdir(placeMapPointsByCategoryDir, { recursive: true }),
   ]);
 
+  // detail-index: id → category 매핑 (상세 페이지 O(1) 조회용)
+  const detailIndex: Record<string, string> = {};
+  for (const place of placesLight) {
+    detailIndex[place.id] = place.category;
+  }
+
   const byCategoryWrites: Promise<void>[] = [];
   for (const cat of PLACE_DB_CATEGORIES) {
     const catPlaces = placesLight.filter((p) => p.category === cat);
@@ -178,6 +184,10 @@ async function main() {
       fs.writeFile(path.join(placeMapPointsByCategoryDir, `${cat}.json`), JSON.stringify(catPoints, null, 2)),
     );
   }
+
+  byCategoryWrites.push(
+    fs.writeFile(path.join(placesByCategoryDir, "detail-index.json"), JSON.stringify(detailIndex)),
+  );
 
   await Promise.all([
     fs.writeFile(path.join(outputDirectory, "restaurants-light.json"), JSON.stringify(restaurantsLight, null, 2)),

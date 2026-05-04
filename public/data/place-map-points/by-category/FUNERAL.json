@@ -48,19 +48,19 @@
     "phone": null
   },
   {
-    "id": "0197e1cd-dece-419f-be3c-eb798eb78b5c",
-    "category": "FUNERAL",
-    "name": "(주)젠틀펫",
-    "lat": 36.7446,
-    "lng": 128.0974,
-    "phone": null
-  },
-  {
     "id": "0daeaa2a-5dc0-4ee6-a027-8501aa2477a5",
     "category": "FUNERAL",
     "name": "(주)젠틀펫",
     "lat": 35.8189,
     "lng": 128.8246,
+    "phone": null
+  },
+  {
+    "id": "0197e1cd-dece-419f-be3c-eb798eb78b5c",
+    "category": "FUNERAL",
+    "name": "(주)젠틀펫",
+    "lat": 36.7446,
+    "lng": 128.0974,
     "phone": null
   },
   {
@@ -440,6 +440,14 @@
     "phone": null
   },
   {
+    "id": "fb857594-271e-4c38-87d7-e2d81064fb20",
+    "category": "FUNERAL",
+    "name": "주식회사 21그램그룹",
+    "lat": 36.5639,
+    "lng": 127.4894,
+    "phone": "1688-1240"
+  },
+  {
     "id": "9ad5fdeb-56c7-4c16-8c69-db20251cbe1d",
     "category": "FUNERAL",
     "name": "주식회사 21그램그룹",
@@ -454,14 +462,6 @@
     "lat": 37.763,
     "lng": 126.8462,
     "phone": "02-1688-1240"
-  },
-  {
-    "id": "fb857594-271e-4c38-87d7-e2d81064fb20",
-    "category": "FUNERAL",
-    "name": "주식회사 21그램그룹",
-    "lat": 36.5639,
-    "lng": 127.4894,
-    "phone": "1688-1240"
   },
   {
     "id": "d7430f62-b33d-460a-88aa-d052d04dbc56",
