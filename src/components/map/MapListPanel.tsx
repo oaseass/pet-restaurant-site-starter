@@ -97,7 +97,7 @@ export function MapListPanel({
                         <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.businessType}</span>
                         {item.coordinateStatus === "ready" && (
                           <span className="rounded-full bg-[#dff3ec] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
-                            \ud540 \ud45c\uc2dc
+                            핀 표시
                           </span>
                         )}
                       </div>

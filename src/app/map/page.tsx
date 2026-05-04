@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Compass, Search } from "lucide-react";
 import { MapCategoryChips } from "@/components/map/MapCategoryChips";
+import { MapLocationButton } from "@/components/map/MapLocationButton";
 import { MapShell } from "@/components/map/MapShell";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { REGION_OPTIONS } from "@/lib/platform-content";
@@ -60,10 +61,10 @@ const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants" | "al
 
 const MAP_CATEGORY_META: Record<MapCategoryKey, { pageTitle: string; listTitle: string; listSubtitle: string; mapTitle: string }> = {
   all: {
-    pageTitle: "내 주변 반려동물 장소",
+    pageTitle: "반려동물 장소 지도",
     listTitle: "전체 장소",
-    listSubtitle: "식당, 병원, 약국, 미용, 유치원·호텔, 장례 장소를 함께 보여드립니다.",
-    mapTitle: "전체 장소 지도",
+    listSubtitle: "식당, 병원, 약국, 미용, 유치원·호텔, 장례 정보를 한 번에 찾아보세요.",
+    mapTitle: "장소 지도",
   },
   restaurants: {
     pageTitle: "반려동물 동반 식당 지도",
@@ -151,9 +152,9 @@ const MAP_CATEGORY_ALIASES: Record<string, MapCategoryKey> = {
   lost_pets: "lost-pets",
 };
 
-function resolveMapCategory(input: string | undefined, hasLocationIntent: boolean): MapCategoryKey {
-  if (!input) return hasLocationIntent ? "all" : "restaurants";
-  return MAP_CATEGORY_ALIASES[input.toLowerCase().replace(/-/g, "_")] ?? "restaurants";
+function resolveMapCategory(input: string | undefined): MapCategoryKey {
+  if (!input) return "all";
+  return MAP_CATEGORY_ALIASES[input.toLowerCase().replace(/-/g, "_")] ?? "all";
 }
 
 function buildCategoryHref(
@@ -162,7 +163,7 @@ function buildCategoryHref(
   location?: { lat: number; lng: number },
 ) {
   const query = new URLSearchParams();
-  if (category !== "restaurants") query.set("category", category);
+  if (category !== "all") query.set("category", category);
   if (params.q) query.set("q", params.q);
   if (params.sido) query.set("sido", params.sido);
   if (params.type) query.set("type", params.type);
@@ -194,11 +195,11 @@ export default async function MapPage({
   const userLng = hasUserLocation ? userLngRaw : 0;
 
   const hasSearchIntent = Boolean(params.q);
-  const hasLocationIntent = hasUserLocation || hasSearchIntent;
-  const activeCategory = resolveMapCategory(params.category, hasLocationIntent);
+  const activeCategory = resolveMapCategory(params.category);
   const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
 
-  const shouldLoadMap = !!(params.q || params.sido || params.type || hasUserLocation || params.category);
+  const isDefaultEntrance = !params.q && !params.sido && !params.type && !hasUserLocation && !params.category;
+  const shouldLoadMap = !isDefaultEntrance;
   const [categoryCounts, restaurantsLight, allPlaces] = await Promise.all([
     getCategoryCountsSnapshot(),
     getRestaurantsLightSnapshot(),
@@ -365,7 +366,7 @@ export default async function MapPage({
       description: "전체 장소",
       href: buildCategoryHref("all", normalized, locationForHref),
       status: "active",
-      countLabel: "전체",
+      countLabel: "",
     },
     {
       key: "restaurants",
@@ -382,6 +383,14 @@ export default async function MapPage({
       href: buildCategoryHref("hospitals", normalized, locationForHref),
       status: placeCategoryMap.get("ANIMAL_HOSPITAL") ? "active" : "coming-soon",
       countLabel: placeCategoryMap.get("ANIMAL_HOSPITAL") ? `${(placeCategoryMap.get("ANIMAL_HOSPITAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+    },
+    {
+      key: "pharmacy",
+      label: "약국",
+      description: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      href: buildCategoryHref("pharmacy", normalized, locationForHref),
+      status: placeCategoryMap.get("PHARMACY") ? "active" : "coming-soon",
+      countLabel: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
     {
       key: "grooming",
@@ -408,16 +417,8 @@ export default async function MapPage({
       countLabel: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
     },
     {
-      key: "pharmacy",
-      label: "약국",
-      description: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
-      href: buildCategoryHref("pharmacy", normalized, locationForHref),
-      status: placeCategoryMap.get("PHARMACY") ? "active" : "coming-soon",
-      countLabel: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
-    },
-    {
       key: "lost-pets",
-      label: "찾아요",
+      label: "보호동물",
       description: "보호동물 공고",
       href: "/lost-pets?tab=shelter",
       status: "active",
@@ -445,7 +446,7 @@ export default async function MapPage({
     ? {
         title: "조건에 맞는 식당이 없습니다.",
         description: "검색어를 줄이거나 지역 필터를 초기화하면 더 많은 식당을 볼 수 있습니다.",
-        href: "/map",
+        href: "/map?category=restaurants",
         hrefLabel: "식당 지도 초기화",
       }
     : undefined;
@@ -469,7 +470,7 @@ export default async function MapPage({
 
       <section className="rounded-xl border border-[var(--line)] bg-white" style={{ padding: "10px 12px" }}>
         <form action="/map" className="flex flex-wrap items-center gap-2">
-          <input type="hidden" name="category" value={activeCategory} />
+          {activeCategory !== "all" && <input type="hidden" name="category" value={activeCategory} />}
 
           {/* 검색 입력 — 모바일: 전체 폭, 데스크톱: flex grow */}
           <div className="relative w-full flex-none sm:w-auto sm:flex-1 sm:min-w-0">
@@ -479,7 +480,7 @@ export default async function MapPage({
               defaultValue={normalized.q}
               style={{ height: "42px", borderRadius: "10px", fontSize: "14px", paddingLeft: "34px" }}
               className="w-full border border-[var(--line)] bg-white pr-3 font-bold placeholder:font-normal placeholder:text-[var(--muted)] focus:outline-none focus:ring-1 focus:ring-[var(--brand)]"
-              placeholder="식당명, 지역, 주소 검색"
+              placeholder={isRestaurantView ? "식당명, 지역, 주소 검색" : "장소명, 지역, 주소 검색"}
             />
           </div>
 
@@ -517,7 +518,7 @@ export default async function MapPage({
           </button>
 
           <Link
-            href={activeCategory === "restaurants" ? "/map" : `/map?category=${activeCategory}`}
+            href={activeCategory === "all" ? "/map" : `/map?category=${activeCategory}`}
             style={{ height: "42px", borderRadius: "10px", fontSize: "13px" }}
             className="flex items-center border border-[var(--line)] bg-white px-3 font-bold text-[var(--ink)]"
           >
@@ -530,31 +531,74 @@ export default async function MapPage({
         </div>
       </section>
 
-      <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
-        <Compass size={14} />
-        <span>
-          {isAllView
-            ? `가까운 장소 ${listItems.length.toLocaleString("ko-KR")}곳 표시`
-            : `${MAP_CATEGORY_LABELS[activeCategory]} ${filteredCount.toLocaleString("ko-KR")}곳 표시`}
-        </span>
-      </div>
+      {!isDefaultEntrance && (
+        <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
+          <Compass size={14} />
+          <span>
+            {isAllView
+              ? `가까운 장소 ${listItems.length.toLocaleString("ko-KR")}곳 표시`
+              : `${MAP_CATEGORY_LABELS[activeCategory]} ${filteredCount.toLocaleString("ko-KR")}곳 표시`}
+          </span>
+        </div>
+      )}
 
-      <MapShell
-        items={listItems}
-        activeCategory={activeCategory}
-        activeCategoryLabel={MAP_CATEGORY_LABELS[activeCategory]}
-        listTitle={MAP_CATEGORY_META[activeCategory].listTitle}
-        listSubtitle={MAP_CATEGORY_META[activeCategory].listSubtitle}
-        mapTitle={MAP_CATEGORY_META[activeCategory].mapTitle}
-        filteredCount={filteredCount}
-        visibleCount={listItems.length}
-        coordinateReadyCount={coordinateReadyCount}
-        coordinatePendingCount={coordinatePendingCount}
-        shouldLoadMap={shouldLoadMap}
-        preparedState={preparedState}
-        emptyState={emptyState}
-        initialUserLocation={hasUserLocation ? { lat: userLat, lng: userLng } : undefined}
-      />
+      {isDefaultEntrance ? (
+        <section className="mt-6">
+          <div className="section-shell p-6 sm:p-8">
+            <div className="border-b border-[var(--line)] pb-6">
+              <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">장소 찾기</p>
+              <h2 className="mt-3 text-[1.75rem] font-black tracking-tight text-[var(--ink)]">어디를 찾고 계신가요?</h2>
+              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                지역, 업종, 장소명을 검색하거나 현재 위치로 가까운 장소를 찾아보세요.
+              </p>
+              <div className="mt-5">
+                <MapLocationButton />
+              </div>
+            </div>
+            <div className="pt-6">
+              <p className="text-[11px] font-black text-[var(--muted)]">카테고리별 장소</p>
+              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {categories.filter((c) => c.key !== "all" && c.key !== "lost-pets").map((cat) => (
+                  <Link
+                    key={cat.key}
+                    href={cat.href}
+                    className="flex flex-col rounded-[1rem] border border-[var(--line)] bg-white p-4 transition hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]"
+                  >
+                    <span className="text-base font-black text-[var(--ink)]">{cat.label}</span>
+                    <span className="mt-1 text-xl font-black tracking-tight text-[var(--brand)]">{cat.countLabel}</span>
+                  </Link>
+                ))}
+              </div>
+              <div className="mt-5">
+                <Link
+                  href="/lost-pets?tab=shelter"
+                  className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--ink)] hover:bg-[#f9faf8]"
+                >
+                  보호동물 공고 바로가기
+                </Link>
+              </div>
+              <p className="mt-5 text-xs text-[var(--muted)]">검색 또는 현재 위치 선택 후 지도가 열립니다.</p>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <MapShell
+          items={listItems}
+          activeCategory={activeCategory}
+          activeCategoryLabel={MAP_CATEGORY_LABELS[activeCategory]}
+          listTitle={MAP_CATEGORY_META[activeCategory].listTitle}
+          listSubtitle={MAP_CATEGORY_META[activeCategory].listSubtitle}
+          mapTitle={MAP_CATEGORY_META[activeCategory].mapTitle}
+          filteredCount={filteredCount}
+          visibleCount={listItems.length}
+          coordinateReadyCount={coordinateReadyCount}
+          coordinatePendingCount={coordinatePendingCount}
+          shouldLoadMap={shouldLoadMap}
+          preparedState={preparedState}
+          emptyState={emptyState}
+          initialUserLocation={hasUserLocation ? { lat: userLat, lng: userLng } : undefined}
+        />
+      )}
     </main>
   );
 }

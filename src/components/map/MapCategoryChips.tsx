@@ -26,7 +26,7 @@ export function MapCategoryChips({
             )}
           >
             <span>{category.label}</span>
-            {category.status === "active" ? (
+            {category.status === "active" && category.countLabel ? (
               <span
                 className={clsx(
                   "text-[11px] font-black",
@@ -35,9 +35,9 @@ export function MapCategoryChips({
               >
                 {category.countLabel}
               </span>
-            ) : (
+            ) : category.status !== "active" ? (
               <span className="text-[10px] text-[var(--muted)] opacity-70">준비</span>
-            )}
+            ) : null}
           </Link>
         );
       })}
