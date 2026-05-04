@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { MapPin, Phone, Navigation, AlertCircle } from "lucide-react";
+import { MapPin, Phone, AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
+import { PlaceDirectionsSheet } from "@/components/PlaceDirectionsSheet";
 import { absoluteUrl } from "@/lib/brand";
 import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
 
@@ -94,12 +95,7 @@ export default async function PlaceSlugPage({
   const displayAddress = place.addressMasked
     ? [place.sido, place.sigungu].filter(Boolean).join(" ") || "주소 일부 비공개"
     : (place.roadAddress ?? place.address ?? "주소 정보 없음");
-
-  // 카카오 지도 링크
-  const kakaoMapHref =
-    place.lat !== null && place.lng !== null
-      ? `https://map.kakao.com/link/to/${encodeURIComponent(place.name)},${place.lat},${place.lng}`
-      : `https://map.kakao.com/link/search/${encodeURIComponent(displayAddress + " " + place.name)}`;
+  const navigationAddress = displayAddress === "주소 정보 없음" ? null : displayAddress;
 
   // 같은 지역 · 카테고리 추천 (상위 5개)
   const type = place.category as "ANIMAL_HOSPITAL" | "PHARMACY" | "GROOMING" | "DAYCARE" | "FUNERAL";
@@ -215,15 +211,7 @@ export default async function PlaceSlugPage({
                 지도에서 보기
               </Link>
             )}
-            <a
-              href={kakaoMapHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--ink)]"
-            >
-              <Navigation size={15} />
-              카카오 길찾기
-            </a>
+            <PlaceDirectionsSheet name={place.name} lat={place.lat} lng={place.lng} address={navigationAddress} />
             <Link
               href={`/report?placeId=${place.id}&name=${encodeURIComponent(place.name)}`}
               className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--muted)]"

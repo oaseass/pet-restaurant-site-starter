@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { PlaceDirectionsSheet } from "@/components/PlaceDirectionsSheet";
 import { OfficialDataNotice } from "@/components/OfficialDataNotice";
 import { AdSlot } from "@/components/AdSlot";
 import { CharacterImage } from "@/components/CharacterImage";
@@ -41,6 +42,18 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
             <Info label="지역" value={`${restaurant.sido}${restaurant.sigungu ? ` ${restaurant.sigungu}` : ""}`} />
             <Info label="데이터 기준일" value={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")} />
             <Info label="출처" value="식품안전나라 공개 정보" />
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            {restaurant.lat !== null && restaurant.lng !== null ? (
+              <Link
+                href={`/map?category=restaurants&lat=${restaurant.lat.toFixed(6)}&lng=${restaurant.lng.toFixed(6)}`}
+                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand)] px-5 py-2.5 text-sm font-black text-[var(--brand)]"
+              >
+                <MapPin size={15} />
+                지도에서 보기
+              </Link>
+            ) : null}
+            <PlaceDirectionsSheet name={restaurant.name} lat={restaurant.lat} lng={restaurant.lng} address={restaurant.address} />
           </div>
         </div>
       </section>
