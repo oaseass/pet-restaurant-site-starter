@@ -6,7 +6,9 @@ import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
 import { PlaceDirectionsSheet } from "@/components/PlaceDirectionsSheet";
 import { SmartLink } from "@/components/SmartLink";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { absoluteUrl } from "@/lib/brand";
+import { getApprovedReviewSummary } from "@/lib/reviews";
 import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
 
 export const dynamic = "force-dynamic";
@@ -96,10 +98,14 @@ export default async function PlaceSlugPage({
     ? [place.sido, place.sigungu].filter(Boolean).join(" ") || "주소 일부 비공개"
     : (place.roadAddress ?? place.address ?? "주소 정보 없음");
   const navigationAddress = displayAddress === "주소 정보 없음" ? null : displayAddress;
+  const reportHref = `/report?type=place&id=${place.id}&name=${encodeURIComponent(place.name)}`;
 
   // 같은 지역 · 카테고리 추천 (상위 5개)
   const type = place.category as "ANIMAL_HOSPITAL" | "PHARMACY" | "GROOMING" | "DAYCARE" | "FUNERAL";
-  const allSameCategory = await getPlacesByCategorySnapshot(type);
+  const [allSameCategory, reviewSummary] = await Promise.all([
+    getPlacesByCategorySnapshot(type),
+    getApprovedReviewSummary("PLACE", place.id),
+  ]);
   const nearby = allSameCategory
     .filter((p) => p.id !== place.id && p.sido === place.sido && p.sigungu === place.sigungu)
     .slice(0, 5);
@@ -215,7 +221,7 @@ export default async function PlaceSlugPage({
             )}
             <PlaceDirectionsSheet name={place.name} lat={place.lat} lng={place.lng} address={navigationAddress} />
             <SmartLink
-              href={`/report?placeId=${place.id}&name=${encodeURIComponent(place.name)}`}
+              href={reportHref}
               className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--muted)]"
             >
               정보수정 제보
@@ -223,6 +229,17 @@ export default async function PlaceSlugPage({
           </div>
         </div>
       </section>
+
+      <ReviewSection
+        targetType="PLACE"
+        targetId={place.id}
+        name={place.name}
+        address={navigationAddress}
+        lat={place.lat}
+        lng={place.lng}
+        summary={reviewSummary}
+        reportHref={reportHref}
+      />
 
       {/* 같은 지역 추천 */}
       {nearby.length > 0 && (

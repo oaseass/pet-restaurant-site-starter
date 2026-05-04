@@ -5,23 +5,28 @@ import { AdSlot } from "@/components/AdSlot";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
 import { PetPolicyPanel } from "@/components/detail/PetPolicyPanel";
 import { VisitChecklist } from "@/components/detail/VisitChecklist";
+import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { SmartLink } from "@/components/SmartLink";
+import { getApprovedReviewSummary } from "@/lib/reviews";
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const restaurant = await prisma.restaurant.findUnique({ where: { id } });
   if (!restaurant || restaurant.status !== "ACTIVE") notFound();
 
-  const nearby = await prisma.restaurant.findMany({
-    where: {
-      status: "ACTIVE",
-      id: { not: restaurant.id },
-      sido: restaurant.sido,
-      sigungu: restaurant.sigungu,
-    },
-    orderBy: { name: "asc" },
-    take: 6,
-  });
+  const [nearby, reviewSummary] = await Promise.all([
+    prisma.restaurant.findMany({
+      where: {
+        status: "ACTIVE",
+        id: { not: restaurant.id },
+        sido: restaurant.sido,
+        sigungu: restaurant.sigungu,
+      },
+      orderBy: { name: "asc" },
+      take: 6,
+    }),
+    getApprovedReviewSummary("RESTAURANT", restaurant.id),
+  ]);
   const regionLabel = `${restaurant.sido}${restaurant.sigungu ? ` ${restaurant.sigungu}` : ""}`;
   const reportHref = `/report?type=restaurant&id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}`;
 
@@ -59,7 +64,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
-          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보가 다르거나 반려동물 동반 조건을 알고 계신가요?</h2>
+        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보가 다르거나 반려동물 동반 조건을 알고 계신가요?</h2>
         <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
           영업 여부, 좌석 운영, 대형견 가능 여부, 케이지 조건처럼 방문자가 알아야 할 내용을 제보해 주시면 내부 확인 후 반영합니다.
         </p>
@@ -72,6 +77,17 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           </SmartLink>
         </div>
       </section>
+
+      <ReviewSection
+        targetType="RESTAURANT"
+        targetId={restaurant.id}
+        name={restaurant.name}
+        address={restaurant.address}
+        lat={restaurant.lat}
+        lng={restaurant.lng}
+        summary={reviewSummary}
+        reportHref={reportHref}
+      />
 
       <AdSlot label="상세 페이지 광고 영역" />
 

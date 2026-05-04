@@ -83,6 +83,37 @@ enum ClaimStatus {
   REJECTED
 }
 
+enum ReviewTargetType {
+  RESTAURANT
+  PLACE
+}
+
+enum ReviewPetType {
+  DOG
+  CAT
+  BOTH
+  OTHER
+}
+
+enum ReviewPetSize {
+  SMALL
+  MEDIUM
+  LARGE
+  UNKNOWN
+}
+
+enum ReviewPolicyAnswer {
+  YES
+  NO
+  UNKNOWN
+}
+
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model Restaurant {
   id                 String           @id @default(cuid())
   sourceKey          String           @unique
@@ -269,6 +300,34 @@ model BusinessClaim {
   place Place? @relation(fields: [placeId], references: [id], onDelete: SetNull)
 
   @@index([status, submittedAt])
+}
+
+model Review {
+  id                String             @id @default(cuid())
+  targetType        ReviewTargetType
+  targetId          String
+  ratingOverall     Int
+  ratingPetFriendly Int
+  ratingCleanliness Int?
+  ratingStaff       Int?
+  ratingParking     Int?
+  petType           ReviewPetType
+  petSize           ReviewPetSize
+  visitDate         DateTime
+  title             String
+  body              String
+  indoorAllowed     ReviewPolicyAnswer @default(UNKNOWN)
+  outdoorAllowed    ReviewPolicyAnswer @default(UNKNOWN)
+  largeDogAllowed   ReviewPolicyAnswer @default(UNKNOWN)
+  carrierRequired   ReviewPolicyAnswer @default(UNKNOWN)
+  leashRequired     ReviewPolicyAnswer @default(UNKNOWN)
+  images            String[]           @default([])
+  status            ReviewStatus       @default(PENDING)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  @@index([targetType, targetId, status, createdAt])
+  @@index([status, createdAt])
 }
 
 model SyncLog {
