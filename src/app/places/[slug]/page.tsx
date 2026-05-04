@@ -4,6 +4,14 @@ import { MapPin, Phone, Navigation, AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
+import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
+import { absoluteUrl } from "@/lib/brand";
+import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
+
+export const dynamic = "force-dynamic";
+
+// UUID v4 형식 감지
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
@@ -34,10 +42,24 @@ const SOURCE_LABELS: Record<string, string> = {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
-  const { id } = await params;
-  const place = await getPlaceDetailById(id);
+  const { slug } = await params;
+
+  if (!UUID_RE.test(slug)) {
+    // 카테고리 목록 페이지
+    const parsed = getPlaceCategoryBySlug(slug);
+    if (!parsed) return { title: "카테고리를 찾을 수 없습니다." };
+    const title = `${getPlaceCategoryLabel(parsed)} | 댕냥지도`;
+    return {
+      title,
+      description: `${getPlaceCategoryLabel(parsed)} 정보를 댕냥지도 내부 DB 기준으로 확인하세요.`,
+      alternates: { canonical: absoluteUrl(`/places/${slug}`) },
+    };
+  }
+
+  // 장소 상세 페이지
+  const place = await getPlaceDetailById(slug);
   if (!place) return { title: "업체를 찾을 수 없습니다." };
 
   const categoryLabel = PLACE_CATEGORY_LABELS[place.category] ?? place.category;
@@ -48,13 +70,20 @@ export async function generateMetadata({
   };
 }
 
-export default async function PlaceDetailPage({
+export default async function PlaceSlugPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { id } = await params;
-  const place = await getPlaceDetailById(id);
+  const { slug } = await params;
+
+  // 카테고리 슬러그 → 목록 페이지
+  if (!UUID_RE.test(slug)) {
+    return <PlaceDirectoryPage categorySlug={slug} />;
+  }
+
+  // UUID → 상세 페이지
+  const place = await getPlaceDetailById(slug);
   if (!place) notFound();
 
   const categoryLabel = PLACE_CATEGORY_LABELS[place.category] ?? place.category;
