@@ -26,7 +26,7 @@ export function MapListPanel({
   coordinateReadyCount: number;
   coordinatePendingCount: number;
   preparedState?: PreparedCategoryState;
-  emptyState?: { title: string; description: string; href: string; hrefLabel: string };
+  emptyState?: { title: string; description: string; href: string; hrefLabel: string; extraLinks?: Array<{ href: string; label: string }> };
 }) {
   return (
     <section className="section-shell flex h-full min-h-[760px] flex-col p-4">
@@ -61,6 +61,11 @@ export function MapListPanel({
           <Link href={emptyState.href} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">
             {emptyState.hrefLabel}
           </Link>
+          {emptyState.extraLinks?.map((link) => (
+            <Link key={link.href} href={link.href} className="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] px-4 py-2 text-sm font-black text-[var(--brand)]">
+              {link.label}
+            </Link>
+          ))}
         </div>
       ) : (
         <div className="relative z-10 mt-5 flex flex-1 flex-col overflow-hidden rounded-[1rem] border border-[var(--line)] bg-white shadow-[0_8px_22px_rgba(23,23,23,0.05)]">

@@ -24,7 +24,7 @@ export function MapBottomSheet({
   coordinateReadyCount: number;
   coordinatePendingCount: number;
   preparedState?: PreparedCategoryState;
-  emptyState?: { title: string; description: string; href: string; hrefLabel: string };
+  emptyState?: { title: string; description: string; href: string; hrefLabel: string; extraLinks?: Array<{ href: string; label: string }> };
 }) {
   return (
     <section className="-mt-5 rounded-t-[1.25rem] border border-[var(--line)] bg-[rgba(255,255,255,0.98)] shadow-[0_-10px_28px_rgba(23,23,23,0.06)] backdrop-blur-sm lg:hidden">
@@ -62,6 +62,11 @@ export function MapBottomSheet({
               <Link href={emptyState.href} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">
                 {emptyState.hrefLabel}
               </Link>
+              {emptyState.extraLinks?.map((link) => (
+                <Link key={link.href} href={link.href} className="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] px-4 py-2 text-sm font-black text-[var(--brand)]">
+                  {link.label}
+                </Link>
+              ))}
             </div>
           ) : (
             <div className="space-y-3">

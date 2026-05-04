@@ -145,6 +145,7 @@ export function MapShell({
   preparedState,
   emptyState,
   initialUserLocation,
+  radiusKm,
 }: {
   items: MapRestaurantListItem[];
   activeCategory: MapCategoryKey;
@@ -158,8 +159,9 @@ export function MapShell({
   coordinatePendingCount: number;
   shouldLoadMap?: boolean;
   preparedState?: PreparedCategoryState;
-  emptyState?: { title: string; description: string; href: string; hrefLabel: string };
+  emptyState?: { title: string; description: string; href: string; hrefLabel: string; extraLinks?: Array<{ href: string; label: string }> };
   initialUserLocation?: { lat: number; lng: number };
+  radiusKm?: number;
 }) {
   const mapStatus = useKakaoMapSdk(shouldLoadMap ?? true);
   const desktopMapRef = useRef<HTMLDivElement | null>(null);
@@ -277,10 +279,16 @@ export function MapShell({
       hasBounds = true;
     }
 
-    if (hasBounds) {
+    if (userLocation && radiusKm) {
+      const latDelta = radiusKm / 111;
+      const lngDelta = radiusKm / (111 * Math.cos((userLocation.lat * Math.PI) / 180));
+      const kakaoSw = new kakao.maps.LatLng(userLocation.lat - latDelta, userLocation.lng - lngDelta);
+      const kakaoNe = new kakao.maps.LatLng(userLocation.lat + latDelta, userLocation.lng + lngDelta);
+      map.setBounds(new kakao.maps.LatLngBounds(kakaoSw, kakaoNe));
+    } else if (hasBounds) {
       map.setBounds(bounds, 60, 60, 60, 60);
     }
-  }, [mapStatus, mappableItems, userLocation]);
+  }, [mapStatus, mappableItems, userLocation, radiusKm]);
 
   useEffect(() => {
     if (mapStatus !== "ready" || !mapInstanceRef.current || !window.kakao?.maps || !selectedItem?.lat || !selectedItem.lng) return;
@@ -362,6 +370,9 @@ export function MapShell({
 
           <div className="relative z-10 mt-5 flex flex-wrap gap-2">
             <span className="badge">{activeCategoryLabel}</span>
+            {userLocation && radiusKm && (
+              <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">내 주변 {radiusKm}km</span>
+            )}
             {coordinateReadyCount > 0 && (
               <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">지도 {coordinateReadyCount.toLocaleString("ko-KR")}건</span>
             )}

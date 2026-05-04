@@ -157,10 +157,13 @@ function resolveMapCategory(input: string | undefined): MapCategoryKey {
   return MAP_CATEGORY_ALIASES[input.toLowerCase().replace(/-/g, "_")] ?? "all";
 }
 
+const DEFAULT_RADIUS_KM = 5;
+const MAX_RADIUS_KM = 50;
+
 function buildCategoryHref(
   category: MapCategoryKey,
   params: { q: string; sido: string; type: string },
-  location?: { lat: number; lng: number },
+  location?: { lat: number; lng: number; radiusKm?: number },
 ) {
   const query = new URLSearchParams();
   if (category !== "all") query.set("category", category);
@@ -170,6 +173,9 @@ function buildCategoryHref(
   if (location) {
     query.set("lat", location.lat.toFixed(6));
     query.set("lng", location.lng.toFixed(6));
+    if (location.radiusKm && location.radiusKm !== DEFAULT_RADIUS_KM) {
+      query.set("radiusKm", location.radiusKm.toString());
+    }
   }
   return query.size > 0 ? `/map?${query.toString()}` : "/map";
 }
@@ -177,7 +183,7 @@ function buildCategoryHref(
 export default async function MapPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; sido?: string; type?: string; category?: string; lat?: string; lng?: string }>;
+  searchParams: Promise<{ q?: string; sido?: string; type?: string; category?: string; lat?: string; lng?: string; radiusKm?: string }>;
 }) {
   const params = await searchParams;
 
@@ -193,6 +199,9 @@ export default async function MapPage({
     userLngRaw <= 132;
   const userLat = hasUserLocation ? userLatRaw : 0;
   const userLng = hasUserLocation ? userLngRaw : 0;
+
+  const radiusRaw = Number(params.radiusKm);
+  const radiusKm = Number.isFinite(radiusRaw) && radiusRaw > 0 && radiusRaw <= MAX_RADIUS_KM ? radiusRaw : DEFAULT_RADIUS_KM;
 
   const hasSearchIntent = Boolean(params.q);
   const activeCategory = resolveMapCategory(params.category);
@@ -247,9 +256,14 @@ export default async function MapPage({
   } else if (isRestaurantView || isAllView) {
     restaurantsFiltered = sortRestaurantsLight(restaurantsFiltered);
   }
+  if (hasUserLocation) {
+    restaurantsFiltered = restaurantsFiltered.filter(
+      (r) => r.lat !== null && r.lng !== null && getDistanceKm(userLat, userLng, r.lat!, r.lng!) <= radiusKm,
+    );
+  }
   const restaurants = isRestaurantView ? restaurantsFiltered.slice(0, 120) : restaurantsFiltered;
-  const filteredRestaurantCount = (isRestaurantView || isAllView) ? filterRestaurantsLight(restaurantsLight, normalized).length : 0;
-  const filteredCoordinateReadyCount = isRestaurantView ? filterRestaurantsLight(restaurantsLight, normalized).filter((r) => r.lat !== null && r.lng !== null).length : 0;
+  const filteredRestaurantCount = (isRestaurantView || isAllView) ? restaurantsFiltered.length : 0;
+  const filteredCoordinateReadyCount = isRestaurantView ? restaurantsFiltered.filter((r) => r.lat !== null && r.lng !== null).length : 0;
 
   // 비식당 카테고리 Place 데이터
   const activePlaceCategory = CATEGORY_KEY_TO_PLACE[activeCategory];
@@ -267,6 +281,9 @@ export default async function MapPage({
       if (!aHasCoord || !bHasCoord) return 0;
       return getDistanceKm(userLat, userLng, a.lat!, a.lng!) - getDistanceKm(userLat, userLng, b.lat!, b.lng!);
     });
+    placesForCategory = placesForCategory.filter(
+      (p) => p.lat !== null && p.lng !== null && getDistanceKm(userLat, userLng, p.lat!, p.lng!) <= radiusKm,
+    );
   }
   const placesForCategorySliced = isAllView ? placesForCategory : placesForCategory.slice(0, 120);
 
@@ -357,7 +374,7 @@ export default async function MapPage({
             : undefined,
       }))) as MapRestaurantListItem[];
 
-  const locationForHref = hasUserLocation ? { lat: userLat, lng: userLng } : undefined;
+  const locationForHref = hasUserLocation ? { lat: userLat, lng: userLng, radiusKm } : undefined;
 
   const categories: MapCategoryOption[] = [
     {
@@ -442,14 +459,30 @@ export default async function MapPage({
     isAllView || isRestaurantView || (activePlaceCategory && (placeCategoryMap.get(activePlaceCategory) ?? 0) > 0)
       ? undefined
       : PREPARED_CATEGORY_COPY[activeCategory as Exclude<MapCategoryKey, "restaurants" | "all">];
-  const emptyState = isRestaurantView && filteredCount === 0
-    ? {
-        title: "조건에 맞는 식당이 없습니다.",
-        description: "검색어를 줄이거나 지역 필터를 초기화하면 더 많은 식당을 볼 수 있습니다.",
-        href: "/map?category=restaurants",
-        hrefLabel: "식당 지도 초기화",
-      }
-    : undefined;
+  const buildRadiusHref = (km: number) => {
+    const q = new URLSearchParams({ lat: userLat.toFixed(6), lng: userLng.toFixed(6) });
+    if (activeCategory !== "all") q.set("category", activeCategory);
+    q.set("radiusKm", km.toString());
+    return `/map?${q.toString()}`;
+  };
+
+  const emptyState =
+    hasUserLocation && listItems.length === 0
+      ? {
+          title: `반경 ${radiusKm}km 안에 표시할 장소가 없습니다.`,
+          description: "반경을 넓히거나 지역명으로 검색해 보세요.",
+          href: buildRadiusHref(10),
+          hrefLabel: "반경 10km로 넓히기",
+          extraLinks: [{ href: buildRadiusHref(20), label: "반경 20km로 넓히기" }],
+        }
+      : isRestaurantView && filteredCount === 0
+        ? {
+            title: "조건에 맞는 식당이 없습니다.",
+            description: "검색어를 줄이거나 지역 필터를 초기화하면 더 많은 식당을 볼 수 있습니다.",
+            href: "/map?category=restaurants",
+            hrefLabel: "식당 지도 초기화",
+          }
+        : undefined;
 
   return (
     <main className="mx-auto max-w-[1440px] px-4 pb-10 sm:px-5 lg:px-6">
@@ -457,10 +490,10 @@ export default async function MapPage({
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 0 10px", borderBottom: "1px solid var(--line)", marginBottom: "16px" }}>
         <div>
           <h1 style={{ fontSize: "17px", fontWeight: 800, color: "var(--ink)", margin: 0 }}>
-            {MAP_CATEGORY_META[activeCategory].pageTitle}
+            {hasUserLocation ? "내 주변 반려동물 장소" : MAP_CATEGORY_META[activeCategory].pageTitle}
           </h1>
           <p style={{ fontSize: "12px", color: "var(--muted)", margin: 0, marginTop: "2px" }}>
-            {MAP_CATEGORY_META[activeCategory].listSubtitle}
+            {hasUserLocation ? `현재 위치 기준 ${radiusKm}km 이내` : MAP_CATEGORY_META[activeCategory].listSubtitle}
           </p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
@@ -535,9 +568,11 @@ export default async function MapPage({
         <div className="mt-4 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
           <Compass size={14} />
           <span>
-            {isAllView
-              ? `가까운 장소 ${listItems.length.toLocaleString("ko-KR")}곳 표시`
-              : `${MAP_CATEGORY_LABELS[activeCategory]} ${filteredCount.toLocaleString("ko-KR")}곳 표시`}
+            {hasUserLocation
+              ? `반경 ${radiusKm}km 내 ${listItems.length.toLocaleString("ko-KR")}곳`
+              : isAllView
+                ? `가까운 장소 ${listItems.length.toLocaleString("ko-KR")}곳 표시`
+                : `${MAP_CATEGORY_LABELS[activeCategory]} ${filteredCount.toLocaleString("ko-KR")}곳 표시`}
           </span>
         </div>
       )}
@@ -586,9 +621,9 @@ export default async function MapPage({
           items={listItems}
           activeCategory={activeCategory}
           activeCategoryLabel={MAP_CATEGORY_LABELS[activeCategory]}
-          listTitle={MAP_CATEGORY_META[activeCategory].listTitle}
-          listSubtitle={MAP_CATEGORY_META[activeCategory].listSubtitle}
-          mapTitle={MAP_CATEGORY_META[activeCategory].mapTitle}
+          listTitle={hasUserLocation ? "내 주변 반려동물 장소" : MAP_CATEGORY_META[activeCategory].listTitle}
+          listSubtitle={hasUserLocation ? `현재 위치 기준 ${radiusKm}km 이내 장소를 가까운 순으로 보여드립니다.` : MAP_CATEGORY_META[activeCategory].listSubtitle}
+          mapTitle={hasUserLocation ? `내 주변 ${radiusKm}km 지도` : MAP_CATEGORY_META[activeCategory].mapTitle}
           filteredCount={filteredCount}
           visibleCount={listItems.length}
           coordinateReadyCount={coordinateReadyCount}
@@ -597,6 +632,7 @@ export default async function MapPage({
           preparedState={preparedState}
           emptyState={emptyState}
           initialUserLocation={hasUserLocation ? { lat: userLat, lng: userLng } : undefined}
+          radiusKm={hasUserLocation ? radiusKm : undefined}
         />
       )}
     </main>
