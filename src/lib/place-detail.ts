@@ -1,4 +1,3 @@
-import { prisma } from "@/lib/prisma";
 import { getPlaceDetailIndexSnapshot, getPlacesByCategorySnapshot, PLACE_DB_CATEGORIES, type PlaceDbCategory } from "@/lib/public-data";
 
 export type PlaceDetail = {
@@ -64,7 +63,7 @@ async function getPlaceDetailFromSnapshots(id: string): Promise<PlaceDetail | nu
 
   // index miss → 전체 검색 (index가 아직 없거나 오래된 경우)
   for (const cat of PLACE_DB_CATEGORIES) {
-    if (cat === category) continue; // 이미 시도한 카테고리 스킵
+    if (cat === category) continue;
     const places = await getPlacesByCategorySnapshot(cat);
     const found = places.find((p) => p.id === id);
     if (found) return snapshotToDetail(found);
@@ -74,56 +73,12 @@ async function getPlaceDetailFromSnapshots(id: string): Promise<PlaceDetail | nu
 }
 
 /**
- * DB에서 id로 place 조회. timeoutMs 내 응답 없으면 null 반환.
- * DB가 잠든 상태에서 긴 대기를 막기 위해 반드시 짧은 timeout을 사용한다.
- */
-async function getPlaceDetailFromDb(id: string, timeoutMs = 1500): Promise<PlaceDetail | null> {
-  const queryPromise = prisma.place.findUnique({
-    where: { id },
-    select: {
-      id: true, category: true, name: true,
-      address: true, roadAddress: true,
-      sido: true, sigungu: true, eupmyeondong: true,
-      phone: true, lat: true, lng: true,
-      businessStatus: true, sourceName: true,
-      isActive: true, updatedAt: true,
-    },
-  }).then((place) => {
-    if (!place || !place.isActive) return null;
-    const addr = place.roadAddress ?? place.address ?? "";
-    return {
-      id: place.id,
-      category: place.category as string,
-      name: place.name,
-      address: place.address,
-      roadAddress: place.roadAddress,
-      sido: place.sido,
-      sigungu: place.sigungu,
-      eupmyeondong: place.eupmyeondong,
-      phone: place.phone,
-      lat: place.lat,
-      lng: place.lng,
-      businessStatus: place.businessStatus,
-      sourceName: place.sourceName,
-      updatedAt: place.updatedAt.toISOString(),
-      addressMasked: addr.includes("*"),
-    } satisfies PlaceDetail;
-  }).catch(() => null);
-
-  const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs));
-  return Promise.race([queryPromise, timeoutPromise]);
-}
-
-/**
- * Place 상세 조회 — snapshot 우선, DB는 1500ms timeout fallback.
- * snapshot에 있으면 DB 호출 없이 즉시 반환하므로 DB 휴면과 무관하게 빠르다.
+ * Place 상세 조회 — snapshot 전용.
+ * 공개 상세 페이지는 DB를 사용하지 않는다.
+ * DB 조회는 관리자/동기화 스크립트에서만 수행한다.
  */
 export async function getPlaceDetailById(id: string): Promise<PlaceDetail | null> {
-  // 1. public snapshot 우선
-  const snapshotResult = await getPlaceDetailFromSnapshots(id);
-  if (snapshotResult) return snapshotResult;
-
-  // 2. snapshot에 없을 때만 DB 시도 (최대 1500ms)
-  return getPlaceDetailFromDb(id, 1500);
+  return getPlaceDetailFromSnapshots(id);
 }
+
 
