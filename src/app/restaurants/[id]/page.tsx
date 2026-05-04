@@ -1,10 +1,10 @@
 import { notFound } from "next/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { PlaceDirectionsSheet } from "@/components/PlaceDirectionsSheet";
-import { OfficialDataNotice } from "@/components/OfficialDataNotice";
 import { AdSlot } from "@/components/AdSlot";
-import { CharacterImage } from "@/components/CharacterImage";
+import { DetailActionBar } from "@/components/detail/DetailActionBar";
+import { PetPolicyPanel } from "@/components/detail/PetPolicyPanel";
+import { VisitChecklist } from "@/components/detail/VisitChecklist";
 import { SmartLink } from "@/components/SmartLink";
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -22,55 +22,56 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
     orderBy: { name: "asc" },
     take: 6,
   });
+  const regionLabel = `${restaurant.sido}${restaurant.sigungu ? ` ${restaurant.sigungu}` : ""}`;
+  const reportHref = `/report?type=restaurant&id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}`;
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
       <section className="section-shell p-6 sm:p-8">
-        <div className="absolute right-3 top-4 hidden h-24 w-24 opacity-95 sm:block">
-          <CharacterImage asset="puppy-front-white" className="h-full w-full mascot-drift" imageClassName="object-contain scale-[1.04]" />
-        </div>
         <div className="relative z-10">
           <div className="mb-4 flex flex-wrap gap-2">
             <span className="badge"><ShieldCheck size={14} /> 공식 등록 데이터</span>
             <span className="badge">{restaurant.businessType}</span>
-            <span className="badge">{restaurant.sido}{restaurant.sigungu ? ` · ${restaurant.sigungu}` : ""}</span>
+            <span className="badge">{regionLabel}</span>
           </div>
-          <h1 className="text-4xl font-black tracking-tight sm:text-[2.7rem]">{restaurant.name}</h1>
-          <p className="mt-4 flex gap-2 text-[#5f5550]"><MapPin className="mt-1 shrink-0" size={18} /> {restaurant.address}</p>
+          <h1 className="text-3xl font-black tracking-tight sm:text-[2.4rem]">{restaurant.name}</h1>
+          <p className="mt-4 flex gap-2 text-sm leading-7 text-[#5f5550] sm:text-base"><MapPin className="mt-1 shrink-0" size={18} /> {restaurant.address}</p>
           <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
             <Info label="업종" value={restaurant.businessType} />
-            <Info label="지역" value={`${restaurant.sido}${restaurant.sigungu ? ` ${restaurant.sigungu}` : ""}`} />
-            <Info label="데이터 기준일" value={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")} />
+            <Info label="지역" value={regionLabel} />
+            <Info label="기준일" value={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")} />
             <Info label="출처" value="식품안전나라 공개 정보" />
           </div>
-          <div className="mt-6 flex flex-wrap gap-3">
-            {restaurant.lat !== null && restaurant.lng !== null ? (
-              <SmartLink
-                href={`/map?category=restaurants&lat=${restaurant.lat.toFixed(6)}&lng=${restaurant.lng.toFixed(6)}`}
-                pendingLabel="지도 여는 중..."
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand)] px-5 py-2.5 text-sm font-black text-[var(--brand)]"
-              >
-                <MapPin size={15} />
-                지도에서 보기
-              </SmartLink>
-            ) : null}
-            <PlaceDirectionsSheet name={restaurant.name} lat={restaurant.lat} lng={restaurant.lng} address={restaurant.address} />
-          </div>
+          <DetailActionBar
+            name={restaurant.name}
+            address={restaurant.address}
+            lat={restaurant.lat}
+            lng={restaurant.lng}
+            phone={null}
+            reportHref={reportHref}
+          />
         </div>
       </section>
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-        <section className="card rounded-[2rem] p-6">
-          <h2 className="text-xl font-black">방문 전 확인 체크리스트</h2>
-          <ul className="mt-4 space-y-2 text-sm leading-7 text-[#5f5550]">
-            <li>· 현재 영업 중인지 확인</li>
-            <li>· 실내·실외 중 어느 좌석에 반려동물 동반이 가능한지 확인</li>
-            <li>· 목줄, 케이지, 대형견, 짖음 관련 운영 기준 확인</li>
-            <li>· 업소별 추가 조건이 있는지 확인</li>
-          </ul>
-        </section>
-        <OfficialDataNotice className="h-full" />
+      <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+        <PetPolicyPanel />
+        <VisitChecklist />
       </div>
+
+      <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
+          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보가 다르거나 반려동물 동반 조건을 알고 계신가요?</h2>
+        <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+          영업 여부, 좌석 운영, 대형견 가능 여부, 케이지 조건처럼 방문자가 알아야 할 내용을 제보해 주시면 내부 확인 후 반영합니다.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <SmartLink href={reportHref} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">
+            정보 수정 제보
+          </SmartLink>
+          <SmartLink href={`${reportHref}&topic=pet-policy`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] bg-white px-5 py-2.5 text-sm font-black text-[var(--brand)]">
+            동반 조건 제보
+          </SmartLink>
+        </div>
+      </section>
 
       <AdSlot label="상세 페이지 광고 영역" />
 
@@ -79,28 +80,47 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
               <p className="eyebrow">Nearby</p>
-              <h2 className="mt-4 text-2xl font-black tracking-tight">주변 같은 지역 업소</h2>
+              <h2 className="mt-4 text-2xl font-black tracking-tight">같은 지역 반려동물 동반 식당</h2>
             </div>
           </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {nearby.map((item) => (
-              <SmartLink key={item.id} href={`/restaurants/${item.id}`} className="card rounded-[1.8rem] p-5 transition hover:-translate-y-1 hover:shadow-soft">
-                <p className="font-black">{item.name}</p>
-                <p className="mt-2 text-sm text-[#655a53]">{item.address}</p>
-              </SmartLink>
+              <article key={item.id} className="card rounded-[1rem] p-4">
+                <p className="font-black leading-snug text-[var(--ink)]">{item.name}</p>
+                <p className="mt-2 text-sm font-bold text-[var(--muted)]">
+                  {item.sido}{item.sigungu ? ` ${item.sigungu}` : ""}
+                </p>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{item.businessType}</p>
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
+                  <SmartLink href={`/restaurants/${item.id}`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-black text-white">
+                    상세보기
+                  </SmartLink>
+                  <SmartLink
+                    href={item.lat !== null && item.lng !== null ? `/map?category=restaurants&lat=${item.lat.toFixed(6)}&lng=${item.lng.toFixed(6)}` : `/map?category=restaurants&q=${encodeURIComponent(item.name)}`}
+                    pendingLabel="지도 여는 중..."
+                    className="inline-flex min-h-9 items-center rounded-full border border-[var(--brand)] px-3 py-1.5 text-xs font-black text-[var(--brand)]"
+                  >
+                    지도보기
+                  </SmartLink>
+                </div>
+              </article>
             ))}
           </div>
         </section>
       ) : null}
+
+      <section className="mt-8 rounded-[1rem] border border-[var(--line)] bg-[#fafdf9] p-5 text-sm leading-7 text-[var(--muted)]">
+        이 정보는 공공데이터를 보기 쉽게 정리한 안내입니다. 실제 영업 여부, 반려동물 동반 조건, 좌석 운영 방식은 업체 사정에 따라 달라질 수 있으므로 방문 전 직접 확인해 주세요.
+      </section>
     </main>
   );
 }
 
 function Info({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-[1.4rem] border border-[rgba(56,41,29,0.08)] bg-white/78 p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-      <p className="text-xs font-black text-[#9b8d81]">{label}</p>
-      <p className="mt-1 font-bold text-[#3f352f]">{value}</p>
+    <div className="rounded-[1rem] border border-[var(--line)] bg-white/78 p-4">
+      <p className="text-xs font-black text-[var(--muted)]">{label}</p>
+      <p className="mt-1 font-bold text-[var(--ink)]">{value}</p>
     </div>
   );
 }
