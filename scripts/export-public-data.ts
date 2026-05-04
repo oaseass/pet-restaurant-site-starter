@@ -151,13 +151,42 @@ async function main() {
       phone: place.phone,
     }));
 
+  const PLACE_DB_CATEGORIES = ["ANIMAL_HOSPITAL", "PHARMACY", "GROOMING", "DAYCARE", "FUNERAL"] as const;
+
+  // 카테고리별 건수
+  const placeCategoryCounts: Record<string, number> = {};
+  for (const cat of PLACE_DB_CATEGORIES) {
+    placeCategoryCounts[cat] = placesLight.filter((p) => p.category === cat).length;
+  }
+
+  const categoryCountsWithPlaces = { ...categoryCounts, placeCategoryCounts };
+
+  // 카테고리별 분리 디렉터리
+  const placesByCategoryDir = path.join(outputDirectory, "places", "by-category");
+  const placeMapPointsByCategoryDir = path.join(outputDirectory, "place-map-points", "by-category");
+  await Promise.all([
+    fs.mkdir(placesByCategoryDir, { recursive: true }),
+    fs.mkdir(placeMapPointsByCategoryDir, { recursive: true }),
+  ]);
+
+  const byCategoryWrites: Promise<void>[] = [];
+  for (const cat of PLACE_DB_CATEGORIES) {
+    const catPlaces = placesLight.filter((p) => p.category === cat);
+    const catPoints = placeMapPoints.filter((p) => p.category === cat);
+    byCategoryWrites.push(
+      fs.writeFile(path.join(placesByCategoryDir, `${cat}.json`), JSON.stringify(catPlaces, null, 2)),
+      fs.writeFile(path.join(placeMapPointsByCategoryDir, `${cat}.json`), JSON.stringify(catPoints, null, 2)),
+    );
+  }
+
   await Promise.all([
     fs.writeFile(path.join(outputDirectory, "restaurants-light.json"), JSON.stringify(restaurantsLight, null, 2)),
     fs.writeFile(path.join(outputDirectory, "map-points.json"), JSON.stringify(mapPoints, null, 2)),
-    fs.writeFile(path.join(outputDirectory, "category-counts.json"), JSON.stringify(categoryCounts, null, 2)),
+    fs.writeFile(path.join(outputDirectory, "category-counts.json"), JSON.stringify(categoryCountsWithPlaces, null, 2)),
     fs.writeFile(path.join(outputDirectory, "regions.json"), JSON.stringify(regions, null, 2)),
     fs.writeFile(path.join(outputDirectory, "places-light.json"), JSON.stringify(placesLight, null, 2)),
     fs.writeFile(path.join(outputDirectory, "place-map-points.json"), JSON.stringify(placeMapPoints, null, 2)),
+    ...byCategoryWrites,
   ]);
 
   console.log(JSON.stringify({
@@ -165,6 +194,7 @@ async function main() {
     mapPoints: mapPoints.length,
     placesLight: placesLight.length,
     placeMapPoints: placeMapPoints.length,
+    placeCategoryCounts,
     regionsBySido: regions.bySido.length,
     regionsBySigungu: regions.bySigungu.length,
     lastUpdatedAt: categoryCounts.lastUpdatedAt,

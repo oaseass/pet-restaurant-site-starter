@@ -59,7 +59,9 @@ export function PlaceListSection({ places, categoryLabel, mapHref }: Props) {
             className="rounded-xl border border-[rgba(56,41,29,0.08)] bg-white px-4 py-3 shadow-sm"
           >
             <div className="flex items-start justify-between gap-2">
-              <p className="font-black text-[#2d1d10] leading-snug">{place.name}</p>
+              <Link href={`/places/${place.id}`} className="font-black text-[#2d1d10] leading-snug hover:text-[var(--brand)] hover:underline">
+                {place.name}
+              </Link>
               {place.businessStatus && (
                 <span
                   className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
@@ -85,6 +87,12 @@ export function PlaceListSection({ places, categoryLabel, mapHref }: Props) {
                 {place.phone}
               </a>
             )}
+            <Link
+              href={`/places/${place.id}`}
+              className="mt-2 inline-flex items-center gap-1 text-[11px] font-black text-[var(--brand)] hover:underline"
+            >
+              상세보기 →
+            </Link>
           </li>
         ))}
       </ul>

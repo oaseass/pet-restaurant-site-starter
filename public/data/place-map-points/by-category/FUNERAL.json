@@ -1,0 +1,690 @@
+[
+  {
+    "id": "fb95c0f3-9591-4007-ae80-2879f44c5427",
+    "category": "FUNERAL",
+    "name": "(주) 하늘펫",
+    "lat": 35.139,
+    "lng": 126.7503,
+    "phone": "062-946-2626"
+  },
+  {
+    "id": "d3738eaf-7943-458d-97c5-0f9d834e8fb3",
+    "category": "FUNERAL",
+    "name": "(주)더소울펫",
+    "lat": 36.3206,
+    "lng": 128.2991,
+    "phone": "1588-9749"
+  },
+  {
+    "id": "129e416a-7847-45f9-b511-7abb3735b59a",
+    "category": "FUNERAL",
+    "name": "(주)더포에버",
+    "lat": 37.6235,
+    "lng": 126.6727,
+    "phone": "031-713-5002"
+  },
+  {
+    "id": "b03eff0f-44fb-4c03-8465-373b4fc25921",
+    "category": "FUNERAL",
+    "name": "(주)동물사랑 대구러브펫",
+    "lat": 35.8456,
+    "lng": 128.5602,
+    "phone": "053-593-4900"
+  },
+  {
+    "id": "83dbffef-1262-4060-80f9-387ad75e81eb",
+    "category": "FUNERAL",
+    "name": "(주)모모리아",
+    "lat": 36.3208,
+    "lng": 128.2992,
+    "phone": null
+  },
+  {
+    "id": "17319180-051e-40f8-b313-c0e56183f650",
+    "category": "FUNERAL",
+    "name": "(주)반려동물 장례지원단",
+    "lat": 36.2927,
+    "lng": 127.4533,
+    "phone": null
+  },
+  {
+    "id": "0197e1cd-dece-419f-be3c-eb798eb78b5c",
+    "category": "FUNERAL",
+    "name": "(주)젠틀펫",
+    "lat": 36.7446,
+    "lng": 128.0974,
+    "phone": null
+  },
+  {
+    "id": "0daeaa2a-5dc0-4ee6-a027-8501aa2477a5",
+    "category": "FUNERAL",
+    "name": "(주)젠틀펫",
+    "lat": 35.8189,
+    "lng": 128.8246,
+    "phone": null
+  },
+  {
+    "id": "b1601749-1f96-4510-8dab-871c5621e3de",
+    "category": "FUNERAL",
+    "name": "(주)좋은친구들",
+    "lat": 36.4439,
+    "lng": 127.0303,
+    "phone": null
+  },
+  {
+    "id": "eeb02779-de5b-40ad-90e7-57c72dd308ef",
+    "category": "FUNERAL",
+    "name": "(주)펫노블레스",
+    "lat": 35.437,
+    "lng": 129.1053,
+    "phone": "055-374-4400"
+  },
+  {
+    "id": "e4fe28e2-4ef9-4bd8-8532-d3e14c6d7659",
+    "category": "FUNERAL",
+    "name": "(주)피케이프",
+    "lat": 35.1201,
+    "lng": 129.0606,
+    "phone": null
+  },
+  {
+    "id": "6f1e8b76-e33e-4dad-9692-05bc9bddb9a7",
+    "category": "FUNERAL",
+    "name": "(주)하늘정원",
+    "lat": 35.1487,
+    "lng": 126.6433,
+    "phone": "062-714-2979"
+  },
+  {
+    "id": "d6db06a0-4990-44c8-b13c-f0f6707a56b5",
+    "category": "FUNERAL",
+    "name": "(주)해피엔딩",
+    "lat": 37.4104,
+    "lng": 127.3015,
+    "phone": null
+  },
+  {
+    "id": "0bb51ecb-ff02-4241-bfbe-742861dad8ef",
+    "category": "FUNERAL",
+    "name": "21그램 반려동물 장례식장 남양주점",
+    "lat": 37.6236,
+    "lng": 127.2904,
+    "phone": "1688-1240"
+  },
+  {
+    "id": "290d8f22-88ce-4b3d-8859-a5e1631d7b89",
+    "category": "FUNERAL",
+    "name": "21그램 반려동물 장례식장 천안아산점",
+    "lat": 36.7649,
+    "lng": 127.145,
+    "phone": null
+  },
+  {
+    "id": "5a6568c7-2a98-475e-a320-3f52df172d8e",
+    "category": "FUNERAL",
+    "name": "21그램 반려동물장례식장 화성점",
+    "lat": 37.2167,
+    "lng": 126.8666,
+    "phone": "02-1688-1240"
+  },
+  {
+    "id": "be38ba4f-99b1-4a1a-8cc5-71124b6a1f7e",
+    "category": "FUNERAL",
+    "name": "ROYHILLS",
+    "lat": 37.4145,
+    "lng": 127.787,
+    "phone": "1855-2004"
+  },
+  {
+    "id": "15a11fb2-7680-475d-856b-e07a905478d4",
+    "category": "FUNERAL",
+    "name": "㈜펫문",
+    "lat": 37.5436,
+    "lng": 126.9128,
+    "phone": "02-322-1004"
+  },
+  {
+    "id": "7333c258-6463-421a-8b28-f2dec1c35d16",
+    "category": "FUNERAL",
+    "name": "강릉펫사랑(장례식장)",
+    "lat": 37.8435,
+    "lng": 128.8123,
+    "phone": null
+  },
+  {
+    "id": "79075ead-be91-42a3-a7f7-23a3d8e94639",
+    "category": "FUNERAL",
+    "name": "강아지 펫 헤븐",
+    "lat": 35.9326,
+    "lng": 128.3986,
+    "phone": null
+  },
+  {
+    "id": "a3871ec8-269b-4389-9dbe-6bd1387d226d",
+    "category": "FUNERAL",
+    "name": "경북반려동물장례식장",
+    "lat": 36.1801,
+    "lng": 128.0373,
+    "phone": null
+  },
+  {
+    "id": "4d9fb60e-b04b-42a2-8042-9db63b25d9da",
+    "category": "FUNERAL",
+    "name": "구리 에이지펫",
+    "lat": 37.5786,
+    "lng": 127.1427,
+    "phone": null
+  },
+  {
+    "id": "50e9b1cc-565e-4cd8-8ac8-a1beaa87483c",
+    "category": "FUNERAL",
+    "name": "꿈애",
+    "lat": 37.7708,
+    "lng": 126.9178,
+    "phone": "1899-7822"
+  },
+  {
+    "id": "a70b6da5-5e7d-4491-9838-778ad18dbec6",
+    "category": "FUNERAL",
+    "name": "대전 이별공간",
+    "lat": 36.1821,
+    "lng": 127.6416,
+    "phone": null
+  },
+  {
+    "id": "eb12ab1a-5d4f-4f5a-b6f6-4b5abb6ad56b",
+    "category": "FUNERAL",
+    "name": "러브펫 반려동물장례식장",
+    "lat": 37.4144,
+    "lng": 127.2854,
+    "phone": "031-796-4341"
+  },
+  {
+    "id": "95e055e5-7587-4b81-b036-0279ec707e11",
+    "category": "FUNERAL",
+    "name": "러블리엔젤",
+    "lat": 36.5649,
+    "lng": 127.3886,
+    "phone": "043-264-2666"
+  },
+  {
+    "id": "4d8eab90-a482-4d02-9aff-868fbb044756",
+    "category": "FUNERAL",
+    "name": "리멤버반려동물장례식장",
+    "lat": 37.1048,
+    "lng": 127.1731,
+    "phone": null
+  },
+  {
+    "id": "b19b74c0-eeaf-4b85-8a4d-24170391e193",
+    "category": "FUNERAL",
+    "name": "리멤버파크",
+    "lat": 36.2078,
+    "lng": 127.2176,
+    "phone": "041-735-1700"
+  },
+  {
+    "id": "1d9dccd2-8401-4bf2-8dea-b8cca22f80f2",
+    "category": "FUNERAL",
+    "name": "리틀포즈 반려동물 장례식장",
+    "lat": 36.1155,
+    "lng": 128.7105,
+    "phone": null
+  },
+  {
+    "id": "a9b260c0-15ff-410e-9ff6-5c8fb03836c4",
+    "category": "FUNERAL",
+    "name": "마스꼬다 휴 주식회사",
+    "lat": 37.7248,
+    "lng": 126.6126,
+    "phone": null
+  },
+  {
+    "id": "2261ce9d-5d47-4ed0-b032-764df7e16974",
+    "category": "FUNERAL",
+    "name": "메리온",
+    "lat": 35.4684,
+    "lng": 129.1046,
+    "phone": "055-374-6503"
+  },
+  {
+    "id": "0be9e1a1-cb65-4f18-98d6-a8aba0136ed9",
+    "category": "FUNERAL",
+    "name": "몽몽이엠파크 반려동물장례식장",
+    "lat": 37.679,
+    "lng": 127.3646,
+    "phone": "1811-1336"
+  },
+  {
+    "id": "cc38d13a-609c-47f3-86f6-12bb3074f0c7",
+    "category": "FUNERAL",
+    "name": "반려마루 추모관",
+    "lat": 37.2365,
+    "lng": 127.6191,
+    "phone": "031-8030-4482"
+  },
+  {
+    "id": "2ecc0157-e324-47b8-858f-473cd386acd3",
+    "category": "FUNERAL",
+    "name": "백꽃사랑하이빛",
+    "lat": 37.3518,
+    "lng": 127.3965,
+    "phone": null
+  },
+  {
+    "id": "28402235-2b24-47f6-b348-5be7d3cfd8c8",
+    "category": "FUNERAL",
+    "name": "별다만 광주전남",
+    "lat": 34.9364,
+    "lng": 126.8199,
+    "phone": "061-337-1230"
+  },
+  {
+    "id": "f501e916-6c62-4797-8dd0-73923a66e851",
+    "category": "FUNERAL",
+    "name": "별이되다",
+    "lat": 35.3104,
+    "lng": 128.9355,
+    "phone": null
+  },
+  {
+    "id": "4588ab5d-9257-4a4c-97db-dca1131c716b",
+    "category": "FUNERAL",
+    "name": "서래안 펫타운",
+    "lat": 35.9798,
+    "lng": 126.7175,
+    "phone": null
+  },
+  {
+    "id": "5816457d-0397-46ea-afa3-5dde8efa253a",
+    "category": "FUNERAL",
+    "name": "순천 반려동물장례식장 하늘별",
+    "lat": 34.8842,
+    "lng": 127.3906,
+    "phone": null
+  },
+  {
+    "id": "f440058a-7a76-4a71-bdec-17b4beb5478d",
+    "category": "FUNERAL",
+    "name": "스마일 어게인",
+    "lat": 36.2059,
+    "lng": 128.065,
+    "phone": "1544-9262"
+  },
+  {
+    "id": "0bc404bc-e86c-4c51-abad-d8c783dcdce2",
+    "category": "FUNERAL",
+    "name": "스윗드림 펫",
+    "lat": 36.0435,
+    "lng": 128.5592,
+    "phone": "054-974-2220"
+  },
+  {
+    "id": "eacdad0c-47c9-4cb2-bb6f-940cca013dd3",
+    "category": "FUNERAL",
+    "name": "스타펫",
+    "lat": 37.8131,
+    "lng": 127.2119,
+    "phone": null
+  },
+  {
+    "id": "8448b1ba-357c-4781-a168-e0264260d2d0",
+    "category": "FUNERAL",
+    "name": "스토리펫",
+    "lat": 37.1497,
+    "lng": 126.9523,
+    "phone": "031-353-5579"
+  },
+  {
+    "id": "689a347a-30af-4b1f-b546-27e7cc3ae487",
+    "category": "FUNERAL",
+    "name": "아이드림펫",
+    "lat": 37.7286,
+    "lng": 126.6263,
+    "phone": null
+  },
+  {
+    "id": "b861d23b-9eda-4698-84dc-539901aac45b",
+    "category": "FUNERAL",
+    "name": "아이드림펫",
+    "lat": 37.585,
+    "lng": 126.6259,
+    "phone": null
+  },
+  {
+    "id": "2d8fd875-d38c-439c-8730-497abc97139f",
+    "category": "FUNERAL",
+    "name": "아이들랜드",
+    "lat": 35.9639,
+    "lng": 128.8302,
+    "phone": "1522-6979"
+  },
+  {
+    "id": "3927561b-f775-4861-bec2-5519fe82ae45",
+    "category": "FUNERAL",
+    "name": "안성펫문화원",
+    "lat": 37.0339,
+    "lng": 127.4321,
+    "phone": null
+  },
+  {
+    "id": "6123da5b-16ec-4b0b-91aa-06ccd0b99fa8",
+    "category": "FUNERAL",
+    "name": "어게인",
+    "lat": 37.5836,
+    "lng": 126.6253,
+    "phone": null
+  },
+  {
+    "id": "ff3d11bd-42ca-4966-b6fe-7d15f19a7239",
+    "category": "FUNERAL",
+    "name": "엔젤스톤",
+    "lat": 37.7343,
+    "lng": 126.6285,
+    "phone": "031-981-0271"
+  },
+  {
+    "id": "0aeb53ea-2960-4607-9c04-f5c722bd15fc",
+    "category": "FUNERAL",
+    "name": "엘림펫",
+    "lat": 37.2775,
+    "lng": 127.3928,
+    "phone": "031-637-8582"
+  },
+  {
+    "id": "df369565-cb12-49dd-bb2c-c9c82dcf111e",
+    "category": "FUNERAL",
+    "name": "예산 위드엔젤",
+    "lat": 36.6958,
+    "lng": 126.915,
+    "phone": "041-332-8787"
+  },
+  {
+    "id": "d1ba0c43-983e-45ac-9aaa-f3bb1bcca5dd",
+    "category": "FUNERAL",
+    "name": "오수 펫 추모공원",
+    "lat": 35.537,
+    "lng": 127.3585,
+    "phone": "063-643-0486"
+  },
+  {
+    "id": "839b3776-ea3c-4e39-8fd4-bf747910c965",
+    "category": "FUNERAL",
+    "name": "우양펫타운",
+    "lat": 35.2719,
+    "lng": 126.9708,
+    "phone": null
+  },
+  {
+    "id": "40569c9e-9157-49a4-8c60-691a651f53a8",
+    "category": "FUNERAL",
+    "name": "전남반려동물장례식장푸른솔",
+    "lat": 34.8652,
+    "lng": 127.612,
+    "phone": "1566-7112"
+  },
+  {
+    "id": "4fbee38c-27b7-4c79-bc14-a795889c09f4",
+    "category": "FUNERAL",
+    "name": "전주 반려동물장례식장 아리움",
+    "lat": 35.8227,
+    "lng": 127.0874,
+    "phone": "063-223-7942"
+  },
+  {
+    "id": "4477628e-6b4f-40f3-b5a6-eb93773a18fe",
+    "category": "FUNERAL",
+    "name": "전주 하늘",
+    "lat": 35.8543,
+    "lng": 127.3309,
+    "phone": null
+  },
+  {
+    "id": "9ad5fdeb-56c7-4c16-8c69-db20251cbe1d",
+    "category": "FUNERAL",
+    "name": "주식회사 21그램그룹",
+    "lat": 37.7248,
+    "lng": 126.6126,
+    "phone": "02-1688-1240"
+  },
+  {
+    "id": "e7c616ad-e6a8-4e6b-8ff5-e15d69e59e33",
+    "category": "FUNERAL",
+    "name": "주식회사 21그램그룹",
+    "lat": 37.763,
+    "lng": 126.8462,
+    "phone": "02-1688-1240"
+  },
+  {
+    "id": "fb857594-271e-4c38-87d7-e2d81064fb20",
+    "category": "FUNERAL",
+    "name": "주식회사 21그램그룹",
+    "lat": 36.5639,
+    "lng": 127.4894,
+    "phone": "1688-1240"
+  },
+  {
+    "id": "d7430f62-b33d-460a-88aa-d052d04dbc56",
+    "category": "FUNERAL",
+    "name": "주식회사 아리아펫",
+    "lat": 37.2775,
+    "lng": 127.3928,
+    "phone": "031-635-2266"
+  },
+  {
+    "id": "07d8b648-4bd6-435f-bf41-7656fe98ea74",
+    "category": "FUNERAL",
+    "name": "주식회사 아이헤븐",
+    "lat": 35.3527,
+    "lng": 128.9086,
+    "phone": "1577-5474"
+  },
+  {
+    "id": "a5a1bb31-4952-4b8c-b47b-a235e94ee8a8",
+    "category": "FUNERAL",
+    "name": "주식회사 이별공간",
+    "lat": 35.5147,
+    "lng": 129.1705,
+    "phone": null
+  },
+  {
+    "id": "dca1b251-251d-4d4f-a33a-443d94c64331",
+    "category": "FUNERAL",
+    "name": "주식회사 패투헤븐",
+    "lat": 37.4272,
+    "lng": 128.0012,
+    "phone": "033-745-4211"
+  },
+  {
+    "id": "cb0d943f-51e4-4576-b8dd-c4e29eca082b",
+    "category": "FUNERAL",
+    "name": "주식회사 퍼스트펫",
+    "lat": 35.0181,
+    "lng": 126.6656,
+    "phone": "061-337-0991"
+  },
+  {
+    "id": "2490b563-4fe0-4b33-baca-332255892763",
+    "category": "FUNERAL",
+    "name": "주식회사 펫콤",
+    "lat": 37.2928,
+    "lng": 126.7709,
+    "phone": null
+  },
+  {
+    "id": "c7317e28-2f37-492c-958c-69496634c3cf",
+    "category": "FUNERAL",
+    "name": "주식회사 하늘소풍",
+    "lat": 35.0856,
+    "lng": 128.4446,
+    "phone": null
+  },
+  {
+    "id": "7a8731e3-c3e8-48f4-b069-8386a98671ef",
+    "category": "FUNERAL",
+    "name": "타임투반려동물 장례식장",
+    "lat": 35.0486,
+    "lng": 126.5274,
+    "phone": null
+  },
+  {
+    "id": "1b93540f-ea46-44d9-babb-017d958304e1",
+    "category": "FUNERAL",
+    "name": "펫 메모리얼",
+    "lat": 37.5209,
+    "lng": 127.9317,
+    "phone": "1566-4379"
+  },
+  {
+    "id": "d13aa3d4-61c2-4cee-a27a-bfa7e0c06a23",
+    "category": "FUNERAL",
+    "name": "펫로스 케어",
+    "lat": 35.3122,
+    "lng": 128.9751,
+    "phone": null
+  },
+  {
+    "id": "299135f7-fcba-4b26-bf75-79b505710fef",
+    "category": "FUNERAL",
+    "name": "펫바라기",
+    "lat": 35.5187,
+    "lng": 127.4288,
+    "phone": null
+  },
+  {
+    "id": "b2350f2b-65ae-4aec-a5e8-a5672d9da467",
+    "category": "FUNERAL",
+    "name": "펫브릿지",
+    "lat": 37.3136,
+    "lng": 126.7881,
+    "phone": "1670-2818"
+  },
+  {
+    "id": "2277dd6f-efcf-473a-9ab5-a2602f7ae83d",
+    "category": "FUNERAL",
+    "name": "펫콤 안산점",
+    "lat": 37.3523,
+    "lng": 126.8448,
+    "phone": "1833-5158"
+  },
+  {
+    "id": "4aa907be-d487-4417-a6e6-88baad155556",
+    "category": "FUNERAL",
+    "name": "펫포레스트 반려동물장례식장 김포점",
+    "lat": 37.7227,
+    "lng": 126.5996,
+    "phone": null
+  },
+  {
+    "id": "5d6c13e8-b8b1-463e-938e-a0b836cfa597",
+    "category": "FUNERAL",
+    "name": "펫포레스트 반려동물장례식장 남양주점",
+    "lat": 37.6173,
+    "lng": 127.2766,
+    "phone": null
+  },
+  {
+    "id": "8de962d8-b5e4-4f61-92e6-4431b03d8982",
+    "category": "FUNERAL",
+    "name": "포포즈 반려동물 장례식장 경기광주점",
+    "lat": 37.3949,
+    "lng": 127.311,
+    "phone": null
+  },
+  {
+    "id": "a5b39eff-ba15-42f8-9b4e-7dae159f92f1",
+    "category": "FUNERAL",
+    "name": "포포즈 반려동물 장례식장 세종점",
+    "lat": 36.5181,
+    "lng": 127.3838,
+    "phone": null
+  },
+  {
+    "id": "c14c0e8f-35ba-45cc-8b83-ed00279b6308",
+    "category": "FUNERAL",
+    "name": "포포즈 반려동물장례식장 김포점",
+    "lat": 37.7282,
+    "lng": 126.5741,
+    "phone": "1588-2888"
+  },
+  {
+    "id": "675f46b4-7f56-4741-896c-3a9976a580be",
+    "category": "FUNERAL",
+    "name": "포포즈 반려동물장례식장 김해점",
+    "lat": 35.3204,
+    "lng": 128.885,
+    "phone": "1811-8044"
+  },
+  {
+    "id": "0cbdfc92-9f8b-4e7b-a6c1-733aefc1724b",
+    "category": "FUNERAL",
+    "name": "포포즈 반려동물장례식장 양주점",
+    "lat": 37.8065,
+    "lng": 126.9207,
+    "phone": "031-878-7779"
+  },
+  {
+    "id": "e22564c7-fc4a-4b4e-be63-a84836dfd2e4",
+    "category": "FUNERAL",
+    "name": "포포즈 반려동물장례식장 일산점",
+    "lat": 37.7111,
+    "lng": 126.8047,
+    "phone": "031-976-3179"
+  },
+  {
+    "id": "9085403a-b033-461d-8270-29672915478a",
+    "category": "FUNERAL",
+    "name": "포포즈 반려동물장례식장 화성1호점",
+    "lat": 37.1724,
+    "lng": 126.8928,
+    "phone": null
+  },
+  {
+    "id": "05918e18-884c-4422-977b-0894e074cae3",
+    "category": "FUNERAL",
+    "name": "하늘강아지 반려동물 장례식장",
+    "lat": 37.3866,
+    "lng": 127.3195,
+    "phone": null
+  },
+  {
+    "id": "0be448b9-efb1-41bb-ab15-49cd3690989b",
+    "category": "FUNERAL",
+    "name": "하얀민들레",
+    "lat": 35.7281,
+    "lng": 128.774,
+    "phone": null
+  },
+  {
+    "id": "1059fb97-44e3-4b11-a260-2ec519f41440",
+    "category": "FUNERAL",
+    "name": "한별 리멤버파크",
+    "lat": 35.3414,
+    "lng": 128.3999,
+    "phone": "055-582-0042"
+  },
+  {
+    "id": "15ef3d95-8054-4813-a7d2-5f322255397b",
+    "category": "FUNERAL",
+    "name": "한별 반려동물 장례식장",
+    "lat": 35.1145,
+    "lng": 128.8968,
+    "phone": null
+  },
+  {
+    "id": "1f6961e7-1709-434d-8abd-5b2fcbc3b962",
+    "category": "FUNERAL",
+    "name": "해늘마루",
+    "lat": 34.8399,
+    "lng": 126.3784,
+    "phone": "061-273-4000"
+  },
+  {
+    "id": "5a50831f-c8f4-4060-b761-b53d4f2531a6",
+    "category": "FUNERAL",
+    "name": "해피펫",
+    "lat": 35.7994,
+    "lng": 127.0194,
+    "phone": "063-242-2114"
+  }
+]

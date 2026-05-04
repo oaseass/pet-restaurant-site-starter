@@ -268,23 +268,38 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                 <MapPin size={9} />
                 {p.sido} {p.sigungu ?? ""}
               </span>
-              {p.lat !== null && (
+              <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
+                {p.lat !== null && (
+                  <Link
+                    href={`/map?q=${encodeURIComponent(p.name)}&category=${p.category.toLowerCase()}`}
+                    style={{
+                      fontSize: "11px",
+                      fontWeight: 700,
+                      color: "var(--brand)",
+                      textDecoration: "none",
+                      padding: "3px 7px",
+                      background: "var(--brand-soft)",
+                      borderRadius: "5px",
+                    }}
+                  >
+                    지도
+                  </Link>
+                )}
                 <Link
-                  href={`/map?q=${encodeURIComponent(p.name)}&category=${p.category.toLowerCase()}`}
+                  href={`/places/${p.id}`}
                   style={{
                     fontSize: "11px",
                     fontWeight: 700,
-                    color: "var(--brand)",
+                    color: "#555",
                     textDecoration: "none",
                     padding: "3px 7px",
-                    background: "var(--brand-soft)",
+                    background: "#f3f4f6",
                     borderRadius: "5px",
-                    flexShrink: 0,
                   }}
                 >
-                  지도
+                  상세
                 </Link>
-              )}
+              </div>
             </div>
           ))}
         </div>

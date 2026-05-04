@@ -21,7 +21,7 @@ export default async function SearchPage({
   const [counts, restaurants, places] = await Promise.all([
     getCategoryCountsSnapshot(),
     getRestaurantsLightSnapshot(),
-    getPlacesLightSnapshot(),
+    keyword ? getPlacesLightSnapshot() : Promise.resolve([]),
   ]);
 
   const restaurantResults = searchRestaurantsSnapshot(restaurants, {

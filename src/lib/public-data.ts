@@ -25,6 +25,9 @@ export type PublicMapPoint = {
   lng: number;
 };
 
+export const PLACE_DB_CATEGORIES = ["ANIMAL_HOSPITAL", "PHARMACY", "GROOMING", "DAYCARE", "FUNERAL"] as const;
+export type PlaceDbCategory = (typeof PLACE_DB_CATEGORIES)[number];
+
 export type PublicCategoryCounts = {
   restaurantCount: number;
   restaurantCoordinateReadyCount: number;
@@ -32,6 +35,7 @@ export type PublicCategoryCounts = {
   placeCount: number;
   lostPetCount: number;
   lastUpdatedAt: string | null;
+  placeCategoryCounts?: Partial<Record<PlaceDbCategory, number>>;
 };
 
 export type PublicRegions = {
@@ -100,6 +104,16 @@ export type PublicPlaceMapPoint = {
 
 export const getPlacesLightSnapshot = cache(async () => readPublicJsonFile<PublicPlaceLight[]>("places-light.json", []));
 export const getPlaceMapPointsSnapshot = cache(async () => readPublicJsonFile<PublicPlaceMapPoint[]>("place-map-points.json", []));
+
+// 카테고리별 경량 스냅샷 — places-light 전체 대신 카테고리 파일만 로드
+export const getPlacesByCategorySnapshot = cache(
+  async (category: PlaceDbCategory): Promise<PublicPlaceLight[]> =>
+    readPublicJsonFile<PublicPlaceLight[]>(`places/by-category/${category}.json`, []),
+);
+export const getPlaceMapPointsByCategorySnapshot = cache(
+  async (category: PlaceDbCategory): Promise<PublicPlaceMapPoint[]> =>
+    readPublicJsonFile<PublicPlaceMapPoint[]>(`place-map-points/by-category/${category}.json`, []),
+);
 
 export function normalizePublicRestaurantSearchParams(params: { q?: string; sido?: string; type?: string }) {
   return {

@@ -4,5 +4,12 @@
   "restaurantCoordinatePendingCount": 1439,
   "placeCount": 54271,
   "lostPetCount": 0,
-  "lastUpdatedAt": "2026-05-02T05:48:19.208Z"
+  "lastUpdatedAt": "2026-05-02T05:48:19.208Z",
+  "placeCategoryCounts": {
+    "ANIMAL_HOSPITAL": 6677,
+    "PHARMACY": 20213,
+    "GROOMING": 15677,
+    "DAYCARE": 9756,
+    "FUNERAL": 99
+  }
 }
