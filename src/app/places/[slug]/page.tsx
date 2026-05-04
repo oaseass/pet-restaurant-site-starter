@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, Phone, AlertCircle } from "lucide-react";
 import type { Metadata } from "next";
@@ -6,6 +5,7 @@ import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
 import { PlaceDirectionsSheet } from "@/components/PlaceDirectionsSheet";
+import { SmartLink } from "@/components/SmartLink";
 import { absoluteUrl } from "@/lib/brand";
 import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
 
@@ -108,14 +108,15 @@ export default async function PlaceSlugPage({
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
       {/* 빵 부스러기 */}
       <nav className="mb-5 flex items-center gap-2 text-xs font-bold text-[var(--muted)]">
-        <Link href="/" className="hover:text-[var(--ink)]">홈</Link>
+        <SmartLink href="/" className="hover:text-[var(--ink)]">홈</SmartLink>
         <span>›</span>
-        <Link
+        <SmartLink
           href={`/map?category=${mapCategoryKey}`}
+          pendingLabel="지도 여는 중..."
           className="hover:text-[var(--ink)]"
         >
           {categoryLabel} 지도
-        </Link>
+        </SmartLink>
         <span>›</span>
         <span className="text-[var(--ink)]">{place.name}</span>
       </nav>
@@ -203,21 +204,22 @@ export default async function PlaceSlugPage({
               </a>
             )}
             {place.lat !== null && place.lng !== null && (
-              <Link
+              <SmartLink
                 href={`/map?category=${mapCategoryKey}&lat=${place.lat.toFixed(6)}&lng=${place.lng.toFixed(6)}`}
+                pendingLabel="지도 여는 중..."
                 className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand)] px-5 py-2.5 text-sm font-black text-[var(--brand)]"
               >
                 <MapPin size={15} />
                 지도에서 보기
-              </Link>
+              </SmartLink>
             )}
             <PlaceDirectionsSheet name={place.name} lat={place.lat} lng={place.lng} address={navigationAddress} />
-            <Link
+            <SmartLink
               href={`/report?placeId=${place.id}&name=${encodeURIComponent(place.name)}`}
               className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--muted)]"
             >
               정보수정 제보
-            </Link>
+            </SmartLink>
           </div>
         </div>
       </section>
@@ -233,7 +235,7 @@ export default async function PlaceSlugPage({
           </div>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {nearby.map((item) => (
-              <Link
+              <SmartLink
                 key={item.id}
                 href={`/places/${item.id}`}
                 className="rounded-xl border border-[var(--line)] bg-white p-4 transition hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]"
@@ -255,7 +257,7 @@ export default async function PlaceSlugPage({
                     {item.businessStatus}
                   </span>
                 )}
-              </Link>
+              </SmartLink>
             ))}
           </div>
         </section>

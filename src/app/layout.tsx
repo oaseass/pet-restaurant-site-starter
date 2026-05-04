@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
+import { RouteProgressProvider } from "@/components/RouteProgress";
 import { BRAND_DESCRIPTION, BRAND_TITLE, absoluteUrl } from "@/lib/brand";
 
 const notoSansKr = Noto_Sans_KR({
@@ -38,12 +39,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="ko">
       <body className={`${notoSansKr.variable} min-h-screen bg-[var(--bg)] text-[var(--ink)] antialiased md:pb-0`}>
-        <div className="relative isolate flex min-h-screen flex-col">
-          <Header />
-          <div className="flex-1">{children}</div>
-          <Footer />
-          <MobileBottomNav />
-        </div>
+        <RouteProgressProvider>
+          <div className="relative isolate flex min-h-screen flex-col">
+            <Header />
+            <div className="flex-1">{children}</div>
+            <Footer />
+            <MobileBottomNav />
+          </div>
+        </RouteProgressProvider>
       </body>
     </html>
   );

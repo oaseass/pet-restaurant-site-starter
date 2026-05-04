@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Map, MapPin, AlertTriangle, Plus } from "lucide-react";
+import { SmartLink } from "@/components/SmartLink";
 
 const QUICK_ACTIONS = [
   {
@@ -43,9 +43,10 @@ export function HomeQuickActions() {
         }}
       >
         {QUICK_ACTIONS.map(({ icon: Icon, title, desc, href, cta }) => (
-          <Link
+          <SmartLink
             key={href}
             href={href}
+            pendingLabel={href === "/map" ? "지도 여는 중..." : "이동 중..."}
             style={{
               display: "flex",
               flexDirection: "column",
@@ -84,7 +85,7 @@ export function HomeQuickActions() {
             >
               {cta} →
             </div>
-          </Link>
+          </SmartLink>
         ))}
       </div>
     </section>

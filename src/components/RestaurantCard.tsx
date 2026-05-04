@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { MapPin } from "lucide-react";
+import { SmartLink } from "@/components/SmartLink";
 
 export type RestaurantCardItem = {
   id: string;
@@ -20,7 +20,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantCardItem 
     : restaurant.sido;
 
   return (
-    <Link
+    <SmartLink
       href={`/restaurants/${restaurant.id}`}
       style={{
         display: "flex",
@@ -85,7 +85,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantCardItem 
       }}>
         상세 →
       </span>
-    </Link>
+    </SmartLink>
   );
 }
 

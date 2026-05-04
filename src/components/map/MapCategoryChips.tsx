@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { clsx } from "clsx";
 import type { MapCategoryKey, MapCategoryOption } from "@/components/map/types";
+import { SmartLink } from "@/components/SmartLink";
 
 export function MapCategoryChips({
   categories,
@@ -15,9 +15,10 @@ export function MapCategoryChips({
         const isActive = category.key === activeCategory;
 
         return (
-          <Link
+          <SmartLink
             key={category.key}
             href={category.href}
+            pendingLabel="지도 여는 중..."
             className={clsx(
               "flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-bold transition",
               isActive
@@ -38,7 +39,7 @@ export function MapCategoryChips({
             ) : category.status !== "active" ? (
               <span className="text-[10px] text-[var(--muted)] opacity-70">준비</span>
             ) : null}
-          </Link>
+          </SmartLink>
         );
       })}
     </div>

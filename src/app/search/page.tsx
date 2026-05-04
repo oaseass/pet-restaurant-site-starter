@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot, getPlacesLightSnapshot } from "@/lib/public-data";
 import { searchRestaurantsSnapshot, searchGuidesStatic, searchPlacesSnapshot, getRecentRestaurants } from "@/lib/public-search";
@@ -6,6 +5,7 @@ import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 import { SearchFilterTabs } from "@/components/search/SearchFilterTabs";
 import { SearchResultsList } from "@/components/search/SearchResultsList";
 import { SearchSuggestionPanel } from "@/components/search/SearchSuggestionPanel";
+import { SmartLink } from "@/components/SmartLink";
 
 // force-dynamic 제거 — DB 조회 없음, JSON 스냅샷 기반
 
@@ -78,7 +78,7 @@ export default async function SearchPage({
       {keyword ? (
         <>
           {showShelterBanner && (
-            <Link
+            <SmartLink
               href="/lost-pets?tab=shelter"
               style={{
                 display: "flex",
@@ -94,7 +94,7 @@ export default async function SearchPage({
                 🐾 보호동물 공고 보기 → 보호중 4,700+건
               </span>
               <span style={{ fontSize: "11px", color: "#3b82f6", fontWeight: 700 }}>보러가기 →</span>
-            </Link>
+            </SmartLink>
           )}
           <SearchResultsList
             restaurants={restaurantResults}

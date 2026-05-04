@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { MapPin } from "lucide-react";
 import type { SearchRestaurantResult, SearchPlaceResult } from "@/lib/public-search";
 import type { GuideDoc } from "@/lib/platform-content";
+import { SmartLink } from "@/components/SmartLink";
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
@@ -46,8 +46,9 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
           )}
         </span>
         {keyword && (
-          <Link
+          <SmartLink
             href={`/map?q=${encodeURIComponent(keyword)}`}
+            pendingLabel="지도 여는 중..."
             style={{
               fontSize: "11px",
               fontWeight: 700,
@@ -60,7 +61,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
           >
             <MapPin size={11} />
             지도에서 보기
-          </Link>
+          </SmartLink>
         )}
       </div>
 
@@ -75,7 +76,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
           </p>
           <div style={{ display: "flex", justifyContent: "center", gap: "8px", flexWrap: "wrap" }}>
             {["서울", "광주", "카페", "조개"].map((kw) => (
-              <Link
+              <SmartLink
                 key={kw}
                 href={`/search?q=${encodeURIComponent(kw)}`}
                 style={{
@@ -89,7 +90,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                 }}
               >
                 {kw}
-              </Link>
+              </SmartLink>
             ))}
           </div>
         </div>
@@ -129,7 +130,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
               </span>
 
               {/* 업체명 */}
-              <Link
+              <SmartLink
                 href={`/restaurants/${r.id}`}
                 style={{
                   flex: 1,
@@ -143,7 +144,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                 }}
               >
                 {r.name}
-              </Link>
+              </SmartLink>
 
               {/* 지역 */}
               <span
@@ -174,8 +175,9 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
 
               {/* 액션 버튼 */}
               <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
-                <Link
+                <SmartLink
                   href={`/map?q=${encodeURIComponent(r.name)}`}
+                  pendingLabel="지도 여는 중..."
                   style={{
                     fontSize: "11px",
                     fontWeight: 700,
@@ -187,8 +189,8 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                   }}
                 >
                   지도
-                </Link>
-                <Link
+                </SmartLink>
+                <SmartLink
                   href={`/restaurants/${r.id}`}
                   style={{
                     fontSize: "11px",
@@ -201,7 +203,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                   }}
                 >
                   상세
-                </Link>
+                </SmartLink>
               </div>
             </div>
           ))}
@@ -270,8 +272,9 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
               </span>
               <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
                 {p.lat !== null && (
-                  <Link
+                  <SmartLink
                     href={`/map?q=${encodeURIComponent(p.name)}&category=${p.category.toLowerCase()}`}
+                    pendingLabel="지도 여는 중..."
                     style={{
                       fontSize: "11px",
                       fontWeight: 700,
@@ -283,9 +286,9 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                     }}
                   >
                     지도
-                  </Link>
+                  </SmartLink>
                 )}
-                <Link
+                <SmartLink
                   href={`/places/${p.id}`}
                   style={{
                     fontSize: "11px",
@@ -298,7 +301,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                   }}
                 >
                   상세
-                </Link>
+                </SmartLink>
               </div>
             </div>
           ))}
@@ -321,7 +324,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
             가이드
           </div>
           {guides.map((g) => (
-            <Link
+            <SmartLink
               key={g.slug}
               href={`/guide/${g.slug}`}
               style={{
@@ -369,7 +372,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
               <span style={{ fontSize: "11px", fontWeight: 700, color: "#7c3aed", flexShrink: 0 }}>
                 보기 →
               </span>
-            </Link>
+            </SmartLink>
           ))}
         </div>
       )}

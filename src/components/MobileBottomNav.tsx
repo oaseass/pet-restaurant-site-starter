@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { Home, Map, Megaphone, BookOpenText, UserRound } from "lucide-react";
 import { MOBILE_NAV } from "@/lib/platform-content";
+import { SmartLink } from "@/components/SmartLink";
 
 const ICONS = [Home, Map, Megaphone, BookOpenText, UserRound];
 
@@ -11,10 +11,10 @@ export function MobileBottomNav() {
         {MOBILE_NAV.map((item, index) => {
           const Icon = ICONS[index];
           return (
-            <Link key={item.href} href={item.href} className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-bold text-[var(--muted)] transition hover:bg-[var(--accent-soft)]">
+            <SmartLink key={item.href} href={item.href} className="flex min-h-11 flex-col items-center justify-center gap-1 rounded-2xl px-2 py-2 text-[11px] font-bold text-[var(--muted)] transition hover:bg-[var(--accent-soft)]">
               <Icon size={18} />
               <span>{item.label}</span>
-            </Link>
+            </SmartLink>
           );
         })}
       </div>

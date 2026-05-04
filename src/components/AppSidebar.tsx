@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   LayoutGrid,
@@ -16,6 +15,7 @@ import {
   BookOpen,
   PlusCircle,
 } from "lucide-react";
+import { SmartLink } from "@/components/SmartLink";
 
 const NAV_ITEMS: Array<{
   href: string;
@@ -44,7 +44,7 @@ export function AppSidebar() {
       {NAV_ITEMS.map(({ href, label, icon: Icon, exact }) => {
         const isActive = exact ? pathname === href : pathname.startsWith(href);
         return (
-          <Link
+          <SmartLink
             key={href}
             href={href}
             style={{
@@ -65,7 +65,7 @@ export function AppSidebar() {
           >
             <Icon size={15} style={{ flexShrink: 0, opacity: isActive ? 1 : 0.6 }} />
             {label}
-          </Link>
+          </SmartLink>
         );
       })}
     </nav>

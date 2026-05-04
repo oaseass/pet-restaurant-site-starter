@@ -1,4 +1,4 @@
-﻿import Link from "next/link";
+﻿import { SmartLink } from "@/components/SmartLink";
 import type { CategoryContent } from "@/lib/category-info-content";
 
 interface Props {
@@ -19,20 +19,20 @@ export function CategoryInfoPage({ data }: Props) {
           </p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
-          <Link href={data.ctaPrimary.href} style={{
+          <SmartLink href={data.ctaPrimary.href} pendingLabel={data.ctaPrimary.href.startsWith("/map") ? "지도 여는 중..." : "이동 중..."} style={{
             fontSize: "11px", fontWeight: 700, color: "#fff",
             background: "var(--brand)", borderRadius: "6px",
             padding: "5px 10px", textDecoration: "none",
           }}>
             {data.ctaPrimary.label}
-          </Link>
-          <Link href={data.ctaSecondary.href} style={{
+          </SmartLink>
+          <SmartLink href={data.ctaSecondary.href} pendingLabel={data.ctaSecondary.href.startsWith("/map") ? "지도 여는 중..." : "이동 중..."} style={{
             fontSize: "11px", fontWeight: 700, color: "#555",
             background: "#f3f4f6", border: "1px solid var(--line)",
             borderRadius: "6px", padding: "5px 10px", textDecoration: "none",
           }}>
             {data.ctaSecondary.label}
-          </Link>
+          </SmartLink>
         </div>
       </div>
 

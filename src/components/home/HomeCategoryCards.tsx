@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { SmartLink } from "@/components/SmartLink";
 
 interface CategoryCardItem {
   label: string;
@@ -91,7 +91,7 @@ export function HomeCategoryCards({ restaurantCount }: HomeCategoryCardsProps) {
         }}
       >
         {categories.map((c) => (
-          <Link
+          <SmartLink
             key={c.href}
             href={c.href}
             style={{
@@ -126,7 +126,7 @@ export function HomeCategoryCards({ restaurantCount }: HomeCategoryCardsProps) {
             >
               {c.cta} →
             </span>
-          </Link>
+          </SmartLink>
         ))}
       </div>
     </section>

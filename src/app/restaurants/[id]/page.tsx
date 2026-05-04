@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -6,6 +5,7 @@ import { PlaceDirectionsSheet } from "@/components/PlaceDirectionsSheet";
 import { OfficialDataNotice } from "@/components/OfficialDataNotice";
 import { AdSlot } from "@/components/AdSlot";
 import { CharacterImage } from "@/components/CharacterImage";
+import { SmartLink } from "@/components/SmartLink";
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -45,13 +45,14 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           </div>
           <div className="mt-6 flex flex-wrap gap-3">
             {restaurant.lat !== null && restaurant.lng !== null ? (
-              <Link
+              <SmartLink
                 href={`/map?category=restaurants&lat=${restaurant.lat.toFixed(6)}&lng=${restaurant.lng.toFixed(6)}`}
+                pendingLabel="지도 여는 중..."
                 className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand)] px-5 py-2.5 text-sm font-black text-[var(--brand)]"
               >
                 <MapPin size={15} />
                 지도에서 보기
-              </Link>
+              </SmartLink>
             ) : null}
             <PlaceDirectionsSheet name={restaurant.name} lat={restaurant.lat} lng={restaurant.lng} address={restaurant.address} />
           </div>
@@ -83,10 +84,10 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           </div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {nearby.map((item) => (
-              <Link key={item.id} href={`/restaurants/${item.id}`} className="card rounded-[1.8rem] p-5 transition hover:-translate-y-1 hover:shadow-soft">
+              <SmartLink key={item.id} href={`/restaurants/${item.id}`} className="card rounded-[1.8rem] p-5 transition hover:-translate-y-1 hover:shadow-soft">
                 <p className="font-black">{item.name}</p>
                 <p className="mt-2 text-sm text-[#655a53]">{item.address}</p>
-              </Link>
+              </SmartLink>
             ))}
           </div>
         </section>

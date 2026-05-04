@@ -1,8 +1,8 @@
-﻿import Link from "next/link";
-import { MapPin } from "lucide-react";
+﻿import { MapPin } from "lucide-react";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 import { LocationSearchButton } from "@/components/LocationSearchButton";
+import { SmartLink } from "@/components/SmartLink";
 import { HomeQuickActions } from "@/components/home/HomeQuickActions";
 import { HomeCategoryCards } from "@/components/home/HomeCategoryCards";
 import { HomeRestaurantHighlights } from "@/components/home/HomeRestaurantHighlights";
@@ -54,8 +54,9 @@ export default async function HomePage() {
           }}
         >
           <LocationSearchButton />
-          <Link
+          <SmartLink
             href="/map"
+            pendingLabel="지도 여는 중..."
             style={{
               display: "flex",
               alignItems: "center",
@@ -73,7 +74,7 @@ export default async function HomePage() {
           >
             <MapPin size={14} />
             지도에서 보기
-          </Link>
+          </SmartLink>
         </div>
       </div>
 
@@ -105,9 +106,9 @@ export default async function HomePage() {
         <div style={{ fontWeight: 700, color: "#666", marginBottom: "4px" }}>데이터 안내</div>
         식당 정보는 식품안전나라 공공데이터를 기반으로 합니다.
         누락·오류 정보는{" "}
-        <Link href="/business" style={{ color: "var(--brand)", fontWeight: 700, textDecoration: "none" }}>
+        <SmartLink href="/business" style={{ color: "var(--brand)", fontWeight: 700, textDecoration: "none" }}>
           업체등록
-        </Link>
+        </SmartLink>
         으로 제보해주세요.
       </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Search, MapPin, X } from "lucide-react";
 import type { SuggestionItem } from "@/lib/public-search";
+import { useRouteProgress } from "@/components/RouteProgress";
 
 interface InstantSearchBoxProps {
   defaultValue?: string;
@@ -22,7 +23,9 @@ export function InstantSearchBox({
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
   const [open, setOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [pendingAction, setPendingAction] = useState<"search" | "map" | "detail" | null>(null);
   const router = useRouter();
+  const { start } = useRouteProgress();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -45,21 +48,28 @@ export function InstantSearchBox({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const q = e.target.value;
     setValue(q);
+    setPendingAction(null);
     setSelectedIndex(-1);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => fetchSuggestions(q), 180);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.SyntheticEvent) => {
     e.preventDefault();
     setOpen(false);
     const q = value.trim();
-    if (q) router.push(`/search?q=${encodeURIComponent(q)}`);
+    if (!q) return;
+    setPendingAction("search");
+    start("검색 중...");
+    router.push(`/search?q=${encodeURIComponent(q)}`);
   };
 
   const handleSuggestionClick = (item: SuggestionItem) => {
     setOpen(false);
     setValue(item.name);
+    const isMapResult = item.lat !== null;
+    setPendingAction(isMapResult ? "map" : "detail");
+    start(isMapResult ? "지도 여는 중..." : "이동 중...");
     if (item.lat !== null) {
       router.push(`/map?q=${encodeURIComponent(item.name)}`);
     } else {
@@ -70,6 +80,8 @@ export function InstantSearchBox({
   const handleMapSearch = () => {
     setOpen(false);
     const q = value.trim();
+    setPendingAction("map");
+    start("지도 여는 중...");
     router.push(q ? `/map?q=${encodeURIComponent(q)}` : "/map");
   };
 
@@ -179,6 +191,7 @@ export function InstantSearchBox({
         {/* 검색 버튼 */}
         <button
           type="submit"
+          disabled={pendingAction === "search"}
           style={{
             height: btnHeight,
             padding: "0 14px",
@@ -188,11 +201,12 @@ export function InstantSearchBox({
             borderRadius: "10px",
             fontSize,
             fontWeight: 700,
-            cursor: "pointer",
+            cursor: pendingAction === "search" ? "wait" : "pointer",
+            opacity: pendingAction === "search" ? 0.72 : 1,
             whiteSpace: "nowrap",
           }}
         >
-          검색
+          {pendingAction === "search" ? "검색 중..." : "검색"}
         </button>
 
         {/* 지도 버튼 */}
@@ -200,6 +214,7 @@ export function InstantSearchBox({
           <button
             type="button"
             onClick={handleMapSearch}
+            disabled={pendingAction === "map"}
             style={{
               height: btnHeight,
               padding: "0 12px",
@@ -209,7 +224,8 @@ export function InstantSearchBox({
               borderRadius: "10px",
               fontSize: "12px",
               fontWeight: 700,
-              cursor: "pointer",
+              cursor: pendingAction === "map" ? "wait" : "pointer",
+              opacity: pendingAction === "map" ? 0.72 : 1,
               whiteSpace: "nowrap",
               display: "flex",
               alignItems: "center",
@@ -217,7 +233,7 @@ export function InstantSearchBox({
             }}
           >
             <MapPin size={12} />
-            지도
+            {pendingAction === "map" ? "지도 여는 중..." : "지도"}
           </button>
         )}
       </form>

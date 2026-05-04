@@ -197,6 +197,12 @@ a { color: inherit; text-decoration: none; }
   50% { transform: translate3d(0, -5px, 0) rotate(-1deg); }
 }
 
+@keyframes route-progress {
+  0% { transform: translateX(-110%); }
+  60% { transform: translateX(85%); }
+  100% { transform: translateX(210%); }
+}
+
 @media (max-width: 640px) {
   .display-title {
     font-size: clamp(1.95rem, 8vw, 2.8rem);

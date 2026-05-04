@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { PublicRestaurantLight } from "@/lib/public-data";
+import { SmartLink } from "@/components/SmartLink";
 
 interface HomeRestaurantHighlightsProps {
   restaurants: PublicRestaurantLight[];
@@ -21,12 +21,12 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
         <div style={{ fontSize: "11px", fontWeight: 800, color: "#999", letterSpacing: "0.05em" }}>
           최근 등록 식당
         </div>
-        <Link
+        <SmartLink
           href="/restaurants"
           style={{ fontSize: "11px", fontWeight: 700, color: "var(--brand)", textDecoration: "none" }}
         >
           전체 보기 →
-        </Link>
+        </SmartLink>
       </div>
 
       <div
@@ -76,8 +76,9 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
               {r.address}
             </div>
             <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
-              <Link
+              <SmartLink
                 href={`/map?q=${encodeURIComponent(r.name)}`}
+                pendingLabel="지도 여는 중..."
                 style={{
                   fontSize: "11px",
                   fontWeight: 700,
@@ -89,8 +90,8 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
                 }}
               >
                 지도
-              </Link>
-              <Link
+              </SmartLink>
+              <SmartLink
                 href={`/restaurants/${r.id}`}
                 style={{
                   fontSize: "11px",
@@ -103,13 +104,13 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
                 }}
               >
                 상세
-              </Link>
+              </SmartLink>
             </div>
           </div>
         ))}
       </div>
 
-      <Link
+      <SmartLink
         href="/restaurants"
         style={{
           display: "flex",
@@ -127,7 +128,7 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
         }}
       >
         전체 식당 보기 →
-      </Link>
+      </SmartLink>
     </section>
   );
 }

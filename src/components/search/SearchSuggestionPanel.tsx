@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { PublicRestaurantLight } from "@/lib/public-data";
+import { SmartLink } from "@/components/SmartLink";
 
 const QUICK_REGIONS = ["서울", "경기", "광주", "부산", "제주", "강원", "대구", "인천"];
 
@@ -42,7 +42,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
           {QUICK_REGIONS.map((r) => (
-            <Link
+            <SmartLink
               key={r}
               href={`/search?q=${encodeURIComponent(r)}`}
               style={{
@@ -57,7 +57,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
               }}
             >
               {r}
-            </Link>
+            </SmartLink>
           ))}
         </div>
       </div>
@@ -73,7 +73,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
           {QUICK_KEYWORDS.map((k) => (
-            <Link
+            <SmartLink
               key={k.q}
               href={`/search?q=${encodeURIComponent(k.q)}`}
               style={{
@@ -88,7 +88,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
               }}
             >
               {k.label}
-            </Link>
+            </SmartLink>
           ))}
         </div>
       </div>
@@ -102,7 +102,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
             최근 등록
           </div>
           {recentRestaurants.map((r) => (
-            <Link
+            <SmartLink
               key={r.id}
               href={`/restaurants/${r.id}`}
               style={{
@@ -147,7 +147,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
               <span style={{ fontSize: "11px", color: "#aaa", flexShrink: 0 }}>
                 {r.sido} {r.sigungu ?? ""}
               </span>
-            </Link>
+            </SmartLink>
           ))}
         </div>
       )}
@@ -161,7 +161,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
         </div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "5px" }}>
           {GUIDE_SHORTCUTS.map((g) => (
-            <Link
+            <SmartLink
               key={g.href}
               href={g.href}
               style={{
@@ -176,7 +176,7 @@ export function SearchSuggestionPanel({ recentRestaurants }: SearchSuggestionPan
               }}
             >
               {g.label}
-            </Link>
+            </SmartLink>
           ))}
         </div>
       </div>

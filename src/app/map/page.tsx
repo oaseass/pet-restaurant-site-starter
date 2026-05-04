@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { Compass, Search } from "lucide-react";
 import { MapCategoryChips } from "@/components/map/MapCategoryChips";
 import { MapLocationButton } from "@/components/map/MapLocationButton";
 import { MapShell } from "@/components/map/MapShell";
+import { PendingSubmitButton } from "@/components/PendingSubmitButton";
+import { SmartLink } from "@/components/SmartLink";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { REGION_OPTIONS } from "@/lib/platform-content";
 import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesByCategorySnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
@@ -510,7 +511,7 @@ export default async function MapPage({
           </p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
-          <Link href="/restaurants" className="btn-secondary" style={{ minHeight: "34px", padding: "0 12px", fontSize: "12px" }}>전체 목록</Link>
+          <SmartLink href="/restaurants" className="btn-secondary" style={{ minHeight: "34px", padding: "0 12px", fontSize: "12px" }}>전체 목록</SmartLink>
         </div>
       </div>
 
@@ -555,21 +556,23 @@ export default async function MapPage({
             ))}
           </select>
 
-          <button
+          <PendingSubmitButton
             type="submit"
+            pendingLabel="검색 중..."
             style={{ height: "42px", borderRadius: "10px", fontSize: "13px" }}
             className="bg-[var(--brand)] px-4 font-black text-white"
           >
             검색
-          </button>
+          </PendingSubmitButton>
 
-          <Link
+          <SmartLink
             href={activeCategory === "all" ? "/map" : `/map?category=${activeCategory}`}
+            pendingLabel="지도 여는 중..."
             style={{ height: "42px", borderRadius: "10px", fontSize: "13px" }}
             className="flex items-center border border-[var(--line)] bg-white px-3 font-bold text-[var(--ink)]"
           >
             전체
-          </Link>
+          </SmartLink>
         </form>
 
         <div className="mt-2">
@@ -607,23 +610,24 @@ export default async function MapPage({
               <p className="text-[11px] font-black text-[var(--muted)]">카테고리별 장소</p>
               <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {categories.filter((c) => c.key !== "all" && c.key !== "lost-pets").map((cat) => (
-                  <Link
+                  <SmartLink
                     key={cat.key}
                     href={cat.href}
+                    pendingLabel="지도 여는 중..."
                     className="flex flex-col rounded-[1rem] border border-[var(--line)] bg-white p-4 transition hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]"
                   >
                     <span className="text-base font-black text-[var(--ink)]">{cat.label}</span>
                     <span className="mt-1 text-xl font-black tracking-tight text-[var(--brand)]">{cat.countLabel}</span>
-                  </Link>
+                  </SmartLink>
                 ))}
               </div>
               <div className="mt-5">
-                <Link
+                <SmartLink
                   href="/lost-pets?tab=shelter"
                   className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--ink)] hover:bg-[#f9faf8]"
                 >
                   보호동물 공고 바로가기
-                </Link>
+                </SmartLink>
               </div>
               <p className="mt-5 text-xs text-[var(--muted)]">검색 또는 현재 위치 선택 후 지도가 열립니다.</p>
             </div>

@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { MapPin, Phone } from "lucide-react";
 import { SourceBadge } from "@/components/SourceBadge";
+import { SmartLink } from "@/components/SmartLink";
 import type { PlaceCategory, SourceType } from "@prisma/client";
 
 export function PlaceCard({
@@ -51,5 +51,5 @@ export function PlaceCard({
     return <article className="card rounded-[1rem] p-5">{body}</article>;
   }
 
-  return <Link href={item.href} className="card block rounded-[1rem] p-5 transition hover:border-[rgba(31,107,91,0.2)] hover:bg-[#fcfbf9]">{body}</Link>;
+  return <SmartLink href={item.href} className="card block rounded-[1rem] p-5 transition hover:border-[rgba(31,107,91,0.2)] hover:bg-[#fcfbf9]">{body}</SmartLink>;
 }

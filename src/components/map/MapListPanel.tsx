@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { clsx } from "clsx";
 import type { MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
+import { SmartLink } from "@/components/SmartLink";
 
 export function MapListPanel({
   title,
@@ -58,13 +58,13 @@ export function MapListPanel({
           <p className="text-[11px] font-black text-[var(--muted)]">검색 결과 없음</p>
           <h3 className="mt-3 text-2xl font-black tracking-tight text-[var(--ink)]">{emptyState.title}</h3>
           <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{emptyState.description}</p>
-          <Link href={emptyState.href} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">
+          <SmartLink href={emptyState.href} className="mt-6 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">
             {emptyState.hrefLabel}
-          </Link>
+          </SmartLink>
           {emptyState.extraLinks?.map((link) => (
-            <Link key={link.href} href={link.href} className="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] px-4 py-2 text-sm font-black text-[var(--brand)]">
+            <SmartLink key={link.href} href={link.href} className="mt-2 inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] px-4 py-2 text-sm font-black text-[var(--brand)]">
               {link.label}
-            </Link>
+            </SmartLink>
           ))}
         </div>
       ) : (
@@ -122,9 +122,9 @@ export function MapListPanel({
                     </button>
                     <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
                       <p className="text-xs font-bold text-[var(--muted)]">기준일 {item.dataUpdatedLabel}</p>
-                      <Link href={item.href} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-black text-white">
+                      <SmartLink href={item.href} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-black text-white">
                         상세보기
-                      </Link>
+                      </SmartLink>
                     </div>
                   </article>
                 );
