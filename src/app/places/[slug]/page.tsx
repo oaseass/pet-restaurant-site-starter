@@ -45,6 +45,24 @@ const SOURCE_LABELS: Record<string, string> = {
   OFFICIAL_DATA: "공공 데이터",
 };
 
+function normalizeDisplayName(name: string) {
+  return name.trim().replace(/^#+\s*/, "").trim();
+}
+
+function isLowConfidencePlaceName(name: string) {
+  const trimmed = normalizeDisplayName(name);
+  if (!trimmed) return true;
+  if (/^#?[a-z_-]+$/i.test(trimmed) && !/[가-힣]/.test(trimmed)) return true;
+  return false;
+}
+
+function getDisplayPlaceName(place: { name: string; sido?: string | null; sigungu?: string | null }, categoryLabel: string) {
+  const cleanedName = normalizeDisplayName(place.name);
+  if (!isLowConfidencePlaceName(place.name)) return cleanedName;
+  const region = [place.sido, place.sigungu].filter(Boolean).join(" ");
+  return region ? `${region} ${categoryLabel}` : `${categoryLabel} 업체`;
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -70,9 +88,10 @@ export async function generateMetadata({
 
   const categoryLabel = PLACE_CATEGORY_LABELS[place.category] ?? place.category;
   const region = [place.sido, place.sigungu].filter(Boolean).join(" ");
+  const displayName = getDisplayPlaceName(place, categoryLabel);
   return {
-    title: `${place.name} | ${categoryLabel} | 댕냥지도`,
-    description: `${region} ${categoryLabel} ${place.name} 상세 정보. 주소, 전화번호, 영업상태를 확인하세요.`,
+    title: `${displayName} | ${categoryLabel} | 댕냥지도`,
+    description: `${region} ${categoryLabel} ${displayName} 상세 정보. 주소, 전화번호, 영업상태를 확인하세요.`,
   };
 }
 
@@ -93,6 +112,7 @@ export default async function PlaceSlugPage({
   if (!place) notFound();
 
   const categoryLabel = PLACE_CATEGORY_LABELS[place.category] ?? place.category;
+  const displayName = getDisplayPlaceName(place, categoryLabel);
   const mapCategoryKey = PLACE_CATEGORY_MAP_KEY[place.category] ?? "all";
   const sourceLabel = SOURCE_LABELS[place.sourceName ?? ""] ?? "공공 데이터";
 
@@ -101,22 +121,30 @@ export default async function PlaceSlugPage({
     ? [place.sido, place.sigungu].filter(Boolean).join(" ") || "주소 일부 비공개"
     : (place.roadAddress ?? place.address ?? "주소 정보 없음");
   const navigationAddress = displayAddress === "주소 정보 없음" ? null : displayAddress;
-  const reportHref = `/report?type=place&id=${place.id}&name=${encodeURIComponent(place.name)}`;
+  const reportHref = `/report?type=place&id=${place.id}&name=${encodeURIComponent(displayName)}`;
   const reviewHref = `/reviews/new?targetType=PLACE&targetId=${place.id}`;
   const mapHref = place.lat !== null && place.lng !== null
     ? `/map?category=${mapCategoryKey}&lat=${place.lat.toFixed(6)}&lng=${place.lng.toFixed(6)}`
-    : `/map?category=${mapCategoryKey}&q=${encodeURIComponent(place.name)}`;
+    : `/map?category=${mapCategoryKey}&q=${encodeURIComponent(displayName)}`;
 
   // 같은 지역 · 카테고리 추천 (상위 5개)
   const type = place.category as "ANIMAL_HOSPITAL" | "PHARMACY" | "GROOMING" | "DAYCARE" | "FUNERAL";
-  const [allSameCategory, reviewSummary, enrichment] = await Promise.all([
+  const supportCategoryTypes: Array<"ANIMAL_HOSPITAL" | "PHARMACY"> = type === "ANIMAL_HOSPITAL" ? ["PHARMACY"] : type === "PHARMACY" ? ["ANIMAL_HOSPITAL"] : ["ANIMAL_HOSPITAL", "PHARMACY"];
+  const [allSameCategory, supportCategoryGroups, reviewSummary, enrichment] = await Promise.all([
     getPlacesByCategorySnapshot(type),
+    Promise.all(supportCategoryTypes.map((category) => getPlacesByCategorySnapshot(category))),
     getApprovedReviewSummary("PLACE", place.id),
     getBusinessEnrichmentForTarget("PLACE", place.id),
   ]);
+  const reliableEnrichment = enrichment && enrichment.matchScore >= 0.85 ? enrichment : null;
+  const bestPhone = place.phone ?? reliableEnrichment?.phone ?? null;
   const nearby = allSameCategory
     .filter((p) => p.id !== place.id && p.sido === place.sido && p.sigungu === place.sigungu)
     .slice(0, 5);
+  const supportPlaces = supportCategoryGroups
+    .flat()
+    .filter((p) => p.id !== place.id && p.sido === place.sido && p.sigungu === place.sigungu)
+    .slice(0, 6);
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
@@ -132,7 +160,7 @@ export default async function PlaceSlugPage({
           {categoryLabel} 지도
         </SmartLink>
         <span>›</span>
-        <span className="text-[var(--ink)]">{place.name}</span>
+        <span className="text-[var(--ink)]">{displayName}</span>
       </nav>
 
       {/* 메인 카드 */}
@@ -157,7 +185,7 @@ export default async function PlaceSlugPage({
             )}
           </div>
 
-          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{place.name}</h1>
+          <h1 className="text-3xl font-black tracking-tight sm:text-4xl">{displayName}</h1>
 
           {/* 주소 */}
           <p className="mt-4 flex items-start gap-2 text-[#5f5550]">
@@ -186,21 +214,22 @@ export default async function PlaceSlugPage({
           {/* 상세 정보 그리드 */}
           <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
             <InfoRow label="분류" value={categoryLabel} />
-            <InfoRow label="전화번호" value={place.phone ?? "전화번호 정보 없음"} />
+            <InfoRow label="전화번호" value={bestPhone ?? "전화번호 정보 없음"} />
             {place.eupmyeondong && <InfoRow label="읍면동" value={place.eupmyeondong} />}
             <InfoRow
               label="데이터 기준일"
               value={new Date(place.updatedAt).toLocaleDateString("ko-KR")}
             />
+            {reliableEnrichment?.externalCategory ? <InfoRow label="외부 분류" value={reliableEnrichment.externalCategory} /> : null}
             <InfoRow label="출처" value={sourceLabel} />
           </div>
 
           <DetailActionBar
-            name={place.name}
+            name={displayName}
             address={navigationAddress}
             lat={place.lat}
             lng={place.lng}
-            phone={place.phone}
+            phone={bestPhone}
             reportHref={reportHref}
             reviewHref={reviewHref}
             mapHref={mapHref}
@@ -208,15 +237,20 @@ export default async function PlaceSlugPage({
         </div>
       </section>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+      {reliableEnrichment ? (
+        <div className="mt-8">
+          <BusinessEnrichmentPanel enrichment={enrichment} category={type} reportHref={reportHref} reviewHref={reviewHref} />
+        </div>
+      ) : null}
+
+      <div className="mt-6">
         <VisitInfoPanel category={type} />
-        <BusinessEnrichmentPanel enrichment={enrichment} category={type} reportHref={reportHref} reviewHref={reviewHref} />
       </div>
 
       <ReviewSection
         targetType="PLACE"
         targetId={place.id}
-        name={place.name}
+        name={displayName}
         address={navigationAddress}
         lat={place.lat}
         lng={place.lng}
@@ -240,7 +274,7 @@ export default async function PlaceSlugPage({
                 href={`/places/${item.id}`}
                 className="rounded-xl border border-[var(--line)] bg-white p-4 transition hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]"
               >
-                <p className="font-black text-[var(--ink)] leading-snug">{item.name}</p>
+                <p className="font-black text-[var(--ink)] leading-snug">{getDisplayPlaceName(item, categoryLabel)}</p>
                 {(item.roadAddress ?? item.address) && (
                   <p className="mt-1 text-xs text-[var(--muted)] line-clamp-1">
                     {item.roadAddress ?? item.address}
@@ -259,6 +293,39 @@ export default async function PlaceSlugPage({
                 )}
               </SmartLink>
             ))}
+          </div>
+        </section>
+      )}
+
+      {supportPlaces.length > 0 && (
+        <section className="mt-10">
+          <div className="mb-4">
+            <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">관련 장소</p>
+            <h2 className="mt-2 text-xl font-black tracking-tight">
+              {[place.sido, place.sigungu].filter(Boolean).join(" ")} 근처 병원·약국
+            </h2>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {supportPlaces.map((item) => {
+              const relatedCategoryLabel = PLACE_CATEGORY_LABELS[item.category] ?? item.category;
+
+              return (
+                <SmartLink
+                  key={item.id}
+                  href={`/places/${item.id}`}
+                  className="rounded-xl border border-[var(--line)] bg-white p-4 transition hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]"
+                >
+                  <span className="inline-flex rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-black text-[#2563eb]">{relatedCategoryLabel}</span>
+                  <p className="mt-3 font-black leading-snug text-[var(--ink)]">{getDisplayPlaceName(item, relatedCategoryLabel)}</p>
+                  {(item.roadAddress ?? item.address) && (
+                    <p className="mt-1 line-clamp-1 text-xs text-[var(--muted)]">
+                      {item.roadAddress ?? item.address}
+                    </p>
+                  )}
+                  <span className="mt-3 inline-flex text-[11px] font-black text-[var(--brand)]">상세보기 →</span>
+                </SmartLink>
+              );
+            })}
           </div>
         </section>
       )}

@@ -1,6 +1,6 @@
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot, getPlacesLightSnapshot } from "@/lib/public-data";
-import { searchRestaurantsSnapshot, searchGuidesStatic, searchPlacesSnapshot, getRecentRestaurants } from "@/lib/public-search";
+import { detectPlaceCategoryFromKeyword, searchRestaurantsSnapshot, searchGuidesStatic, searchPlacesSnapshot, getRecentRestaurants } from "@/lib/public-search";
 import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 import { SearchFilterTabs } from "@/components/search/SearchFilterTabs";
 import { SearchResultsList } from "@/components/search/SearchResultsList";
@@ -17,26 +17,32 @@ export default async function SearchPage({
   const params = await searchParams;
   const keyword = params.q?.trim() ?? "";
   const category = params.category ?? "all";
+  const placeCategoryIntent = category === "all" ? detectPlaceCategoryFromKeyword(keyword) : null;
+  const isRestaurantOnly = category === "restaurants";
+  const isGuideOnly = category === "guide";
+  const shouldShowRestaurants = !isGuideOnly && (isRestaurantOnly || !placeCategoryIntent);
+  const shouldShowPlaces = !isRestaurantOnly && !isGuideOnly && Boolean(keyword);
 
   const [counts, restaurants, places] = await Promise.all([
     getCategoryCountsSnapshot(),
     getRestaurantsLightSnapshot(),
-    keyword ? getPlacesLightSnapshot() : Promise.resolve([]),
+    shouldShowPlaces ? getPlacesLightSnapshot() : Promise.resolve([]),
   ]);
 
-  const restaurantResults = searchRestaurantsSnapshot(restaurants, {
+  const restaurantResults = shouldShowRestaurants ? searchRestaurantsSnapshot(restaurants, {
     q: keyword,
     sido: params.sido,
     limit: 50,
-  });
+  }) : [];
 
-  const placeResults = searchPlacesSnapshot(places, {
+  const placeResults = shouldShowPlaces ? searchPlacesSnapshot(places, {
     q: keyword,
     sido: params.sido,
+    category: placeCategoryIntent ?? undefined,
     limit: 30,
-  });
+  }) : [];
 
-  const guideResults = keyword ? searchGuidesStatic(keyword) : [];
+  const guideResults = keyword && !isRestaurantOnly ? searchGuidesStatic(keyword) : [];
   const recentRestaurants = keyword ? [] : getRecentRestaurants(restaurants, 10);
 
   const SHELTER_KEYWORDS = ["유기견", "유기묘", "유기동물", "보호소", "보호동물", "구조동물", "입양", "보호중"];

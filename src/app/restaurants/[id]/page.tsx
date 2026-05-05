@@ -16,7 +16,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
   const restaurant = await prisma.restaurant.findUnique({ where: { id } });
   if (!restaurant || restaurant.status !== "ACTIVE") notFound();
 
-  const [nearby, reviewSummary, enrichment] = await Promise.all([
+  const [nearby, relatedCarePlaces, reviewSummary, enrichment] = await Promise.all([
     prisma.restaurant.findMany({
       where: {
         status: "ACTIVE",
@@ -27,9 +27,21 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       orderBy: { name: "asc" },
       take: 6,
     }),
+    prisma.place.findMany({
+      where: {
+        isActive: true,
+        sido: restaurant.sido,
+        sigungu: restaurant.sigungu,
+        category: { in: ["ANIMAL_HOSPITAL", "PHARMACY"] },
+      },
+      orderBy: { name: "asc" },
+      take: 6,
+    }),
     getApprovedReviewSummary("RESTAURANT", restaurant.id),
     getBusinessEnrichmentForTarget("RESTAURANT", restaurant.id),
   ]);
+  const reliableEnrichment = enrichment && enrichment.matchScore >= 0.85 ? enrichment : null;
+  const bestPhone = reliableEnrichment?.phone ?? null;
   const regionLabel = `${restaurant.sido}${restaurant.sigungu ? ` ${restaurant.sigungu}` : ""}`;
   const reportHref = `/report?type=restaurant&id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}`;
   const reviewHref = `/reviews/new?targetType=RESTAURANT&targetId=${restaurant.id}`;
@@ -51,8 +63,9 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
             <Info label="업종" value={restaurant.businessType} />
             <Info label="지역" value={regionLabel} />
-            <Info label="전화번호" value="전화번호 정보 없음" />
+            <Info label="전화번호" value={bestPhone ?? "전화번호 정보 없음"} />
             <Info label="기준일" value={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")} />
+            {reliableEnrichment?.externalCategory ? <Info label="외부 분류" value={reliableEnrichment.externalCategory} /> : null}
             <Info label="출처" value="식품안전나라 공개 정보" />
           </div>
           <DetailActionBar
@@ -60,7 +73,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
             address={restaurant.address}
             lat={restaurant.lat}
             lng={restaurant.lng}
-            phone={null}
+            phone={bestPhone}
             reportHref={reportHref}
             reviewHref={reviewHref}
             mapHref={mapHref}
@@ -68,13 +81,13 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
         </div>
       </section>
 
-      <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
-        <VisitInfoPanel category="RESTAURANT" />
-        <VisitChecklist />
+      <div className="mt-8">
+        <BusinessEnrichmentPanel enrichment={enrichment} category="RESTAURANT" reportHref={reportHref} reviewHref={reviewHref} />
       </div>
 
-      <div className="mt-6">
-        <BusinessEnrichmentPanel enrichment={enrichment} category="RESTAURANT" reportHref={reportHref} reviewHref={reviewHref} />
+      <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+        <VisitInfoPanel category="RESTAURANT" />
+        <VisitChecklist />
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
@@ -129,6 +142,40 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
                   </SmartLink>
                   <SmartLink
                     href={item.lat !== null && item.lng !== null ? `/map?category=restaurants&lat=${item.lat.toFixed(6)}&lng=${item.lng.toFixed(6)}` : `/map?category=restaurants&q=${encodeURIComponent(item.name)}`}
+                    pendingLabel="지도 여는 중..."
+                    className="inline-flex min-h-9 items-center rounded-full border border-[var(--brand)] px-3 py-1.5 text-xs font-black text-[var(--brand)]"
+                  >
+                    지도보기
+                  </SmartLink>
+                </div>
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {relatedCarePlaces.length > 0 ? (
+        <section className="mt-10">
+          <div className="mb-4 flex items-end justify-between gap-4">
+            <div>
+              <p className="eyebrow">Care Nearby</p>
+              <h2 className="mt-4 text-2xl font-black tracking-tight">같은 지역 병원·약국</h2>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {relatedCarePlaces.map((item) => (
+              <article key={item.id} className="card rounded-[1rem] p-4">
+                <SmartLink href={`/places/${item.id}`} className="block rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
+                  <span className="badge">{item.category === "PHARMACY" ? "동물약국" : "동물병원"}</span>
+                  <p className="mt-3 font-black leading-snug text-[var(--ink)]">{item.name}</p>
+                  <p className="mt-2 line-clamp-2 text-sm font-bold text-[var(--muted)]">{item.roadAddress ?? item.address ?? regionLabel}</p>
+                </SmartLink>
+                <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
+                  <SmartLink href={`/places/${item.id}`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-black text-white">
+                    상세보기
+                  </SmartLink>
+                  <SmartLink
+                    href={item.lat !== null && item.lng !== null ? `/map?category=${item.category === "PHARMACY" ? "pharmacy" : "hospitals"}&lat=${item.lat.toFixed(6)}&lng=${item.lng.toFixed(6)}` : `/map?category=${item.category === "PHARMACY" ? "pharmacy" : "hospitals"}&q=${encodeURIComponent(item.name)}`}
                     pendingLabel="지도 여는 중..."
                     className="inline-flex min-h-9 items-center rounded-full border border-[var(--brand)] px-3 py-1.5 text-xs font-black text-[var(--brand)]"
                   >

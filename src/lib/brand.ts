@@ -6,7 +6,8 @@ export const BRAND_DESCRIPTION =
   "댕냥지도는 반려견·반려묘 보호자를 위한 생활형 지도 서비스입니다. 반려동물 동반 식당, 동물병원, 미용, 유치원, 여행, 장례, 실종 제보 정보를 한곳에서 확인하세요.";
 
 export function getSiteUrl() {
-  return (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").trim();
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  return siteUrl || "http://localhost:3000";
 }
 
 export function absoluteUrl(path = "/") {

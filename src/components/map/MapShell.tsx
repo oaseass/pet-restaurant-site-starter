@@ -114,8 +114,8 @@ function buildMapAreaCopy({
 
   if (mapStatus === "unavailable") {
     return {
-      title: "지도를 준비 중입니다.",
-      description: "아래 목록에서 먼저 확인해 주세요.",
+      title: "지도 표시를 바로 사용할 수 없습니다.",
+      description: "아래 목록에서 장소를 먼저 확인하고 상세 페이지의 외부 지도 링크를 이용해 주세요.",
     };
   }
 

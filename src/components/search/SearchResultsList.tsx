@@ -18,6 +18,25 @@ interface SearchResultsListProps {
   keyword: string;
 }
 
+function normalizeDisplayName(name: string) {
+  return name.trim().replace(/^#+\s*/, "").trim();
+}
+
+function isLowConfidencePlaceName(name: string) {
+  const trimmed = normalizeDisplayName(name);
+  if (!trimmed) return true;
+  if (/^#?[a-z_-]+$/i.test(trimmed) && !/[가-힣]/.test(trimmed)) return true;
+  return false;
+}
+
+function getDisplayPlaceName(place: SearchPlaceResult) {
+  const cleanedName = normalizeDisplayName(place.name);
+  if (!isLowConfidencePlaceName(place.name)) return cleanedName;
+  const label = place.categoryLabel ?? PLACE_CATEGORY_LABELS[place.category] ?? "시설";
+  const region = [place.sido, place.sigungu].filter(Boolean).join(" ");
+  return region ? `${region} ${label}` : `${label} 업체`;
+}
+
 export function SearchResultsList({ restaurants, places = [], guides, keyword }: SearchResultsListProps) {
   const total = restaurants.length + places.length + guides.length;
 
@@ -127,7 +146,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                 {/* 분류 뱃지 */}
                 <span
                   style={{
-                    width: "34px",
+                    minWidth: "34px",
                     fontSize: "10px",
                     fontWeight: 700,
                     color: "#1f6b5b",
@@ -262,7 +281,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
               >
                 <span
                   style={{
-                    width: "34px",
+                    minWidth: "34px",
                     fontSize: "10px",
                     fontWeight: 700,
                     color: "#0369a1",
@@ -271,9 +290,10 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                     padding: "2px 3px",
                     flexShrink: 0,
                     textAlign: "center",
+                    whiteSpace: "nowrap",
                   }}
                 >
-                  {PLACE_CATEGORY_LABELS[p.category] ?? p.category}
+                  {p.categoryLabel ?? PLACE_CATEGORY_LABELS[p.category] ?? p.category}
                 </span>
                 <span
                   style={{
@@ -285,7 +305,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                     whiteSpace: "nowrap",
                   }}
                 >
-                  {p.name}
+                  {getDisplayPlaceName(p)}
                 </span>
                 <span style={{ fontSize: "11px", color: "#888", flexShrink: 0, display: "flex", alignItems: "center", gap: "2px" }}>
                   <MapPin size={9} />
@@ -295,7 +315,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
               <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
                 {p.lat !== null && (
                   <SmartLink
-                    href={`/map?q=${encodeURIComponent(p.name)}&category=${p.category.toLowerCase()}`}
+                    href={`/map?q=${encodeURIComponent(getDisplayPlaceName(p))}&category=${p.category.toLowerCase()}`}
                     pendingLabel="지도 여는 중..."
                     style={{
                       fontSize: "11px",
@@ -362,7 +382,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
             >
               <span
                 style={{
-                  width: "34px",
+                  minWidth: "34px",
                   fontSize: "10px",
                   fontWeight: 700,
                   color: "#7c3aed",
@@ -371,6 +391,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                   padding: "2px 3px",
                   flexShrink: 0,
                   textAlign: "center",
+                  whiteSpace: "nowrap",
                 }}
               >
                 가이드

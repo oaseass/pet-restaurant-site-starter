@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
+import { getSiteUrl } from "@/lib/brand";
 import { getRestaurantsLightSnapshot } from "@/lib/public-data";
 import { CALCULATOR_CARDS, GUIDE_DOCS, POLICY_LINKS, REGION_OPTIONS, getPlaceCategorySlug, PLACE_DIRECTORY_CATEGORIES } from "@/lib/platform-content";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").trim().replace(/\/$/, "");
+  const baseUrl = getSiteUrl().replace(/\/$/, "");
   const generatedAt = new Date();
   const restaurants = await getRestaurantsLightSnapshot().catch(() => []);
 
@@ -28,7 +29,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/report`, lastModified: generatedAt },
     { url: `${baseUrl}/policies`, lastModified: generatedAt },
     ...PLACE_DIRECTORY_CATEGORIES.map((category) => ({ url: `${baseUrl}/places/${getPlaceCategorySlug(category)}`, lastModified: generatedAt })),
-    ...GUIDE_DOCS.map((guide) => ({ url: `${baseUrl}/guide/${guide.slug}`, lastModified: new Date(guide.reviewedAt) })),
+    ...GUIDE_DOCS.map((guide) => ({ url: `${baseUrl}/guide/${guide.slug}`, lastModified: new Date(guide.updatedAt) })),
     ...CALCULATOR_CARDS.map((card) => ({ url: `${baseUrl}${card.href}`, lastModified: generatedAt })),
     ...POLICY_LINKS.map((policy) => ({ url: `${baseUrl}${policy.href}`, lastModified: generatedAt })),
     ...REGION_OPTIONS.map((region) => ({ url: `${baseUrl}/regions/${encodeURIComponent(region)}`, lastModified: generatedAt })),

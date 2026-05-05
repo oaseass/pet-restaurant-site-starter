@@ -101,9 +101,11 @@ export function searchGuidesStatic(keyword: string): GuideDoc[] {
   if (!keyword.trim()) return GUIDE_DOCS.slice(0, 4);
   const norm = normalizeSearchKeyword(keyword);
   return GUIDE_DOCS.filter((g) => {
+    const bodyText = g.sections.flatMap((section) => [section.heading, ...section.body]).join(" ");
     return (
       normalizeSearchKeyword(g.title).includes(norm) ||
-      normalizeSearchKeyword(g.summary).includes(norm)
+      normalizeSearchKeyword(g.summary).includes(norm) ||
+      normalizeSearchKeyword(bodyText).includes(norm)
     );
   });
 }
@@ -173,10 +175,30 @@ export function getSuggestions(
 
 const PLACE_CATEGORY_LABEL: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
+  PHARMACY: "동물약국",
   GROOMING: "미용",
   DAYCARE: "유치원·호텔",
   FUNERAL: "장례",
 };
+
+const PLACE_CATEGORY_SEARCH_TERMS: Record<string, string[]> = {
+  ANIMAL_HOSPITAL: ["동물병원", "병원", "수의사", "진료", "응급병원", "24시병원"],
+  PHARMACY: ["동물약국", "약국", "동물의약품", "구충제", "심장사상충"],
+  GROOMING: ["미용", "애견미용", "반려동물미용", "그루밍", "목욕"],
+  DAYCARE: ["유치원", "호텔", "위탁", "돌봄", "놀이방", "훈련"],
+  FUNERAL: ["장례", "장묘", "화장", "봉안", "추모"],
+};
+
+export function detectPlaceCategoryFromKeyword(keyword: string): string | null {
+  const norm = normalizeSearchKeyword(keyword);
+  if (!norm) return null;
+
+  for (const [category, terms] of Object.entries(PLACE_CATEGORY_SEARCH_TERMS)) {
+    if (terms.some((term) => norm.includes(normalizeSearchKeyword(term)))) return category;
+  }
+
+  return null;
+}
 
 export type SearchPlaceResult = PublicPlaceLight & { score: number; categoryLabel: string };
 
@@ -188,7 +210,7 @@ export function searchPlacesSnapshot(
   places: PublicPlaceLight[],
   params: { q: string; sido?: string; category?: string; limit?: number },
 ): SearchPlaceResult[] {
-  const { q, sido, category, limit = 50 } = params;
+  const { q, sido, category = detectPlaceCategoryFromKeyword(q) ?? undefined, limit = 50 } = params;
   const norm = normalizeSearchKeyword(q);
 
   let pool = places;
@@ -214,6 +236,8 @@ export function searchPlacesSnapshot(
       const address = normalizeSearchKeyword(p.address ?? "");
       const sigungu = p.sigungu ? normalizeSearchKeyword(p.sigungu) : "";
       const sidoN = p.sido ? normalizeSearchKeyword(p.sido) : "";
+      const categoryLabel = PLACE_CATEGORY_LABEL[p.category] ?? p.category;
+      const categoryTerms = [categoryLabel, ...(PLACE_CATEGORY_SEARCH_TERMS[p.category] ?? [])].map(normalizeSearchKeyword);
       let score = 0;
 
       if (name === norm) score += 100;
@@ -223,10 +247,11 @@ export function searchPlacesSnapshot(
       if (sigungu.includes(norm)) score += 20;
       if (sidoN.includes(norm)) score += 15;
       if (address.includes(norm)) score += 12;
+      if (categoryTerms.some((term) => term.includes(norm) || norm.includes(term))) score += 70;
       if (p.lat !== null) score += 2;
 
       return score > 0
-        ? ({ ...p, score, categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? p.category } as SearchPlaceResult)
+        ? ({ ...p, score, categoryLabel } as SearchPlaceResult)
         : null;
     })
     .filter((p): p is SearchPlaceResult => p !== null)

@@ -100,7 +100,7 @@ export function createUnifiedSearchService(deps: UnifiedSearchDeps) {
 
     const staticGuides = GUIDE_DOCS.filter((guide) => {
       if (!keyword) return true;
-      return [guide.title, guide.summary, ...guide.sections.flatMap((section) => [section.title, ...section.bullets])]
+      return [guide.title, guide.summary, ...guide.sections.flatMap((section) => [section.heading, ...section.body])]
         .join(" ")
         .toLowerCase()
         .includes(keyword.toLowerCase());

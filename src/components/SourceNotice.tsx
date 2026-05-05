@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { getLatestSuccessfulSync } from "@/lib/foodsafety/sync";
 
 export async function SourceNotice({ className }: { className?: string }) {
-  let syncedAtLabel = "동기화 준비 중";
+  let syncedAtLabel = "동기화 이력 확인 전";
   let syncedCountLabel = "";
 
   if (process.env.DATABASE_URL) {

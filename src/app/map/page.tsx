@@ -60,34 +60,34 @@ const CATEGORY_GUIDANCE_COPY: Record<MapCategoryKey, string> = {
 
 const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants" | "all">, PreparedCategoryState> = {
   pharmacy: {
-    title: "동물약국 지도는 준비 중입니다.",
-    description: "동물약국 정보는 순차적으로 지도에서 볼 수 있도록 준비하고 있습니다.",
-    note: "지금은 식당 지도를 먼저 이용해 주세요.",
+    title: "동물약국 목록을 지역 기준으로 안내합니다.",
+    description: "지역이나 현재 위치를 적용하면 동물약국 목록과 지도 연결을 확인할 수 있습니다.",
+    note: "검색 조건을 넣으면 해당 범위의 장소만 표시합니다.",
   },
   hospitals: {
-    title: "동물병원 지도는 준비 중입니다.",
-    description: "병원 정보는 곧 지도에서 볼 수 있도록 준비하고 있습니다.",
-    note: "지금은 식당 지도를 먼저 이용해 주세요.",
+    title: "동물병원 목록을 지역 기준으로 안내합니다.",
+    description: "지역이나 현재 위치를 적용하면 가까운 동물병원 목록과 지도 연결을 확인할 수 있습니다.",
+    note: "진료 가능 동물과 야간 운영 여부는 상세 페이지에서 다시 확인해 주세요.",
   },
   grooming: {
-    title: "미용 지도는 준비 중입니다.",
-    description: "미용 정보도 같은 방식으로 지도에서 볼 수 있도록 정리하고 있습니다.",
-    note: "지금은 식당 지도를 먼저 이용해 주세요.",
+    title: "미용업소 목록을 지역 기준으로 안내합니다.",
+    description: "지역이나 현재 위치를 적용하면 반려동물 미용업소를 범위 안에서 확인할 수 있습니다.",
+    note: "미용 가능 견종과 예약 방식은 방문 전 업체 확인이 필요합니다.",
   },
   daycare: {
-    title: "유치원 지도는 준비 중입니다.",
-    description: "유치원과 호텔 정보도 순차적으로 지도에 반영할 예정입니다.",
-    note: "지금은 식당 지도를 먼저 이용해 주세요.",
+    title: "유치원·호텔 목록을 지역 기준으로 안내합니다.",
+    description: "지역이나 현재 위치를 적용하면 유치원, 호텔, 위탁관리 업체를 범위 안에서 확인할 수 있습니다.",
+    note: "입소 조건과 예방접종 증명 여부는 상세 페이지에서 다시 확인해 주세요.",
   },
   funeral: {
-    title: "장례 지도는 준비 중입니다.",
-    description: "장례 정보는 신중하게 정리한 뒤 순차적으로 공개할 예정입니다.",
-    note: "지금은 식당 지도를 먼저 이용해 주세요.",
+    title: "장례업체 목록을 지역 기준으로 안내합니다.",
+    description: "지역이나 현재 위치를 적용하면 반려동물 장례업체를 범위 안에서 확인할 수 있습니다.",
+    note: "화장·봉안·운구 가능 여부는 상담 전 업체에 직접 확인해 주세요.",
   },
   "lost-pets": {
-    title: "찾아요 지도는 준비 중입니다.",
-    description: "실종 제보도 지도에서 보기 쉽게 보여드릴 수 있도록 준비하고 있습니다.",
-    note: "지금은 식당 지도를 먼저 이용해 주세요.",
+    title: "보호동물 공고는 목록에서 확인합니다.",
+    description: "실종 제보와 보호동물 공고는 찾아요 페이지에서 지역과 공고 번호로 확인할 수 있습니다.",
+    note: "지도 화면에서는 식당과 시설 위치 탐색을 먼저 제공합니다.",
   },
 };
 
@@ -143,9 +143,8 @@ const MAP_CATEGORY_META: Record<MapCategoryKey, { pageTitle: string; listTitle: 
 };
 
 function sanitizePlaceName(name?: string | null): string {
-  const value = name?.trim();
+  const value = name?.trim().replace(/^#+\s*/, "").trim();
   if (!value) return "이름 미확인 업체";
-  if (value.startsWith("#")) return "이름 미확인 업체";
   const BLOCKED_NAMES = new Set(["grooming", "daycare", "funeral", "pharmacy", "hospital", "restaurants", "restaurant"]);
   if (BLOCKED_NAMES.has(value.toLowerCase())) return "이름 미확인 업체";
   return value;
@@ -504,42 +503,42 @@ export default async function MapPage({
     {
       key: "hospitals",
       label: "병원",
-      description: placeCategoryMap.get("ANIMAL_HOSPITAL") ? `${(placeCategoryMap.get("ANIMAL_HOSPITAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      description: placeCategoryMap.get("ANIMAL_HOSPITAL") ? `${(placeCategoryMap.get("ANIMAL_HOSPITAL") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
       href: buildCategoryHref("hospitals", normalized, locationForHref),
       status: placeCategoryMap.get("ANIMAL_HOSPITAL") ? "active" : "coming-soon",
-      countLabel: placeCategoryMap.get("ANIMAL_HOSPITAL") ? `${(placeCategoryMap.get("ANIMAL_HOSPITAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      countLabel: placeCategoryMap.get("ANIMAL_HOSPITAL") ? `${(placeCategoryMap.get("ANIMAL_HOSPITAL") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
     },
     {
       key: "pharmacy",
       label: "약국",
-      description: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      description: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
       href: buildCategoryHref("pharmacy", normalized, locationForHref),
       status: placeCategoryMap.get("PHARMACY") ? "active" : "coming-soon",
-      countLabel: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      countLabel: placeCategoryMap.get("PHARMACY") ? `${(placeCategoryMap.get("PHARMACY") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
     },
     {
       key: "grooming",
       label: "미용",
-      description: placeCategoryMap.get("GROOMING") ? `${(placeCategoryMap.get("GROOMING") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      description: placeCategoryMap.get("GROOMING") ? `${(placeCategoryMap.get("GROOMING") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
       href: buildCategoryHref("grooming", normalized, locationForHref),
       status: placeCategoryMap.get("GROOMING") ? "active" : "coming-soon",
-      countLabel: placeCategoryMap.get("GROOMING") ? `${(placeCategoryMap.get("GROOMING") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      countLabel: placeCategoryMap.get("GROOMING") ? `${(placeCategoryMap.get("GROOMING") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
     },
     {
       key: "daycare",
       label: "유치원",
-      description: placeCategoryMap.get("DAYCARE") ? `${(placeCategoryMap.get("DAYCARE") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      description: placeCategoryMap.get("DAYCARE") ? `${(placeCategoryMap.get("DAYCARE") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
       href: buildCategoryHref("daycare", normalized, locationForHref),
       status: placeCategoryMap.get("DAYCARE") ? "active" : "coming-soon",
-      countLabel: placeCategoryMap.get("DAYCARE") ? `${(placeCategoryMap.get("DAYCARE") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      countLabel: placeCategoryMap.get("DAYCARE") ? `${(placeCategoryMap.get("DAYCARE") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
     },
     {
       key: "funeral",
       label: "장례",
-      description: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      description: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
       href: buildCategoryHref("funeral", normalized, locationForHref),
       status: placeCategoryMap.get("FUNERAL") ? "active" : "coming-soon",
-      countLabel: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "준비중",
+      countLabel: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
     },
     {
       key: "lost-pets",

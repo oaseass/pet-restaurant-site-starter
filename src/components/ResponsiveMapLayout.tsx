@@ -154,7 +154,7 @@ export function ResponsiveMapLayout({
                 {mapStatus === "error" ? (
                   <p>지도 SDK를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.</p>
                 ) : mappableItems.length === 0 ? (
-                  <p>현재 지도에 표시할 좌표를 준비 중입니다. 아래 목록에서 먼저 장소를 확인해 주세요.</p>
+                  <p>현재 지도에 표시할 좌표가 없습니다. 아래 목록에서 먼저 장소를 확인해 주세요.</p>
                 ) : selectedItem ? (
                   <div>
                     <p className="font-black text-[var(--ink)]">{selectedItem.name}</p>

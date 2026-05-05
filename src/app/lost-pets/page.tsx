@@ -26,43 +26,56 @@ function shelterPageHref(page: number) {
   return page <= 1 ? "/lost-pets?tab=shelter" : `/lost-pets?tab=shelter&page=${page}`;
 }
 
+function normalizeNoticeImageUrl(value: string) {
+  return value.trim().replace(/^http:\/\//i, "https://");
+}
+
 function AnimalNoticeCard({ notice, index }: { notice: PublicAnimalNotice; index: number }) {
   const sexLabel = notice.sexCd === "M" ? "수컷" : notice.sexCd === "F" ? "암컷" : "미상";
   const stateColor = notice.processState === "보호중" ? "#2563eb" : notice.processState === "종료" ? "#6b7280" : "#d97706";
   const foundRegion = shortenFoundRegion(notice.happenPlace, notice.orgNm);
   const noticeStart = formatNoticeDate(notice.noticeSdt);
   const noticeEnd = formatNoticeDate(notice.noticeEdt);
+  const detailHref = `/lost-pets/notices/${encodeURIComponent(notice.desertionNo)}`;
+  const imageUrl = notice.popfile ? normalizeNoticeImageUrl(notice.popfile) : "";
 
   return (
     <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden", background: "#fff", fontSize: "12px" }}>
-      {notice.popfile ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={notice.popfile}
-          alt={notice.kindCd || "보호동물 사진"}
-          width={320}
-          height={180}
-          style={{ width: "100%", height: "140px", objectFit: "cover" }}
-          loading={index < 6 ? "eager" : "lazy"}
-          decoding="async"
-        />
-      ) : (
-        <div style={{ width: "100%", height: "140px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: "11px" }}>사진 없음</div>
-      )}
+      <SmartLink href={detailHref} className="block" aria-label={`${notice.kindCd || "보호동물"} 공고 상세 보기`}>
+        {imageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={imageUrl}
+            alt={notice.kindCd || "보호동물 사진"}
+            width={320}
+            height={180}
+            style={{ width: "100%", height: "140px", objectFit: "cover" }}
+            loading={index < 6 ? "eager" : "lazy"}
+            decoding="async"
+          />
+        ) : (
+          <div style={{ width: "100%", height: "140px", background: "#f3f4f6", display: "flex", alignItems: "center", justifyContent: "center", color: "#9ca3af", fontSize: "11px" }}>사진 없음</div>
+        )}
+      </SmartLink>
       <div style={{ padding: "8px 10px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
-          <span style={{ fontWeight: 700, color: "#111", fontSize: "13px" }}>{notice.kindCd || "미상"}</span>
-          <span style={{ fontSize: "10px", fontWeight: 700, color: stateColor }}>{notice.processState}</span>
-        </div>
-        <div style={{ color: "#555", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{foundRegion}</div>
-        <div style={{ color: "#777", marginBottom: "4px" }}>{formatNoticeDate(notice.happenDt) ? `발견 ${formatNoticeDate(notice.happenDt)}` : "발견일 미상"} · {sexLabel}</div>
-        <div style={{ color: "#555", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>보호소: {notice.careNm || "미상"}</div>
+        <SmartLink href={detailHref} className="block rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
+            <span style={{ fontWeight: 700, color: "#111", fontSize: "13px" }}>{notice.kindCd || "미상"}</span>
+            <span style={{ fontSize: "10px", fontWeight: 700, color: stateColor }}>{notice.processState}</span>
+          </div>
+          <div style={{ color: "#555", marginBottom: "2px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{foundRegion}</div>
+          <div style={{ color: "#777", marginBottom: "4px" }}>{formatNoticeDate(notice.happenDt) ? `발견 ${formatNoticeDate(notice.happenDt)}` : "발견일 미상"} · {sexLabel}</div>
+          <div style={{ color: "#555", marginBottom: "4px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>보호소: {notice.careNm || "미상"}</div>
+        </SmartLink>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: "10px", color: "#9ca3af" }}>공고 {noticeStart}{noticeEnd ? ` ~ ${noticeEnd}` : ""}</span>
           {notice.careTel && (
             <a href={`tel:${notice.careTel}`} style={{ fontSize: "11px", color: "#2563eb", textDecoration: "none", fontWeight: 600 }}>{notice.careTel}</a>
           )}
         </div>
+        <SmartLink href={detailHref} style={{ display: "inline-flex", marginTop: "8px", fontSize: "11px", color: "#2563eb", fontWeight: 800, textDecoration: "none" }}>
+          자세히 보기 →
+        </SmartLink>
       </div>
     </div>
   );
@@ -150,7 +163,7 @@ export default async function LostPetsPage({ searchParams }: { searchParams: Pro
           <div className="portal-notice-bar">
             <span style={{ fontSize: "12px", color: "#777" }}>
               최근 30일 공고 <strong style={{ color: "#222" }}>{noticeTotal.toLocaleString("ko-KR")}</strong>건 중 {pageRangeLabel}건 표시
-              {noticeTotal === 0 && " (데이터 준비 중)"}
+              {noticeTotal === 0 && " (공개 데이터 없음)"}
             </span>
           </div>
           {notices.length > SHELTER_PAGE_SIZE && (
@@ -200,7 +213,7 @@ export default async function LostPetsPage({ searchParams }: { searchParams: Pro
           <div style={{ padding: "12px 14px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "10px" }}>
             {noticesForPage.length > 0
               ? noticesForPage.map((notice, index) => <AnimalNoticeCard key={notice.desertionNo} notice={notice} index={index} />)
-              : <EmptyState title="보호동물 공고 데이터 준비 중입니다." description="농림축산식품부 공공데이터 연동 예정입니다." character="cat-peeking" />}
+              : <EmptyState title="보호동물 공고가 없습니다." description="새 공고가 반영되면 이 화면에 30건 단위로 표시됩니다." character="cat-peeking" />}
           </div>
         </>
       ) : (

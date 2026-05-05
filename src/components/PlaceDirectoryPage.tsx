@@ -36,8 +36,8 @@ function getCategoryReadinessCopy(category: PlaceCategory, count: number) {
   const label = PLACE_CATEGORY_LABELS[category];
   if (count === 0) {
     return {
-      title: `${label} 정보를 준비 중입니다.`,
-      description: `${label} 정보는 지역별로 정리한 뒤 순차적으로 공개할 예정입니다.`,
+      title: `${label} 공개 데이터가 아직 없습니다.`,
+      description: `${label} 정보가 추가되면 지역별 목록과 상세 페이지에서 바로 확인할 수 있습니다.`,
     };
   }
 

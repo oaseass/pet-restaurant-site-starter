@@ -7,9 +7,37 @@ type Props = {
   mapHref?: string;
 };
 
+const PLACEHOLDER_NAME_PATTERNS = [
+  /^#?grooming$/i,
+  /^#?daycare$/i,
+  /^#?funeral$/i,
+  /^#?pharmacy$/i,
+  /^#?hospital$/i,
+  /^#?animal[-_\s]?hospital$/i,
+];
+
+function normalizeDisplayName(name: string) {
+  return name.trim().replace(/^#+\s*/, "").trim();
+}
+
+function isLowConfidencePlaceName(name: string) {
+  const trimmed = normalizeDisplayName(name);
+  if (!trimmed) return true;
+  if (PLACEHOLDER_NAME_PATTERNS.some((pattern) => pattern.test(trimmed))) return true;
+  return false;
+}
+
+function getDisplayPlaceName(place: PublicPlaceLight, categoryLabel: string) {
+  const cleanedName = normalizeDisplayName(place.name);
+  if (!isLowConfidencePlaceName(place.name)) return cleanedName;
+  const region = [place.sido, place.sigungu].filter(Boolean).join(" ");
+  return region ? `${region} ${categoryLabel}` : `${categoryLabel} 업체`;
+}
+
 export function PlaceListSection({ places, categoryLabel, mapHref }: Props) {
   if (places.length === 0) return null;
 
+  const displayPlaces = [...places].sort((a, b) => Number(isLowConfidencePlaceName(a.name)) - Number(isLowConfidencePlaceName(b.name)));
   const withCoords = places.filter((p) => p.lat !== null);
   const sidoCounts = new Map<string, number>();
   for (const p of places) {
@@ -53,50 +81,54 @@ export function PlaceListSection({ places, categoryLabel, mapHref }: Props) {
 
       {/* 업체 카드 목록 (최대 50건 표시 — 정적 렌더) */}
       <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {places.slice(0, 50).map((place) => (
-          <li
-            key={place.id}
-            className="rounded-xl border border-[rgba(56,41,29,0.08)] bg-white px-4 py-3 shadow-sm"
-          >
-            <SmartLink href={`/places/${place.id}`} className="block rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
-              <div className="flex items-start justify-between gap-2">
-                <span className="font-black leading-snug text-[#2d1d10] hover:text-[var(--brand)] hover:underline">
-                  {place.name}
-                </span>
-                {place.businessStatus && (
-                  <span
-                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
-                      place.businessStatus === "영업" || place.businessStatus === "정상"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-[#fef3e8] text-[#b45309]"
-                    }`}
-                  >
-                    {place.businessStatus}
-                  </span>
-                )}
-              </div>
-              {(place.roadAddress ?? place.address) && (
-                <p className="mt-1 line-clamp-1 text-xs text-[#9d8e82]">
-                  {place.roadAddress ?? place.address}
-                </p>
-              )}
-            </SmartLink>
-            {place.phone && (
-              <a
-                href={`tel:${place.phone.replace(/\s+/g, "")}`}
-                className="mt-1 block text-xs font-black text-[var(--brand)]"
-              >
-                {place.phone}
-              </a>
-            )}
-            <SmartLink
-              href={`/places/${place.id}`}
-              className="mt-2 inline-flex items-center gap-1 text-[11px] font-black text-[var(--brand)] hover:underline"
+        {displayPlaces.slice(0, 50).map((place) => {
+          const displayName = getDisplayPlaceName(place, categoryLabel);
+
+          return (
+            <li
+              key={place.id}
+              className="rounded-xl border border-[rgba(56,41,29,0.08)] bg-white px-4 py-3 shadow-sm"
             >
-              상세보기 →
-            </SmartLink>
-          </li>
-        ))}
+              <SmartLink href={`/places/${place.id}`} className="block rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
+                <div className="flex items-start justify-between gap-2">
+                  <span className="font-black leading-snug text-[#2d1d10] hover:text-[var(--brand)] hover:underline">
+                    {displayName}
+                  </span>
+                  {place.businessStatus && (
+                    <span
+                      className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
+                        place.businessStatus === "영업" || place.businessStatus === "정상"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-[#fef3e8] text-[#b45309]"
+                      }`}
+                    >
+                      {place.businessStatus}
+                    </span>
+                  )}
+                </div>
+                {(place.roadAddress ?? place.address) && (
+                  <p className="mt-1 line-clamp-1 text-xs text-[#9d8e82]">
+                    {place.roadAddress ?? place.address}
+                  </p>
+                )}
+              </SmartLink>
+              {place.phone && (
+                <a
+                  href={`tel:${place.phone.replace(/\s+/g, "")}`}
+                  className="mt-1 block text-xs font-black text-[var(--brand)]"
+                >
+                  {place.phone}
+                </a>
+              )}
+              <SmartLink
+                href={`/places/${place.id}`}
+                className="mt-2 inline-flex items-center gap-1 text-[11px] font-black text-[var(--brand)] hover:underline"
+              >
+                상세보기 →
+              </SmartLink>
+            </li>
+          );
+        })}
       </ul>
 
       {places.length > 50 && (

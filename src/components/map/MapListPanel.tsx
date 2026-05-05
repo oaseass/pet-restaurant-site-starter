@@ -44,7 +44,7 @@ export function MapListPanel({
       {preparedState ? (
         <div className="relative z-10 mt-5 flex flex-1 flex-col gap-4">
           <div className="rounded-[1rem] border border-[var(--line)] bg-white p-5 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
-            <p className="text-[11px] font-black text-[var(--brand)]">준비 중</p>
+            <p className="text-[11px] font-black text-[var(--brand)]">안내</p>
             <h3 className="mt-3 text-2xl font-black tracking-tight">{preparedState.title}</h3>
             <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{preparedState.description}</p>
           </div>

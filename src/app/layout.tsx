@@ -5,7 +5,7 @@ import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MobileBottomNav } from "@/components/MobileBottomNav";
 import { RouteProgressProvider } from "@/components/RouteProgress";
-import { BRAND_DESCRIPTION, BRAND_TITLE, absoluteUrl } from "@/lib/brand";
+import { BRAND_DESCRIPTION, BRAND_TITLE, absoluteUrl, getSiteUrl } from "@/lib/brand";
 
 const notoSansKr = Noto_Sans_KR({
   subsets: ["latin"],
@@ -17,7 +17,7 @@ const notoSansKr = Noto_Sans_KR({
 export const metadata: Metadata = {
   title: BRAND_TITLE,
   description: BRAND_DESCRIPTION,
-  metadataBase: new URL((process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").trim()),
+  metadataBase: new URL(getSiteUrl()),
   applicationName: "댕냥지도",
   manifest: absoluteUrl("/manifest.webmanifest"),
   openGraph: {

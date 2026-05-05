@@ -49,7 +49,7 @@ export function MapBottomSheet({
         <div className="max-h-[48vh] overflow-y-auto px-4 pb-5">
           {preparedState ? (
             <div className="rounded-[1rem] border border-[var(--line)] bg-white p-5 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
-              <p className="text-[11px] font-black text-[var(--brand)]">준비 중</p>
+              <p className="text-[11px] font-black text-[var(--brand)]">안내</p>
               <h3 className="mt-3 text-xl font-black tracking-tight">{preparedState.title}</h3>
               <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{preparedState.description}</p>
               <p className="mt-4 rounded-[1rem] bg-[#fcfbf8] p-3 text-sm leading-6 text-[var(--muted)]">{preparedState.note}</p>
@@ -95,7 +95,7 @@ export function MapBottomSheet({
                           </span>
                         ) : null}
                         <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.businessType}</span>
-                        <span className={clsx("rounded-full px-2.5 py-1 text-[11px] font-black", item.coordinateStatus === "ready" ? "bg-[#dff3ec] text-[#1a463f]" : "bg-[#fff0e3] text-[#b9632e]")}>{item.coordinateStatus === "ready" ? "핀 표시" : "좌표 준비중"}</span>
+                        <span className={clsx("rounded-full px-2.5 py-1 text-[11px] font-black", item.coordinateStatus === "ready" ? "bg-[#dff3ec] text-[#1a463f]" : "bg-[#fff0e3] text-[#b9632e]")}>{item.coordinateStatus === "ready" ? "핀 표시" : "좌표 확인 필요"}</span>
                       </div>
                       <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
                       <p className="mt-2 text-sm font-bold text-[var(--muted)]">{item.regionLabel}</p>
