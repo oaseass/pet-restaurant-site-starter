@@ -51,7 +51,12 @@
 - 확인 경로: `/`, `/search?q=동물병원`, `/search?q=동물약국`, `/search?q=식당`, `/restaurants`, `/hospitals`, `/pharmacy`, `/grooming`, `/daycare`, `/funeral`, `/map?lat=35.190605&lng=126.815636&category=all`, `/map?lat=35.190605&lng=126.815636&category=hospitals`, `/restaurants/9bbc43ee-d9c5-4fac-a593-116d3cced8d6`, `/places/33e00bc4-44eb-4e88-a866-e1a3a868832b`, `/places/bd5eeb9b-cfb6-4bcb-a9fe-38f9a7556b31`
 - 모바일 viewport 390px에서 확인 경로 가로 overflow 없음
 - 검색/목록/지도 카드에서 상세, 지도, 전화 가능/전화 제보, 첫 리뷰 대기, 외부정보/공공 데이터 신호 확인
-- 공개 production URL 확인은 기능 커밋 배포 완료 후 최종 갱신 예정입니다.
+- 공개 production 확인: `https://pet-restaurant-site-starter.vercel.app` 확인 완료
+- Vercel deployment: `https://pet-restaurant-site-starter-j6c1d4v00-larchides-projects.vercel.app` Ready, production alias 연결 확인
+- production 확인 경로: `/`, `/search?q=동물병원`, `/restaurants`, `/hospitals`, `/pharmacy`, `/map?lat=35.190605&lng=126.815636&category=all`, `/restaurants/9bbc43ee-d9c5-4fac-a593-116d3cced8d6`, `/places/33e00bc4-44eb-4e88-a866-e1a3a868832b`
+- production 모바일 viewport 390px에서 확인 경로 가로 overflow 없음
+- production 검색/목록/지도 카드에서 상세, 지도, 전화 가능/전화 제보, 첫 리뷰 대기, 외부정보/공공 데이터 신호 확인
+- production 화면에서 `ANIMAL_HOSPITAL`, `PHARMACY`, `GROOMING`, `DAYCARE`, `FUNERAL` 같은 개발자용 enum 문구가 노출되지 않음을 확인
 
 ## 8. 아직 남은 문제
 - 실제 AdSense 노출은 Vercel 환경변수 `NEXT_PUBLIC_ADSENSE_ENABLED=true`, `NEXT_PUBLIC_ADSENSE_CLIENT_ID`, `NEXT_PUBLIC_ADSENSE_DEFAULT_SLOT_ID` 설정 후 확인이 필요합니다.
@@ -64,5 +69,4 @@
 - 광고 슬롯이 실제 활성화된 환경에서 CLS와 모바일 스크롤 체감을 측정합니다.
 
 ## 커밋 hash
-- 기능 변경 커밋: `배포 전`
-- production 확인 보고서 커밋: `배포 전`
+- 기능 변경 커밋: `9913fba1055ff09ad25ad4c8dff821412a7a05d5`
