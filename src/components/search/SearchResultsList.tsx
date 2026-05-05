@@ -1,6 +1,6 @@
 import { MapPin } from "lucide-react";
 import type { SearchRestaurantResult, SearchPlaceResult } from "@/lib/public-search";
-import type { GuideDoc } from "@/lib/platform-content";
+import { PLACE_CATEGORY_LABELS as GUIDE_CATEGORY_LABELS, type GuideDoc } from "@/lib/platform-content";
 import { SmartLink } from "@/components/SmartLink";
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
@@ -112,66 +112,76 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
               }}
               className="hover:bg-[var(--bg)]"
             >
-              {/* 분류 뱃지 */}
-              <span
-                style={{
-                  width: "34px",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                  color: "#1f6b5b",
-                  background: "#f0fdf4",
-                  borderRadius: "4px",
-                  padding: "2px 3px",
-                  flexShrink: 0,
-                  textAlign: "center",
-                }}
-              >
-                식당
-              </span>
-
-              {/* 업체명 */}
               <SmartLink
                 href={`/restaurants/${r.id}`}
                 style={{
                   flex: 1,
-                  fontSize: "14px",
-                  fontWeight: 600,
                   color: "var(--ink)",
                   textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  minWidth: 0,
+                }}
+              >
+                {/* 분류 뱃지 */}
+                <span
+                  style={{
+                    width: "34px",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    color: "#1f6b5b",
+                    background: "#f0fdf4",
+                    borderRadius: "4px",
+                    padding: "2px 3px",
+                    flexShrink: 0,
+                    textAlign: "center",
+                  }}
+                >
+                  식당
+                </span>
+
+                {/* 업체명 */}
+                <span
+                  style={{
+                  flex: 1,
+                  fontSize: "14px",
+                  fontWeight: 600,
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
-                }}
-              >
-                {r.name}
+                  }}
+                >
+                  {r.name}
+                </span>
+
+                {/* 지역 */}
+                <span
+                  style={{
+                    fontSize: "11px",
+                    color: "#888",
+                    flexShrink: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "2px",
+                  }}
+                >
+                  <MapPin size={9} />
+                  {r.sido} {r.sigungu ?? ""}
+                </span>
+
+                {/* 업종 - 데스크탑만 */}
+                <span
+                  style={{
+                    fontSize: "10px",
+                    color: "#bbb",
+                    flexShrink: 0,
+                  }}
+                  className="hidden sm:block"
+                >
+                  {r.businessType}
+                </span>
               </SmartLink>
-
-              {/* 지역 */}
-              <span
-                style={{
-                  fontSize: "11px",
-                  color: "#888",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "2px",
-                }}
-              >
-                <MapPin size={9} />
-                {r.sido} {r.sigungu ?? ""}
-              </span>
-
-              {/* 업종 - 데스크탑만 */}
-              <span
-                style={{
-                  fontSize: "10px",
-                  color: "#bbb",
-                  flexShrink: 0,
-                }}
-                className="hidden sm:block"
-              >
-                {r.businessType}
-              </span>
 
               {/* 액션 버튼 */}
               <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
@@ -238,38 +248,50 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
               }}
               className="hover:bg-[var(--bg)]"
             >
-              <span
-                style={{
-                  width: "34px",
-                  fontSize: "10px",
-                  fontWeight: 700,
-                  color: "#0369a1",
-                  background: "#e0f2fe",
-                  borderRadius: "4px",
-                  padding: "2px 3px",
-                  flexShrink: 0,
-                  textAlign: "center",
-                }}
-              >
-                {PLACE_CATEGORY_LABELS[p.category] ?? p.category}
-              </span>
-              <span
+              <SmartLink
+                href={`/places/${p.id}`}
                 style={{
                   flex: 1,
-                  fontSize: "14px",
-                  fontWeight: 600,
                   color: "var(--ink)",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  minWidth: 0,
                 }}
               >
-                {p.name}
-              </span>
-              <span style={{ fontSize: "11px", color: "#888", flexShrink: 0, display: "flex", alignItems: "center", gap: "2px" }}>
-                <MapPin size={9} />
-                {p.sido} {p.sigungu ?? ""}
-              </span>
+                <span
+                  style={{
+                    width: "34px",
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    color: "#0369a1",
+                    background: "#e0f2fe",
+                    borderRadius: "4px",
+                    padding: "2px 3px",
+                    flexShrink: 0,
+                    textAlign: "center",
+                  }}
+                >
+                  {PLACE_CATEGORY_LABELS[p.category] ?? p.category}
+                </span>
+                <span
+                  style={{
+                    flex: 1,
+                    fontSize: "14px",
+                    fontWeight: 600,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {p.name}
+                </span>
+                <span style={{ fontSize: "11px", color: "#888", flexShrink: 0, display: "flex", alignItems: "center", gap: "2px" }}>
+                  <MapPin size={9} />
+                  {p.sido} {p.sigungu ?? ""}
+                </span>
+              </SmartLink>
               <div style={{ display: "flex", gap: "4px", flexShrink: 0 }}>
                 {p.lat !== null && (
                   <SmartLink
@@ -367,7 +389,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
                 {g.title}
               </span>
               <span style={{ fontSize: "11px", color: "#aaa", flexShrink: 0 }}>
-                {g.category}
+                {GUIDE_CATEGORY_LABELS[g.category] ?? "가이드"}
               </span>
               <span style={{ fontSize: "11px", fontWeight: 700, color: "#7c3aed", flexShrink: 0 }}>
                 보기 →

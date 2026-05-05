@@ -102,6 +102,7 @@ export async function PlaceDirectoryPage({
         lat: place.lat,
         lng: place.lng,
         categoryLabel: PLACE_CATEGORY_LABELS[place.category],
+        href: `/places/${place.id}`,
       }));
 
   return (
@@ -166,6 +167,7 @@ export async function PlaceDirectoryPage({
                       sourceType: place.sourceType,
                       category: place.category,
                       categoryLabel: PLACE_CATEGORY_LABELS[place.category],
+                      href: `/places/${place.id}`,
                     }}
                   />
                 ))

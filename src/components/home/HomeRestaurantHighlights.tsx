@@ -49,32 +49,38 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
               gap: "4px",
             }}
           >
-            <div
-              style={{
-                fontSize: "13px",
-                fontWeight: 700,
-                color: "var(--ink)",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
+            <SmartLink
+              href={`/restaurants/${r.id}`}
+              style={{ display: "block", color: "inherit", textDecoration: "none" }}
             >
-              {r.name}
-            </div>
-            <div style={{ fontSize: "11px", color: "var(--muted)" }}>
-              {r.sigungu ?? r.sido} · {r.businessType}
-            </div>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#bbb",
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {r.address}
-            </div>
+              <div
+                style={{
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  color: "var(--ink)",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {r.name}
+              </div>
+              <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
+                {r.sigungu ?? r.sido} · {r.businessType}
+              </div>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "#bbb",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  marginTop: "4px",
+                }}
+              >
+                {r.address}
+              </div>
+            </SmartLink>
             <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
               <SmartLink
                 href={`/map?q=${encodeURIComponent(r.name)}`}

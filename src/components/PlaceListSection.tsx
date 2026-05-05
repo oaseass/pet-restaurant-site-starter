@@ -58,27 +58,29 @@ export function PlaceListSection({ places, categoryLabel, mapHref }: Props) {
             key={place.id}
             className="rounded-xl border border-[rgba(56,41,29,0.08)] bg-white px-4 py-3 shadow-sm"
           >
-            <div className="flex items-start justify-between gap-2">
-              <SmartLink href={`/places/${place.id}`} className="font-black text-[#2d1d10] leading-snug hover:text-[var(--brand)] hover:underline">
-                {place.name}
-              </SmartLink>
-              {place.businessStatus && (
-                <span
-                  className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
-                    place.businessStatus === "영업" || place.businessStatus === "정상"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-[#fef3e8] text-[#b45309]"
-                  }`}
-                >
-                  {place.businessStatus}
+            <SmartLink href={`/places/${place.id}`} className="block rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
+              <div className="flex items-start justify-between gap-2">
+                <span className="font-black leading-snug text-[#2d1d10] hover:text-[var(--brand)] hover:underline">
+                  {place.name}
                 </span>
+                {place.businessStatus && (
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-black ${
+                      place.businessStatus === "영업" || place.businessStatus === "정상"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-[#fef3e8] text-[#b45309]"
+                    }`}
+                  >
+                    {place.businessStatus}
+                  </span>
+                )}
+              </div>
+              {(place.roadAddress ?? place.address) && (
+                <p className="mt-1 line-clamp-1 text-xs text-[#9d8e82]">
+                  {place.roadAddress ?? place.address}
+                </p>
               )}
-            </div>
-            {(place.roadAddress ?? place.address) && (
-              <p className="mt-1 text-xs text-[#9d8e82] line-clamp-1">
-                {place.roadAddress ?? place.address}
-              </p>
-            )}
+            </SmartLink>
             {place.phone && (
               <a
                 href={`tel:${place.phone.replace(/\s+/g, "")}`}

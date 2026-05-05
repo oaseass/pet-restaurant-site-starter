@@ -2,11 +2,13 @@ import { notFound } from "next/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { AdSlot } from "@/components/AdSlot";
+import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
-import { PetPolicyPanel } from "@/components/detail/PetPolicyPanel";
+import { VisitInfoPanel } from "@/components/detail/VisitInfoPanel";
 import { VisitChecklist } from "@/components/detail/VisitChecklist";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { SmartLink } from "@/components/SmartLink";
+import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
 import { getApprovedReviewSummary } from "@/lib/reviews";
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -14,7 +16,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
   const restaurant = await prisma.restaurant.findUnique({ where: { id } });
   if (!restaurant || restaurant.status !== "ACTIVE") notFound();
 
-  const [nearby, reviewSummary] = await Promise.all([
+  const [nearby, reviewSummary, enrichment] = await Promise.all([
     prisma.restaurant.findMany({
       where: {
         status: "ACTIVE",
@@ -26,9 +28,14 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       take: 6,
     }),
     getApprovedReviewSummary("RESTAURANT", restaurant.id),
+    getBusinessEnrichmentForTarget("RESTAURANT", restaurant.id),
   ]);
   const regionLabel = `${restaurant.sido}${restaurant.sigungu ? ` ${restaurant.sigungu}` : ""}`;
   const reportHref = `/report?type=restaurant&id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}`;
+  const reviewHref = `/reviews/new?targetType=RESTAURANT&targetId=${restaurant.id}`;
+  const mapHref = restaurant.lat !== null && restaurant.lng !== null
+    ? `/map?category=restaurants&lat=${restaurant.lat.toFixed(6)}&lng=${restaurant.lng.toFixed(6)}`
+    : `/map?category=restaurants&q=${encodeURIComponent(restaurant.name)}`;
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
@@ -44,6 +51,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
             <Info label="업종" value={restaurant.businessType} />
             <Info label="지역" value={regionLabel} />
+            <Info label="전화번호" value="전화번호 정보 없음" />
             <Info label="기준일" value={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")} />
             <Info label="출처" value="식품안전나라 공개 정보" />
           </div>
@@ -54,13 +62,19 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
             lng={restaurant.lng}
             phone={null}
             reportHref={reportHref}
+            reviewHref={reviewHref}
+            mapHref={mapHref}
           />
         </div>
       </section>
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
-        <PetPolicyPanel />
+        <VisitInfoPanel category="RESTAURANT" />
         <VisitChecklist />
+      </div>
+
+      <div className="mt-6">
+        <BusinessEnrichmentPanel enrichment={enrichment} reportHref={reportHref} reviewHref={reviewHref} />
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
@@ -102,11 +116,13 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {nearby.map((item) => (
               <article key={item.id} className="card rounded-[1rem] p-4">
-                <p className="font-black leading-snug text-[var(--ink)]">{item.name}</p>
-                <p className="mt-2 text-sm font-bold text-[var(--muted)]">
-                  {item.sido}{item.sigungu ? ` ${item.sigungu}` : ""}
-                </p>
-                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{item.businessType}</p>
+                <SmartLink href={`/restaurants/${item.id}`} className="block rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
+                  <p className="font-black leading-snug text-[var(--ink)]">{item.name}</p>
+                  <p className="mt-2 text-sm font-bold text-[var(--muted)]">
+                    {item.sido}{item.sigungu ? ` ${item.sigungu}` : ""}
+                  </p>
+                  <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{item.businessType}</p>
+                </SmartLink>
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
                   <SmartLink href={`/restaurants/${item.id}`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-black text-white">
                     상세보기

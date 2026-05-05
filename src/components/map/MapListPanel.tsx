@@ -88,7 +88,7 @@ export function MapListPanel({
                         : "border-[var(--line)] bg-white hover:border-[rgba(31,107,91,0.18)] hover:bg-[#fcfbf9]",
                     )}
                   >
-                    <button type="button" onClick={() => onSelect(item.id)} className="block w-full text-left">
+                    <SmartLink href={item.href} className="block w-full rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
                       <div className="flex flex-wrap gap-2">
                         {item.categoryLabel && (
                           <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-black text-[#2563eb]">{item.categoryLabel}</span>
@@ -119,12 +119,17 @@ export function MapListPanel({
                         <MapPin className="mt-0.5 shrink-0" size={15} />
                         <span>{item.address}</span>
                       </p>
-                    </button>
-                    <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
+                    </SmartLink>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
                       <p className="text-xs font-bold text-[var(--muted)]">기준일 {item.dataUpdatedLabel}</p>
-                      <SmartLink href={item.href} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-black text-white">
-                        상세보기
-                      </SmartLink>
+                      <div className="flex flex-wrap gap-2">
+                        <button type="button" onClick={() => onSelect(item.id)} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] px-4 py-2 text-sm font-black text-[var(--brand)]">
+                          지도에서 보기
+                        </button>
+                        <SmartLink href={item.href} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-black text-white">
+                          상세보기
+                        </SmartLink>
+                      </div>
                     </div>
                   </article>
                 );

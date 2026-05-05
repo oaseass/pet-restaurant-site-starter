@@ -1,13 +1,16 @@
 import { notFound } from "next/navigation";
-import { MapPin, Phone, AlertCircle } from "lucide-react";
+import { AlertCircle, MapPin, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
+import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
+import { DetailActionBar } from "@/components/detail/DetailActionBar";
+import { VisitInfoPanel } from "@/components/detail/VisitInfoPanel";
 import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
-import { PlaceDirectionsSheet } from "@/components/PlaceDirectionsSheet";
 import { SmartLink } from "@/components/SmartLink";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { absoluteUrl } from "@/lib/brand";
+import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
 import { getApprovedReviewSummary } from "@/lib/reviews";
 import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
 
@@ -99,12 +102,17 @@ export default async function PlaceSlugPage({
     : (place.roadAddress ?? place.address ?? "주소 정보 없음");
   const navigationAddress = displayAddress === "주소 정보 없음" ? null : displayAddress;
   const reportHref = `/report?type=place&id=${place.id}&name=${encodeURIComponent(place.name)}`;
+  const reviewHref = `/reviews/new?targetType=PLACE&targetId=${place.id}`;
+  const mapHref = place.lat !== null && place.lng !== null
+    ? `/map?category=${mapCategoryKey}&lat=${place.lat.toFixed(6)}&lng=${place.lng.toFixed(6)}`
+    : `/map?category=${mapCategoryKey}&q=${encodeURIComponent(place.name)}`;
 
   // 같은 지역 · 카테고리 추천 (상위 5개)
   const type = place.category as "ANIMAL_HOSPITAL" | "PHARMACY" | "GROOMING" | "DAYCARE" | "FUNERAL";
-  const [allSameCategory, reviewSummary] = await Promise.all([
+  const [allSameCategory, reviewSummary, enrichment] = await Promise.all([
     getPlacesByCategorySnapshot(type),
     getApprovedReviewSummary("PLACE", place.id),
+    getBusinessEnrichmentForTarget("PLACE", place.id),
   ]);
   const nearby = allSameCategory
     .filter((p) => p.id !== place.id && p.sido === place.sido && p.sigungu === place.sigungu)
@@ -131,6 +139,7 @@ export default async function PlaceSlugPage({
       <section className="section-shell p-6 sm:p-8">
         <div className="relative z-10">
           <div className="mb-4 flex flex-wrap gap-2">
+            <span className="badge"><ShieldCheck size={14} /> 공식 등록 데이터</span>
             <span className="badge">{categoryLabel}</span>
             {place.businessStatus && (
               <span
@@ -166,19 +175,6 @@ export default async function PlaceSlugPage({
             <p className="mt-1 ml-7 text-sm text-[var(--muted)]">지번: {place.address}</p>
           )}
 
-          {/* 전화번호 */}
-          {place.phone && (
-            <p className="mt-3 flex items-center gap-2">
-              <Phone size={16} className="shrink-0 text-[var(--brand)]" />
-              <a
-                href={`tel:${place.phone.replace(/\s+/g, "")}`}
-                className="font-black text-[var(--brand)] hover:underline"
-              >
-                {place.phone}
-              </a>
-            </p>
-          )}
-
           {/* 마스킹 안내 */}
           {place.addressMasked && (
             <div className="mt-4 flex items-start gap-2 rounded-xl bg-[#fef9ef] p-3 text-sm text-[#92400e]">
@@ -190,6 +186,7 @@ export default async function PlaceSlugPage({
           {/* 상세 정보 그리드 */}
           <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
             <InfoRow label="분류" value={categoryLabel} />
+            <InfoRow label="전화번호" value={place.phone ?? "전화번호 정보 없음"} />
             {place.eupmyeondong && <InfoRow label="읍면동" value={place.eupmyeondong} />}
             <InfoRow
               label="데이터 기준일"
@@ -198,37 +195,23 @@ export default async function PlaceSlugPage({
             <InfoRow label="출처" value={sourceLabel} />
           </div>
 
-          {/* CTA 버튼 */}
-          <div className="mt-6 flex flex-wrap gap-3">
-            {place.phone && (
-              <a
-                href={`tel:${place.phone.replace(/\s+/g, "")}`}
-                className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white"
-              >
-                <Phone size={15} />
-                전화하기
-              </a>
-            )}
-            {place.lat !== null && place.lng !== null && (
-              <SmartLink
-                href={`/map?category=${mapCategoryKey}&lat=${place.lat.toFixed(6)}&lng=${place.lng.toFixed(6)}`}
-                pendingLabel="지도 여는 중..."
-                className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--brand)] px-5 py-2.5 text-sm font-black text-[var(--brand)]"
-              >
-                <MapPin size={15} />
-                지도에서 보기
-              </SmartLink>
-            )}
-            <PlaceDirectionsSheet name={place.name} lat={place.lat} lng={place.lng} address={navigationAddress} />
-            <SmartLink
-              href={reportHref}
-              className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--muted)]"
-            >
-              정보수정 제보
-            </SmartLink>
-          </div>
+          <DetailActionBar
+            name={place.name}
+            address={navigationAddress}
+            lat={place.lat}
+            lng={place.lng}
+            phone={place.phone}
+            reportHref={reportHref}
+            reviewHref={reviewHref}
+            mapHref={mapHref}
+          />
         </div>
       </section>
+
+      <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
+        <VisitInfoPanel category={type} />
+        <BusinessEnrichmentPanel enrichment={enrichment} reportHref={reportHref} reviewHref={reviewHref} />
+      </div>
 
       <ReviewSection
         targetType="PLACE"
