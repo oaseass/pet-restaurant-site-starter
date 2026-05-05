@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { AdSlot } from "@/components/AdSlot";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { SmartLink } from "@/components/SmartLink";
 import { getAnimalNoticesSnapshot, getCategoryCountsSnapshot } from "@/lib/public-data";
@@ -127,6 +128,8 @@ export default async function AnimalNoticeDetailPage({ params }: { params: Promi
         <section className="mt-6 rounded-2xl border border-[#dbeafe] bg-[#eff6ff] p-5 text-sm leading-7 text-[#1e3a8a]">
           보호동물 공고는 지자체·보호소 공개 자료를 바탕으로 표시됩니다. 실제 상태, 입양 가능 여부, 방문 가능 시간은 보호소에 직접 확인해 주세요.
         </section>
+
+        <AdSlot label="보호동물 공고 상세 광고 영역" />
       </main>
     </PublicPageShell>
   );

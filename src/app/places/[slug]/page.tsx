@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { AlertCircle, MapPin, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
+import { AdSlot } from "@/components/AdSlot";
 import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
@@ -257,6 +258,8 @@ export default async function PlaceSlugPage({
         summary={reviewSummary}
         reportHref={reportHref}
       />
+
+      <AdSlot label={`${displayName} 상세 광고 영역`} />
 
       {/* 같은 지역 추천 */}
       {nearby.length > 0 && (

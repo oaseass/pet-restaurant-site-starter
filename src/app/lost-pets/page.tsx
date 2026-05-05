@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { AdSlot } from "@/components/AdSlot";
 import { LostPetCard } from "@/components/LostPetCard";
 import { EmptyState } from "@/components/EmptyState";
 import { PublicPageShell } from "@/components/PublicPageShell";
@@ -41,7 +42,7 @@ function AnimalNoticeCard({ notice, index }: { notice: PublicAnimalNotice; index
 
   return (
     <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden", background: "#fff", fontSize: "12px" }}>
-      <SmartLink href={detailHref} className="block" aria-label={`${notice.kindCd || "보호동물"} 공고 상세 보기`}>
+      <SmartLink href={detailHref} prefetch={false} className="block" aria-label={`${notice.kindCd || "보호동물"} 공고 상세 보기`}>
         {imageUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -58,7 +59,7 @@ function AnimalNoticeCard({ notice, index }: { notice: PublicAnimalNotice; index
         )}
       </SmartLink>
       <div style={{ padding: "8px 10px" }}>
-        <SmartLink href={detailHref} className="block rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2">
+        <SmartLink href={detailHref} prefetch={false} className="block rounded-md focus:outline-none focus:ring-2 focus:ring-[#2563eb] focus:ring-offset-2">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "4px" }}>
             <span style={{ fontWeight: 700, color: "#111", fontSize: "13px" }}>{notice.kindCd || "미상"}</span>
             <span style={{ fontSize: "10px", fontWeight: 700, color: stateColor }}>{notice.processState}</span>
@@ -73,7 +74,7 @@ function AnimalNoticeCard({ notice, index }: { notice: PublicAnimalNotice; index
             <a href={`tel:${notice.careTel}`} style={{ fontSize: "11px", color: "#2563eb", textDecoration: "none", fontWeight: 600 }}>{notice.careTel}</a>
           )}
         </div>
-        <SmartLink href={detailHref} style={{ display: "inline-flex", marginTop: "8px", fontSize: "11px", color: "#2563eb", fontWeight: 800, textDecoration: "none" }}>
+        <SmartLink href={detailHref} prefetch={false} style={{ display: "inline-flex", marginTop: "8px", fontSize: "11px", color: "#2563eb", fontWeight: 800, textDecoration: "none" }}>
           자세히 보기 →
         </SmartLink>
       </div>
@@ -86,11 +87,13 @@ export default async function LostPetsPage({ searchParams }: { searchParams: Pro
   const isShelterTab = !tab || tab === "shelter";
 
   const [items, counts, notices, noticeCounts] = await Promise.all([
-    prisma.lostPet.findMany({
-      where: { status: { in: ["APPROVED", "FOUND"] } },
-      orderBy: { createdAt: "desc" },
-      take: 24,
-    }),
+    isShelterTab
+      ? Promise.resolve([])
+      : prisma.lostPet.findMany({
+          where: { status: { in: ["APPROVED", "FOUND"] } },
+          orderBy: { createdAt: "desc" },
+          take: 24,
+        }),
     getCategoryCountsSnapshot(),
     getAnimalNoticesSnapshot(),
     getAnimalNoticeCountsSnapshot(),
@@ -166,6 +169,7 @@ export default async function LostPetsPage({ searchParams }: { searchParams: Pro
               {noticeTotal === 0 && " (공개 데이터 없음)"}
             </span>
           </div>
+          <AdSlot label="보호동물 공고 목록 광고 영역" className="mx-4" />
           {notices.length > SHELTER_PAGE_SIZE && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px", padding: "10px 14px 0" }}>
               <SmartLink
@@ -224,6 +228,7 @@ export default async function LostPetsPage({ searchParams }: { searchParams: Pro
               공개 제보 <strong style={{ color: "#222" }}>{items.length}</strong>건 표시 중
             </span>
           </div>
+          <AdSlot label="실종 제보 목록 광고 영역" className="mx-4" />
           {/* 목록 */}
           <div style={{ padding: "12px 14px", display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "8px" }}>
             {items.length > 0

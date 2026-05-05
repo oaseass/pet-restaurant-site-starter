@@ -9,6 +9,14 @@ import { SmartLink } from "@/components/SmartLink";
 
 // force-dynamic 제거 — DB 조회 없음, JSON 스냅샷 기반
 
+const PLACE_CATEGORY_MAP_KEY: Record<string, string> = {
+  ANIMAL_HOSPITAL: "hospitals",
+  PHARMACY: "pharmacy",
+  GROOMING: "grooming",
+  DAYCARE: "daycare",
+  FUNERAL: "funeral",
+};
+
 export default async function SearchPage({
   searchParams,
 }: {
@@ -44,6 +52,9 @@ export default async function SearchPage({
 
   const guideResults = keyword && !isRestaurantOnly ? searchGuidesStatic(keyword) : [];
   const recentRestaurants = keyword ? [] : getRecentRestaurants(restaurants, 10);
+  const mapHref = placeCategoryIntent
+    ? `/map?q=${encodeURIComponent(keyword)}&category=${PLACE_CATEGORY_MAP_KEY[placeCategoryIntent] ?? "all"}`
+    : `/map?q=${encodeURIComponent(keyword)}`;
 
   const SHELTER_KEYWORDS = ["유기견", "유기묘", "유기동물", "보호소", "보호동물", "구조동물", "입양", "보호중"];
   const showShelterBanner = keyword ? SHELTER_KEYWORDS.some((kw) => keyword.includes(kw)) : false;
@@ -107,6 +118,7 @@ export default async function SearchPage({
             places={placeResults}
             guides={guideResults}
             keyword={keyword}
+            mapHref={mapHref}
           />
         </>
       ) : (

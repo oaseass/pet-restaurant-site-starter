@@ -18,13 +18,11 @@ type AdSlotProps = {
 
 const adsenseClientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID;
 const adsenseEnabled = process.env.NEXT_PUBLIC_ADSENSE_ENABLED === "true";
+const defaultAdsenseSlotId = process.env.NEXT_PUBLIC_ADSENSE_DEFAULT_SLOT_ID;
 
 export function AdSlot({ label = "광고 영역", slotId, className, format = "auto" }: AdSlotProps) {
-  const shouldRenderAdsense = Boolean(adsenseEnabled && adsenseClientId && slotId);
-
-  if (!shouldRenderAdsense) {
-    return null;
-  }
+  const resolvedSlotId = slotId ?? defaultAdsenseSlotId;
+  const shouldRenderAdsense = Boolean(adsenseEnabled && adsenseClientId && resolvedSlotId);
 
   useEffect(() => {
     if (!shouldRenderAdsense || typeof window === "undefined") return;
@@ -35,7 +33,11 @@ export function AdSlot({ label = "광고 영역", slotId, className, format = "a
     } catch {
       // Ignore duplicate pushes in development or during route transitions.
     }
-  }, [shouldRenderAdsense, slotId]);
+  }, [shouldRenderAdsense, resolvedSlotId]);
+
+  if (!shouldRenderAdsense) {
+    return null;
+  }
 
   return (
     <aside className={clsx("my-8", className)} aria-label={label}>
@@ -48,7 +50,7 @@ export function AdSlot({ label = "광고 영역", slotId, className, format = "a
           className="adsbygoogle block min-h-28 w-full overflow-hidden rounded-[1.6rem] bg-white/85"
           style={{ display: "block" }}
           data-ad-client={adsenseClientId}
-          data-ad-slot={slotId}
+          data-ad-slot={resolvedSlotId}
           data-ad-format={format}
           data-full-width-responsive="true"
         />

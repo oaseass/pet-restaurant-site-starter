@@ -16,6 +16,7 @@ interface SearchResultsListProps {
   places?: SearchPlaceResult[];
   guides: GuideDoc[];
   keyword: string;
+  mapHref?: string;
 }
 
 function normalizeDisplayName(name: string) {
@@ -37,7 +38,7 @@ function getDisplayPlaceName(place: SearchPlaceResult) {
   return region ? `${region} ${label}` : `${label} 업체`;
 }
 
-export function SearchResultsList({ restaurants, places = [], guides, keyword }: SearchResultsListProps) {
+export function SearchResultsList({ restaurants, places = [], guides, keyword, mapHref }: SearchResultsListProps) {
   const total = restaurants.length + places.length + guides.length;
 
   return (
@@ -66,7 +67,7 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword }:
         </span>
         {keyword && (
           <SmartLink
-            href={`/map?q=${encodeURIComponent(keyword)}`}
+            href={mapHref ?? `/map?q=${encodeURIComponent(keyword)}`}
             pendingLabel="지도 여는 중..."
             style={{
               fontSize: "11px",
