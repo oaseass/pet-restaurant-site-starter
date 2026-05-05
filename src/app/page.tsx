@@ -4,6 +4,7 @@ import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 import { LocationSearchButton } from "@/components/LocationSearchButton";
 import { SmartLink } from "@/components/SmartLink";
 import { HomeQuickActions } from "@/components/home/HomeQuickActions";
+import { HomeStartPaths } from "@/components/home/HomeStartPaths";
 import { HomeCategoryCards } from "@/components/home/HomeCategoryCards";
 import { HomeRestaurantHighlights } from "@/components/home/HomeRestaurantHighlights";
 import { HomeGuideSection } from "@/components/home/HomeGuideSection";
@@ -81,8 +82,10 @@ export default async function HomePage() {
       {/* QuickActions */}
       <HomeQuickActions />
 
+      <HomeStartPaths />
+
       {/* CategoryCards */}
-      <HomeCategoryCards restaurantCount={counts.restaurantCount} />
+      <HomeCategoryCards counts={counts} />
 
       {/* RestaurantHighlights */}
       <HomeRestaurantHighlights restaurants={restaurants} />

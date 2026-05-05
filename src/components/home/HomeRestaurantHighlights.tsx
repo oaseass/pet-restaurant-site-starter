@@ -32,7 +32,7 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(2, 1fr)",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
           gap: "6px",
         }}
       >
@@ -47,11 +47,12 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
               display: "flex",
               flexDirection: "column",
               gap: "4px",
+              minWidth: 0,
             }}
           >
             <SmartLink
               href={`/restaurants/${r.id}`}
-              style={{ display: "block", color: "inherit", textDecoration: "none" }}
+              style={{ display: "block", minWidth: 0, color: "inherit", textDecoration: "none" }}
             >
               <div
                 style={{
@@ -83,7 +84,7 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
             </SmartLink>
             <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>
               <SmartLink
-                href={`/map?q=${encodeURIComponent(r.name)}`}
+                href={r.lat !== null && r.lng !== null ? `/map?category=restaurants&lat=${r.lat.toFixed(6)}&lng=${r.lng.toFixed(6)}` : `/map?category=restaurants&q=${encodeURIComponent(r.name)}`}
                 pendingLabel="지도 여는 중..."
                 style={{
                   fontSize: "11px",

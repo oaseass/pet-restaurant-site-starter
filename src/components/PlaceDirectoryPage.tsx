@@ -163,9 +163,12 @@ export async function PlaceDirectoryPage({
                       name: place.name,
                       address: place.address,
                       phone: place.phone,
+                      lat: place.lat,
+                      lng: place.lng,
                       ownerVerified: place.ownerVerified,
                       sourceType: place.sourceType,
                       category: place.category,
+                      businessStatus: place.businessStatus,
                       categoryLabel: PLACE_CATEGORY_LABELS[place.category],
                       href: `/places/${place.id}`,
                     }}

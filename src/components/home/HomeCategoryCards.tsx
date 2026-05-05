@@ -1,4 +1,5 @@
 import { SmartLink } from "@/components/SmartLink";
+import type { PublicCategoryCounts } from "@/lib/public-data";
 
 interface CategoryCardItem {
   label: string;
@@ -60,15 +61,25 @@ const CATEGORIES: CategoryCardItem[] = [
 ];
 
 interface HomeCategoryCardsProps {
-  restaurantCount?: number;
+  counts: PublicCategoryCounts;
 }
 
-export function HomeCategoryCards({ restaurantCount }: HomeCategoryCardsProps) {
-  const categories = CATEGORIES.map((c) =>
-    c.label === "식당" && restaurantCount !== undefined
-      ? { ...c, count: restaurantCount }
-      : c,
-  );
+const CATEGORY_COUNT_KEYS: Record<string, keyof NonNullable<PublicCategoryCounts["placeCategoryCounts"]>> = {
+  병원: "ANIMAL_HOSPITAL",
+  미용: "GROOMING",
+  "유치원·호텔": "DAYCARE",
+  장례: "FUNERAL",
+  약국: "PHARMACY",
+};
+
+function getCategoryCount(category: CategoryCardItem, counts: PublicCategoryCounts) {
+  if (category.label === "식당") return counts.restaurantCount;
+  const key = CATEGORY_COUNT_KEYS[category.label];
+  return key ? counts.placeCategoryCounts?.[key] : undefined;
+}
+
+export function HomeCategoryCards({ counts }: HomeCategoryCardsProps) {
+  const categories = CATEGORIES.map((category) => ({ ...category, count: getCategoryCount(category, counts) }));
 
   return (
     <section style={{ padding: "16px 14px 0" }}>
@@ -114,6 +125,9 @@ export function HomeCategoryCards({ restaurantCount }: HomeCategoryCardsProps) {
                   ? `${c.count.toLocaleString("ko-KR")}건`
                   : c.desc}
               </div>
+              {c.count !== undefined ? (
+                <div style={{ fontSize: "10px", color: "#999", marginTop: "2px" }}>{c.desc}</div>
+              ) : null}
             </div>
             <span
               style={{
