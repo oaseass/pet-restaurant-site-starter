@@ -18,6 +18,8 @@ type Target = (typeof TARGETS)[number];
 type Args = {
   target: Target;
   limit: number;
+  concurrency: number;
+  skipExisting: boolean;
   dryRun: boolean;
   validateOnly: boolean;
   help: boolean;
@@ -49,6 +51,14 @@ type ExternalCandidate = {
 
 type ExternalCandidateDraft = Omit<ExternalCandidate, "score" | "assessment">;
 
+type ProcessedTarget = {
+  target: BusinessTarget;
+  candidates: ExternalCandidate[];
+  best?: ExternalCandidate;
+  entry?: BusinessEnrichmentEntry;
+  report: ReturnType<typeof toTargetReport>;
+};
+
 const SOURCE_PRIORITY: Record<ExternalCandidate["source"], number> = {
   KAKAO: 0,
   NAVER: 1,
@@ -56,7 +66,7 @@ const SOURCE_PRIORITY: Record<ExternalCandidate["source"], number> = {
 };
 
 function printHelp() {
-  console.log(`댕냥지도 업체 외부 장소 정보 보강\n\n사용법:\n  npm run enrich:businesses -- --target=ALL --limit=20 --dry-run\n  npm run enrich:businesses -- --target=ANIMAL_HOSPITAL --limit=50 --dry-run\n  npm run enrich:businesses -- --validate-only\n\n옵션:\n  --target=ALL|RESTAURANT|ANIMAL_HOSPITAL|PHARMACY|GROOMING|DAYCARE|FUNERAL\n  --limit=1..100\n  --dry-run       API 조회와 매칭 결과만 출력하고 파일을 쓰지 않습니다. 원본/후보/matchScore/반영 가능 여부/거절 사유를 확인합니다.\n  --validate-only 인자, 스크립트 구조, API 키 존재 여부만 검증합니다. DB 연결이 없어도 실행됩니다.\n\n저장 정책:\n  matchScore 0.85 이상이면서 이름·주소 지역·카테고리 조건을 통과한 후보만 public/data/business-enrichment.json에 반영합니다.\n  matchScore 0.65~0.84 후보는 관리자 확인 필요 후보로만 dry-run에 기록하고 상세 페이지에는 자동 표시하지 않습니다.\n  matchScore 0.65 미만 후보는 저장하지 않습니다.\n\n환경변수:\n  KAKAO_REST_API_KEY\n  NAVER_CLIENT_ID\n  NAVER_CLIENT_SECRET\n  GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY`);
+  console.log(`댕냥지도 업체 외부 장소 정보 보강\n\n사용법:\n  npm run enrich:businesses -- --target=ALL --limit=20 --dry-run\n  npm run enrich:businesses -- --target=RESTAURANT --limit=500 --concurrency=3 --skip-existing\n  npm run enrich:businesses -- --validate-only\n\n옵션:\n  --target=ALL|RESTAURANT|ANIMAL_HOSPITAL|PHARMACY|GROOMING|DAYCARE|FUNERAL\n  --limit=1..1000\n  --concurrency=1..5 동시 API 처리 수입니다. 기본값은 3입니다.\n  --skip-existing  이미 public/data/business-enrichment.json에 있는 key는 API 호출 전 제외합니다. 기본값은 켜짐입니다.\n  --no-skip-existing 기존 항목도 다시 조회합니다.\n  --dry-run       API 조회와 매칭 결과만 출력하고 파일을 쓰지 않습니다. 원본/후보/matchScore/반영 가능 여부/거절 사유를 확인합니다.\n  --validate-only 인자, 스크립트 구조, API 키 존재 여부만 검증합니다. DB 연결이 없어도 실행됩니다.\n\n저장 정책:\n  matchScore 0.85 이상이면서 이름·주소 지역·카테고리 조건을 통과한 후보만 public/data/business-enrichment.json에 반영합니다.\n  matchScore 0.65~0.84 후보는 관리자 확인 필요 후보로만 dry-run에 기록하고 상세 페이지에는 자동 표시하지 않습니다.\n  matchScore 0.65 미만 후보는 저장하지 않습니다.\n\n환경변수:\n  KAKAO_REST_API_KEY\n  NAVER_CLIENT_ID\n  NAVER_CLIENT_SECRET\n  GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY`);
 }
 
 function readOption(args: string[], name: string) {
@@ -75,13 +85,21 @@ function parseArgs(argv: string[]): Args {
 
   const rawLimit = readOption(argv, "limit") ?? "10";
   const limit = Number(rawLimit);
-  if (!Number.isInteger(limit) || limit < 1 || limit > 100) {
-    throw new Error("[enrich-businesses] --limit은 1부터 100 사이의 정수여야 합니다.");
+  if (!Number.isInteger(limit) || limit < 1 || limit > 1000) {
+    throw new Error("[enrich-businesses] --limit은 1부터 1000 사이의 정수여야 합니다.");
+  }
+
+  const rawConcurrency = readOption(argv, "concurrency") ?? "3";
+  const concurrency = Number(rawConcurrency);
+  if (!Number.isInteger(concurrency) || concurrency < 1 || concurrency > 5) {
+    throw new Error("[enrich-businesses] --concurrency는 1부터 5 사이의 정수여야 합니다.");
   }
 
   return {
     target: targetValue as Target,
     limit,
+    concurrency,
+    skipExisting: !argv.includes("--no-skip-existing"),
     dryRun: argv.includes("--dry-run"),
     validateOnly: argv.includes("--validate-only"),
     help: argv.includes("--help") || argv.includes("-h"),
@@ -325,6 +343,39 @@ function toTargetReport(target: BusinessTarget, candidates: ExternalCandidate[],
   };
 }
 
+async function mapWithConcurrency<T, R>(items: T[], concurrency: number, mapper: (item: T, index: number) => Promise<R>) {
+  const results = new Array<R>(items.length);
+  let nextIndex = 0;
+  const workers = Array.from({ length: Math.min(concurrency, items.length) }, async () => {
+    while (nextIndex < items.length) {
+      const currentIndex = nextIndex;
+      nextIndex += 1;
+      results[currentIndex] = await mapper(items[currentIndex], currentIndex);
+    }
+  });
+  await Promise.all(workers);
+  return results;
+}
+
+async function processTarget(
+  target: BusinessTarget,
+  keys: { kakaoKey?: string; naverClientId?: string; naverClientSecret?: string; googlePlacesKey?: string },
+): Promise<ProcessedTarget> {
+  const candidates = [
+    ...(await fetchKakaoCandidates(target, keys.kakaoKey)),
+    ...(await fetchNaverCandidates(target, keys.naverClientId, keys.naverClientSecret)),
+    ...(await fetchGoogleCandidates(target, keys.googlePlacesKey)),
+  ].sort(sortCandidates);
+  const best = candidates.find((candidate) => candidate.assessment.autoApplicable);
+  return {
+    target,
+    candidates,
+    best,
+    entry: best ? toEntry(target, best) : undefined,
+    report: toTargetReport(target, candidates, best),
+  };
+}
+
 async function collectTargets(target: Target, limit: number): Promise<BusinessTarget[]> {
   const { prisma } = await import("../src/lib/prisma");
   const targets: BusinessTarget[] = [];
@@ -421,7 +472,7 @@ async function main() {
 
   if (args.validateOnly) {
     const apiKeyStatus = getApiKeyStatus();
-    console.log(JSON.stringify({ ok: true, target: args.target, limit: args.limit, dryRun: args.dryRun, targets: TARGETS, apiKeyStatus }, null, 2));
+    console.log(JSON.stringify({ ok: true, target: args.target, limit: args.limit, concurrency: args.concurrency, skipExisting: args.skipExisting, dryRun: args.dryRun, targets: TARGETS, apiKeyStatus }, null, 2));
     return;
   }
 
@@ -434,26 +485,28 @@ async function main() {
     throw new Error(`[enrich-businesses] 외부 로컬 검색 API 키가 없습니다. 누락: ${apiKeyStatus.missing.join(", ")}. KAKAO_REST_API_KEY, NAVER_CLIENT_ID/NAVER_CLIENT_SECRET, GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY 중 하나를 설정한 뒤 --dry-run으로 먼저 확인하세요. 키 없이 구조만 확인하려면 --validate-only를 사용하세요.`);
   }
 
+  const snapshot = await readSnapshot();
   const targets = await collectTargets(args.target, args.limit);
+  const targetsToProcess = args.skipExisting
+    ? targets.filter((target) => !snapshot[buildBusinessEnrichmentKey(target.targetType, target.targetId)])
+    : targets;
+  const skippedExisting = targets.length - targetsToProcess.length;
   const entries: BusinessEnrichmentSnapshot = {};
-  const reports: ReturnType<typeof toTargetReport>[] = [];
-
-  for (const target of targets) {
-    const candidates = [
-      ...(await fetchKakaoCandidates(target, kakaoKey)),
-      ...(await fetchNaverCandidates(target, naverClientId, naverClientSecret)),
-      ...(await fetchGoogleCandidates(target, googlePlacesKey)),
-    ].sort(sortCandidates);
-    const best = candidates.find((candidate) => candidate.assessment.autoApplicable);
-    reports.push(toTargetReport(target, candidates, best));
-    if (best) entries[buildBusinessEnrichmentKey(target.targetType, target.targetId)] = toEntry(target, best);
+  const processed = await mapWithConcurrency(targetsToProcess, args.concurrency, (target) => processTarget(target, { kakaoKey, naverClientId, naverClientSecret, googlePlacesKey }));
+  const reports = processed.map((item) => item.report);
+  for (const item of processed) {
+    if (item.entry) entries[buildBusinessEnrichmentKey(item.target.targetType, item.target.targetId)] = item.entry;
   }
 
   if (args.dryRun) {
     console.log(JSON.stringify({
       target: args.target,
       limit: args.limit,
-      checked: targets.length,
+      concurrency: args.concurrency,
+      skipExisting: args.skipExisting,
+      requestedTargets: targets.length,
+      skippedExisting,
+      checked: targetsToProcess.length,
       apiKeyStatus,
       autoApplicableCount: Object.keys(entries).length,
       policy: {
@@ -470,18 +523,19 @@ async function main() {
   if (Object.keys(entries).length === 0) {
     console.log(JSON.stringify({
       written: 0,
-      skipped: targets.length,
+      requestedTargets: targets.length,
+      skippedExisting,
+      checked: targetsToProcess.length,
       reason: "자동 반영 기준(matchScore >= 0.85 및 필수 조건)을 통과한 후보가 없습니다.",
     }, null, 2));
     return;
   }
 
-  const snapshot = await readSnapshot();
   const nextSnapshot = { ...snapshot, ...entries };
   const filePath = path.join(process.cwd(), "public", "data", "business-enrichment.json");
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(filePath, `${JSON.stringify(nextSnapshot, null, 2)}\n`);
-  console.log(JSON.stringify({ written: Object.keys(entries).length, filePath }, null, 2));
+  console.log(JSON.stringify({ written: Object.keys(entries).length, requestedTargets: targets.length, skippedExisting, checked: targetsToProcess.length, filePath }, null, 2));
 }
 
 main().catch((error) => {
