@@ -15,7 +15,10 @@
 - 후속 라운드 `npm run build`: 통과 (Next.js 15.5.15 production build)
 - 후속 라운드 `business-enrichment.json` 안전 검증: total 663, targetTypes PLACE/RESTAURANT, bad 0
 - 후속 라운드 금지 변경 확인: `.env.local`, `public/data/business-enrichment.json`, `prisma/schema.prisma`, `prisma/migrations` 변경 없음
-- 후속 라운드 프로덕션 URL 확인: 배포 후 갱신 예정
+- 후속 라운드 프로덕션 URL 확인: `https://pet-restaurant-site-starter.vercel.app` 확인 완료
+	- Vercel deployment: `https://pet-restaurant-site-starter-qbc4h85ca-larchides-projects.vercel.app` Ready
+	- 확인 경로: `/restaurants/9bbc43ee-d9c5-4fac-a593-116d3cced8d6`, `/places/bd5eeb9b-cfb6-4bcb-a9fe-38f9a7556b31`, `/guide/travel`
+	- 모바일 viewport 390px에서 상세/장소/가이드 핵심 블록 렌더링 및 가로 overflow 없음 확인
 - `npm test`: 통과 (22개 테스트)
 - `npm run build`: 통과 (Next.js 15.5.15 production build)
 - `business-enrichment.json` 안전 검증: total 663, targetTypes PLACE/RESTAURANT, bad 0
@@ -27,6 +30,7 @@
 
 ## 커밋 hash
 - 후속 P1/P2 기능 변경 커밋: `5395fd8a01767194dc4581b902fd274420cf5e7b`
+- 후속 보고서 hash 반영 커밋: `aa19486c795d9326c1f7fd0906991b4b06ec09fe`
 - 기능 변경 커밋: `43df261f10f2fc5b2ae86c0517370db99eb81175`
 - 프로덕션 확인 커밋: `08cb82a768005d164479375cf93fbdd77f15306f`
 
