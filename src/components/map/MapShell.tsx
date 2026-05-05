@@ -18,6 +18,8 @@ type UserLocation = {
   lng: number;
 };
 
+const DEFAULT_RADIUS_KM = 5;
+
 function useKakaoMapSdk(enabled: boolean) {
   const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_KEY?.trim();
   const [status, setStatus] = useState<"not-requested" | "unavailable" | "loading" | "ready" | "error">(
@@ -171,8 +173,9 @@ export function MapShell({
   const userMarkerRef = useRef<any>(null);
   const [selectedId, setSelectedId] = useState<string | null>(items.find((item) => item.coordinateStatus === "ready")?.id ?? items[0]?.id ?? null);
   const [bottomSheetOpen, setBottomSheetOpen] = useState(true);
-  const [userLocation, setUserLocation] = useState<UserLocation | null>(initialUserLocation ?? null);
-  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "ready" | "error" | "unsupported">(initialUserLocation ? "ready" : "idle");
+  const hasAppliedLocationFilter = Boolean(initialUserLocation && radiusKm);
+  const [userLocation] = useState<UserLocation | null>(initialUserLocation ?? null);
+  const [locationStatus, setLocationStatus] = useState<"idle" | "loading" | "opening" | "ready" | "error" | "unsupported">(hasAppliedLocationFilter ? "ready" : "idle");
   const [isDesktopViewport, setIsDesktopViewport] = useState(false);
 
   const mappableItems = useMemo(
@@ -311,13 +314,15 @@ export function MapShell({
 
   const locationButtonLabel = locationStatus === "loading"
     ? "위치 확인 중"
+    : locationStatus === "opening"
+      ? "지도 여는 중"
     : locationStatus === "ready"
       ? "현재 위치 적용됨"
       : locationStatus === "unsupported"
         ? "현재 위치 미지원"
         : locationStatus === "error"
           ? "위치 재시도"
-          : "현재 위치";
+          : "현재 위치로 찾기";
 
   const requestUserLocation = () => {
     if (!navigator.geolocation) {
@@ -328,11 +333,13 @@ export function MapShell({
     setLocationStatus("loading");
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setUserLocation({
-          lat: position.coords.latitude,
-          lng: position.coords.longitude,
-        });
-        setLocationStatus("ready");
+        const params = new URLSearchParams();
+        params.set("lat", position.coords.latitude.toFixed(6));
+        params.set("lng", position.coords.longitude.toFixed(6));
+        params.set("radiusKm", (radiusKm ?? DEFAULT_RADIUS_KM).toString());
+        params.set("category", activeCategory);
+        setLocationStatus("opening");
+        window.location.assign(`/map?${params.toString()}`);
       },
       () => setLocationStatus("error"),
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 },

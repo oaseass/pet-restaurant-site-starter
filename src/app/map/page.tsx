@@ -1,4 +1,5 @@
 import { Compass, Search } from "lucide-react";
+import { redirect } from "next/navigation";
 import { MapCategoryChips } from "@/components/map/MapCategoryChips";
 import { MapLocationButton } from "@/components/map/MapLocationButton";
 import { MapShell } from "@/components/map/MapShell";
@@ -25,6 +26,36 @@ const PLACE_CATEGORY_LABEL: Record<string, string> = {
   DAYCARE: "유치원",
   FUNERAL: "장례",
   PHARMACY: "약국",
+};
+
+const PLACE_CATEGORY_SEARCH_TERMS: Record<string, string[]> = {
+  ANIMAL_HOSPITAL: ["병원", "동물병원", "진료"],
+  PHARMACY: ["약국", "동물약국", "동물의약품"],
+  GROOMING: ["미용", "반려동물 미용", "애견미용"],
+  DAYCARE: ["유치원", "호텔", "위탁", "훈련", "반려동물 유치원"],
+  FUNERAL: ["장례", "장묘", "화장", "반려동물 장례"],
+};
+
+const CATEGORY_LIST_HREF: Record<MapCategoryKey, string> = {
+  all: "/categories",
+  restaurants: "/restaurants",
+  hospitals: "/hospitals",
+  pharmacy: "/pharmacy",
+  grooming: "/grooming",
+  daycare: "/daycare",
+  funeral: "/funeral",
+  "lost-pets": "/lost-pets?tab=shelter",
+};
+
+const CATEGORY_GUIDANCE_COPY: Record<MapCategoryKey, string> = {
+  all: "지역을 선택하거나 현재 위치를 적용하면 주변 반려동물 장소를 한 번에 보여드립니다.",
+  restaurants: "지역을 선택하거나 현재 위치를 적용하면 반려동물 동반 식당을 보여드립니다.",
+  hospitals: "지역을 선택하거나 현재 위치를 적용하면 가까운 동물병원을 보여드립니다.",
+  pharmacy: "지역을 선택하거나 현재 위치를 적용하면 동물약국을 보여드립니다.",
+  grooming: "지역을 선택하거나 현재 위치를 적용하면 반려동물 미용업소를 보여드립니다.",
+  daycare: "지역을 선택하거나 현재 위치를 적용하면 유치원·호텔·위탁관리 업체를 보여드립니다.",
+  funeral: "지역을 선택하거나 현재 위치를 적용하면 반려동물 장례업체를 보여드립니다.",
+  "lost-pets": "보호동물 공고는 찾아요 페이지에서 확인해 주세요.",
 };
 
 const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants" | "all">, PreparedCategoryState> = {
@@ -120,6 +151,10 @@ function sanitizePlaceName(name?: string | null): string {
   return value;
 }
 
+function isUnknownBusinessName(name?: string | null) {
+  return sanitizePlaceName(name) === "이름 미확인 업체";
+}
+
 function formatPublicAddress(
   item: { address?: string | null; roadAddress?: string | null; sido?: string | null; sigungu?: string | null },
 ): string {
@@ -167,18 +202,45 @@ function buildCategoryHref(
   location?: { lat: number; lng: number; radiusKm?: number },
 ) {
   const query = new URLSearchParams();
-  if (category !== "all") query.set("category", category);
+  if (category !== "all" || location) query.set("category", category);
   if (params.q) query.set("q", params.q);
   if (params.sido) query.set("sido", params.sido);
-  if (params.type) query.set("type", params.type);
+  if (category === "restaurants" && params.type) query.set("type", params.type);
   if (location) {
     query.set("lat", location.lat.toFixed(6));
     query.set("lng", location.lng.toFixed(6));
-    if (location.radiusKm && location.radiusKm !== DEFAULT_RADIUS_KM) {
-      query.set("radiusKm", location.radiusKm.toString());
-    }
+    query.set("radiusKm", (location.radiusKm ?? DEFAULT_RADIUS_KM).toString());
   }
   return query.size > 0 ? `/map?${query.toString()}` : "/map";
+}
+
+function placeMatchesKeyword(place: { category: string; name?: string | null; address?: string | null; roadAddress?: string | null; sido?: string | null; sigungu?: string | null; phone?: string | null }, keyword: string) {
+  if (!keyword) return true;
+  const haystack = [
+    place.name,
+    place.address,
+    place.roadAddress,
+    place.sido,
+    place.sigungu,
+    place.phone,
+    PLACE_CATEGORY_LABEL[place.category],
+    ...(PLACE_CATEGORY_SEARCH_TERMS[place.category] ?? []),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(keyword.toLowerCase());
+}
+
+function compareKnownName(leftName: string, rightName: string) {
+  return Number(isUnknownBusinessName(leftName)) - Number(isUnknownBusinessName(rightName));
+}
+
+function limitKnownNameFirst<T extends { name: string }>(items: T[], limit: number) {
+  const normal = items.filter((item) => !isUnknownBusinessName(item.name));
+  if (normal.length >= limit) return normal.slice(0, limit);
+  return [...normal, ...items.filter((item) => isUnknownBusinessName(item.name))].slice(0, limit);
 }
 
 export default async function MapPage({
@@ -204,16 +266,19 @@ export default async function MapPage({
   const radiusRaw = Number(params.radiusKm);
   const radiusKm = Number.isFinite(radiusRaw) && radiusRaw > 0 && radiusRaw <= MAX_RADIUS_KM ? radiusRaw : DEFAULT_RADIUS_KM;
 
-  const hasSearchIntent = Boolean(params.q);
   const activeCategory = resolveMapCategory(params.category);
-  const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
+  if (activeCategory === "lost-pets") {
+    redirect("/lost-pets?tab=shelter");
+  }
 
-  // /map 또는 /map?category=all (추가 파라미터 없음) → 시작 화면, 데이터 로드 금지
-  const isDefaultMapEntrance =
-    !params.q && !params.sido && !params.type && !hasUserLocation &&
-    (!params.category || activeCategory === "all");
-  const isDefaultEntrance = isDefaultMapEntrance; // JSX 호환 유지
-  const shouldLoadMap = !isDefaultMapEntrance;
+  const normalized = normalizePublicRestaurantSearchParams({ q: params.q, sido: params.sido, type: params.type });
+  const hasRegion = Boolean(normalized.sido);
+  const hasKeyword = Boolean(normalized.q.trim());
+  const hasResultIntent = hasUserLocation || hasRegion || hasKeyword;
+
+  // /map 또는 /map?category=... 단독 진입은 안내 화면만 표시하고 대용량 데이터 로드를 막는다.
+  const isDefaultEntrance = !hasResultIntent;
+  const shouldLoadData = hasResultIntent;
   const isRestaurantView = activeCategory === "restaurants";
   const isAllView = activeCategory === "all";
 
@@ -230,8 +295,8 @@ export default async function MapPage({
   // 카테고리별 파일만 로드 — places-light.json 전체 52k 금지
   // shouldLoadMap=false(기본 진입)이면 restaurants/places 데이터 로드 완전 차단
   const activePlaceCategory = CATEGORY_KEY_TO_PLACE[activeCategory] as PlaceDbCat | undefined;
-  const needsRestaurants = shouldLoadMap && (isRestaurantView || isAllView);
-  const needsPlaces = shouldLoadMap && (isAllView || Boolean(activePlaceCategory));
+  const needsRestaurants = shouldLoadData && (isRestaurantView || isAllView);
+  const needsPlaces = shouldLoadData && (isAllView || Boolean(activePlaceCategory));
 
   const [categoryCounts, restaurantsLight, categoryPlaces] = await Promise.all([
     getCategoryCountsSnapshot(),
@@ -264,7 +329,12 @@ export default async function MapPage({
   // 식당 목록
   let restaurantsFiltered = (isRestaurantView || isAllView) ? filterRestaurantsLight(restaurantsLight, normalized) : [];
   if (hasUserLocation) {
+    restaurantsFiltered = restaurantsFiltered.filter(
+      (r) => r.lat !== null && r.lng !== null && getDistanceKm(userLat, userLng, r.lat!, r.lng!) <= radiusKm,
+    );
     restaurantsFiltered = restaurantsFiltered.sort((a, b) => {
+      const nameCompare = compareKnownName(a.name, b.name);
+      if (nameCompare !== 0) return nameCompare;
       const aHasCoord = a.lat !== null && a.lng !== null;
       const bHasCoord = b.lat !== null && b.lng !== null;
       if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
@@ -272,40 +342,51 @@ export default async function MapPage({
       return getDistanceKm(userLat, userLng, a.lat!, a.lng!) - getDistanceKm(userLat, userLng, b.lat!, b.lng!);
     });
   } else if (isRestaurantView || isAllView) {
-    restaurantsFiltered = sortRestaurantsLight(restaurantsFiltered);
+    restaurantsFiltered = sortRestaurantsLight(restaurantsFiltered).sort((a, b) => compareKnownName(a.name, b.name));
   }
-  if (hasUserLocation) {
-    restaurantsFiltered = restaurantsFiltered.filter(
-      (r) => r.lat !== null && r.lng !== null && getDistanceKm(userLat, userLng, r.lat!, r.lng!) <= radiusKm,
-    );
-  }
-  const restaurants = isRestaurantView ? restaurantsFiltered.slice(0, 120) : restaurantsFiltered;
+  const restaurants = restaurantsFiltered;
   const filteredRestaurantCount = (isRestaurantView || isAllView) ? restaurantsFiltered.length : 0;
-  const filteredCoordinateReadyCount = isRestaurantView ? restaurantsFiltered.filter((r) => r.lat !== null && r.lng !== null).length : 0;
 
   // 비식당 카테고리 Place 데이터 — categoryPlaces는 이미 해당 카테고리만 포함
-  let placesForCategory = (normalized.sido
-    ? categoryPlaces.filter((p) => p.sido === normalized.sido)
-    : categoryPlaces.slice());
+  let placesForCategory = categoryPlaces.filter((place) => {
+    if (normalized.sido && place.sido !== normalized.sido) return false;
+    return placeMatchesKeyword(place, normalized.q);
+  });
   if (hasUserLocation) {
+    placesForCategory = placesForCategory.filter(
+      (p) => p.lat !== null && p.lng !== null && getDistanceKm(userLat, userLng, p.lat!, p.lng!) <= radiusKm,
+    );
     placesForCategory = placesForCategory.sort((a, b) => {
+      const nameCompare = compareKnownName(sanitizePlaceName(a.name), sanitizePlaceName(b.name));
+      if (nameCompare !== 0) return nameCompare;
       const aHasCoord = a.lat !== null && a.lng !== null;
       const bHasCoord = b.lat !== null && b.lng !== null;
       if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
       if (!aHasCoord || !bHasCoord) return 0;
       return getDistanceKm(userLat, userLng, a.lat!, a.lng!) - getDistanceKm(userLat, userLng, b.lat!, b.lng!);
     });
-    placesForCategory = placesForCategory.filter(
-      (p) => p.lat !== null && p.lng !== null && getDistanceKm(userLat, userLng, p.lat!, p.lng!) <= radiusKm,
-    );
+  } else {
+    placesForCategory = placesForCategory.sort((a, b) => {
+      const leftName = sanitizePlaceName(a.name);
+      const rightName = sanitizePlaceName(b.name);
+      const nameCompare = compareKnownName(leftName, rightName);
+      if (nameCompare !== 0) return nameCompare;
+      const aHasCoord = a.lat !== null && a.lng !== null;
+      const bHasCoord = b.lat !== null && b.lng !== null;
+      if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
+      const leftUpdatedAt = new Date(a.updatedAt).getTime();
+      const rightUpdatedAt = new Date(b.updatedAt).getTime();
+      if (leftUpdatedAt !== rightUpdatedAt) return rightUpdatedAt - leftUpdatedAt;
+      return leftName.localeCompare(rightName, "ko-KR");
+    });
   }
-  const placesForCategorySliced = isAllView ? placesForCategory : placesForCategory.slice(0, 120);
+  const placesForCategorySliced = placesForCategory;
 
   // all 카테고리: 식당 + 전체 place 합산 후 거리순 정렬 → 120건 제한
   const MAX_LIST = 120;
   const MAX_MAP_POINTS = 500;
 
-  const listItems: MapRestaurantListItem[] = (isAllView
+  const rawListItems: MapRestaurantListItem[] = (isAllView
     ? (() => {
         const combined: MapRestaurantListItem[] = [
           ...restaurantsFiltered.map((r) => ({
@@ -345,12 +426,23 @@ export default async function MapPage({
         ];
         if (hasUserLocation) {
           combined.sort((a, b) => {
+            const nameCompare = compareKnownName(a.name, b.name);
+            if (nameCompare !== 0) return nameCompare;
             const aD = a.distanceKm ?? Infinity;
             const bD = b.distanceKm ?? Infinity;
             return aD - bD;
           });
+        } else {
+          combined.sort((a, b) => {
+            const nameCompare = compareKnownName(a.name, b.name);
+            if (nameCompare !== 0) return nameCompare;
+            const aHasCoord = a.coordinateStatus === "ready";
+            const bHasCoord = b.coordinateStatus === "ready";
+            if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
+            return a.name.localeCompare(b.name, "ko-KR");
+          });
         }
-        return combined.slice(0, MAX_LIST);
+        return combined;
       })()
     : isRestaurantView
     ? restaurants.map((restaurant) => ({
@@ -387,6 +479,8 @@ export default async function MapPage({
             ? getDistanceKm(userLat, userLng, place.lat, place.lng)
             : undefined,
       }))) as MapRestaurantListItem[];
+
+  const listItems = limitKnownNameFirst(rawListItems, MAX_LIST);
 
   const locationForHref = hasUserLocation ? { lat: userLat, lng: userLng, radiusKm } : undefined;
 
@@ -462,12 +556,8 @@ export default async function MapPage({
     : isRestaurantView
       ? filteredRestaurantCount
       : placesForCategorySliced.length;
-  const coordinateReadyCount = isAllView
-    ? listItems.filter((item) => item.coordinateStatus === "ready").length
-    : isRestaurantView
-      ? filteredCoordinateReadyCount
-      : placesForCategorySliced.filter((p) => p.lat !== null && p.lng !== null).length;
-  const coordinatePendingCount = Math.max((isAllView ? listItems.length : filteredCount) - coordinateReadyCount, 0);
+  const coordinateReadyCount = listItems.filter((item) => item.coordinateStatus === "ready").length;
+  const coordinatePendingCount = Math.max(listItems.length - coordinateReadyCount, 0);
   // preparedState: all이나 데이터 있는 카테고리면 undefined
   const preparedState =
     isAllView || isRestaurantView || (activePlaceCategory && (placeCategoryMap.get(activePlaceCategory) ?? 0) > 0)
@@ -475,7 +565,7 @@ export default async function MapPage({
       : PREPARED_CATEGORY_COPY[activeCategory as Exclude<MapCategoryKey, "restaurants" | "all">];
   const buildRadiusHref = (km: number) => {
     const q = new URLSearchParams({ lat: userLat.toFixed(6), lng: userLng.toFixed(6) });
-    if (activeCategory !== "all") q.set("category", activeCategory);
+    q.set("category", activeCategory);
     q.set("radiusKm", km.toString());
     return `/map?${q.toString()}`;
   };
@@ -498,6 +588,18 @@ export default async function MapPage({
           }
         : undefined;
 
+  const shouldLoadMapSdk = hasResultIntent && coordinateReadyCount > 0;
+  const isPlainMapStart = activeCategory === "all" && !params.category;
+  const activeCategoryCountLabel = activeCategory === "all"
+    ? `${(categoryCounts.restaurantCount + categoryCounts.placeCount).toLocaleString("ko-KR")}건`
+    : activeCategory === "restaurants"
+      ? `${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`
+      : activePlaceCategory
+        ? `${(placeCategoryMap.get(activePlaceCategory) ?? 0).toLocaleString("ko-KR")}건`
+        : "";
+  const activeCategoryListHref = CATEGORY_LIST_HREF[activeCategory];
+  const activeCategoryListLabel = activeCategory === "all" ? "카테고리별 목록 보기" : "전체 목록 보기";
+
   return (
     <main className="mx-auto max-w-[1440px] px-4 pb-10 sm:px-5 lg:px-6">
       {/* 컴팩트 헤더 */}
@@ -511,7 +613,7 @@ export default async function MapPage({
           </p>
         </div>
         <div style={{ display: "flex", gap: "6px" }}>
-          <SmartLink href="/restaurants" className="btn-secondary" style={{ minHeight: "34px", padding: "0 12px", fontSize: "12px" }}>전체 목록</SmartLink>
+          <SmartLink href={activeCategoryListHref} className="btn-secondary" style={{ minHeight: "34px", padding: "0 12px", fontSize: "12px" }}>{activeCategoryListLabel}</SmartLink>
         </div>
       </div>
 
@@ -596,41 +698,66 @@ export default async function MapPage({
       {isDefaultEntrance ? (
         <section className="mt-6">
           <div className="section-shell p-6 sm:p-8">
-            <div className="border-b border-[var(--line)] pb-6">
-              <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">장소 찾기</p>
-              <h2 className="mt-3 text-[1.75rem] font-black tracking-tight text-[var(--ink)]">어디를 찾고 계신가요?</h2>
-              <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-                지역, 업종, 장소명을 검색하거나 현재 위치로 가까운 장소를 찾아보세요.
-              </p>
-              <div className="mt-5">
-                <MapLocationButton />
+            {isPlainMapStart ? (
+              <>
+                <div className="border-b border-[var(--line)] pb-6">
+                  <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">장소 찾기</p>
+                  <h2 className="mt-3 text-[1.75rem] font-black tracking-tight text-[var(--ink)]">어디를 찾고 계신가요?</h2>
+                  <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
+                    지역, 업종, 장소명을 검색하거나 현재 위치로 가까운 장소를 찾아보세요.
+                  </p>
+                  <div className="mt-5">
+                    <MapLocationButton category="all" />
+                  </div>
+                </div>
+                <div className="pt-6">
+                  <p className="text-[11px] font-black text-[var(--muted)]">카테고리별 장소</p>
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {categories.filter((c) => c.key !== "all" && c.key !== "lost-pets").map((cat) => (
+                      <SmartLink
+                        key={cat.key}
+                        href={cat.href}
+                        pendingLabel="지도 여는 중..."
+                        className="flex flex-col rounded-[1rem] border border-[var(--line)] bg-white p-4 transition hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]"
+                      >
+                        <span className="text-base font-black text-[var(--ink)]">{cat.label}</span>
+                        <span className="mt-1 text-xl font-black tracking-tight text-[var(--brand)]">{cat.countLabel}</span>
+                      </SmartLink>
+                    ))}
+                  </div>
+                  <div className="mt-5">
+                    <SmartLink
+                      href="/lost-pets?tab=shelter"
+                      className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--ink)] hover:bg-[#f9faf8]"
+                    >
+                      보호동물 공고 바로가기
+                    </SmartLink>
+                  </div>
+                  <p className="mt-5 text-xs text-[var(--muted)]">검색 또는 현재 위치 선택 후 지도가 열립니다.</p>
+                </div>
+              </>
+            ) : (
+              <div>
+                <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">카테고리 선택됨</p>
+                <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
+                  <div>
+                    <h2 className="text-[1.75rem] font-black tracking-tight text-[var(--ink)]">{MAP_CATEGORY_META[activeCategory].pageTitle}</h2>
+                    <p className="mt-2 text-2xl font-black text-[var(--brand)]">{activeCategoryCountLabel}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <MapLocationButton category={activeCategory} />
+                    <SmartLink href={activeCategoryListHref} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] bg-white px-5 py-2 text-sm font-black text-[var(--brand)]">
+                      {activeCategoryListLabel}
+                    </SmartLink>
+                  </div>
+                </div>
+                <div className="mt-5 rounded-[1rem] border border-[var(--line)] bg-white p-5 text-sm leading-7 text-[var(--muted)]">
+                  <p className="font-black text-[var(--ink)]">안내</p>
+                  <p className="mt-2">{CATEGORY_GUIDANCE_COPY[activeCategory]}</p>
+                  <p className="mt-2 text-xs font-bold text-[var(--muted)]">카테고리만 선택한 상태에서는 전국 목록과 전국 마커를 자동으로 표시하지 않습니다.</p>
+                </div>
               </div>
-            </div>
-            <div className="pt-6">
-              <p className="text-[11px] font-black text-[var(--muted)]">카테고리별 장소</p>
-              <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {categories.filter((c) => c.key !== "all" && c.key !== "lost-pets").map((cat) => (
-                  <SmartLink
-                    key={cat.key}
-                    href={cat.href}
-                    pendingLabel="지도 여는 중..."
-                    className="flex flex-col rounded-[1rem] border border-[var(--line)] bg-white p-4 transition hover:border-[rgba(31,107,91,0.22)] hover:bg-[#f9faf8]"
-                  >
-                    <span className="text-base font-black text-[var(--ink)]">{cat.label}</span>
-                    <span className="mt-1 text-xl font-black tracking-tight text-[var(--brand)]">{cat.countLabel}</span>
-                  </SmartLink>
-                ))}
-              </div>
-              <div className="mt-5">
-                <SmartLink
-                  href="/lost-pets?tab=shelter"
-                  className="inline-flex items-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-bold text-[var(--ink)] hover:bg-[#f9faf8]"
-                >
-                  보호동물 공고 바로가기
-                </SmartLink>
-              </div>
-              <p className="mt-5 text-xs text-[var(--muted)]">검색 또는 현재 위치 선택 후 지도가 열립니다.</p>
-            </div>
+            )}
           </div>
         </section>
       ) : (
@@ -645,7 +772,7 @@ export default async function MapPage({
           visibleCount={listItems.length}
           coordinateReadyCount={coordinateReadyCount}
           coordinatePendingCount={coordinatePendingCount}
-          shouldLoadMap={shouldLoadMap}
+          shouldLoadMap={shouldLoadMapSdk}
           preparedState={preparedState}
           emptyState={emptyState}
           initialUserLocation={hasUserLocation ? { lat: userLat, lng: userLng } : undefined}

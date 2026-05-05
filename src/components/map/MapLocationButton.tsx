@@ -22,7 +22,8 @@ export function MapLocationButton({ category }: { category?: string }) {
         const lat = position.coords.latitude.toFixed(6);
         const lng = position.coords.longitude.toFixed(6);
         const params = new URLSearchParams({ lat, lng });
-        if (category && category !== "all") params.set("category", category);
+        params.set("radiusKm", "5");
+        if (category) params.set("category", category);
         setStatus("opening");
         start("지도 여는 중...");
         router.push(`/map?${params.toString()}`);
