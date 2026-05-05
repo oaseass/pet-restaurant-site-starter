@@ -11,10 +11,14 @@
 - `npm run build`: 통과 (Next.js 15.5.15 production build)
 - `business-enrichment.json` 안전 검증: total 663, targetTypes PLACE/RESTAURANT, bad 0
 - 금지 변경 확인: `.env.local`, `public/data/business-enrichment.json`, `prisma/schema.prisma`, `prisma/migrations` 변경 없음
-- 프로덕션 URL 확인: 배포 후 갱신 예정
+- 프로덕션 URL 확인: `https://pet-restaurant-site-starter.vercel.app` 확인 완료
+	- Vercel deployment: `https://pet-restaurant-site-starter-q9wwvg3kx-larchides-projects.vercel.app` Ready, production alias 연결 확인
+	- 확인 경로: `/lost-pets`, `/search?q=동물병원`, `/map?q=동물병원&category=hospitals`, `/places/bd5eeb9b-cfb6-4bcb-a9fe-38f9a7556b31`, `/lost-pets/notices/448567202600554`
+	- 보호동물 상세 이미지 URL은 HTTPS로 렌더링됨을 확인
 
 ## 커밋 hash
 - 기능 변경 커밋: `43df261f10f2fc5b2ae86c0517370db99eb81175`
+- 프로덕션 확인 커밋: `08cb82a768005d164479375cf93fbdd77f15306f`
 
 ## 남은 문제
 - 현재 작업트리에 이전 build/export 산출물로 보이는 `public/data/**` 수정과 `hosp_check.html` 삭제가 남아 있습니다. 이번 작업에서는 스테이징하지 않았습니다.
