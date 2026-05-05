@@ -25,6 +25,11 @@
 - 이번 라운드 로컬 production 확인: `http://localhost:3000`에서 `/`, `/search?q=동물병원`, `/restaurants`, `/hospitals` 확인
 	- 모바일 viewport 390px에서 홈/검색/식당/병원 목록 가로 overflow 없음 확인
 	- 검색 결과 병원 카드의 지도 링크가 `category=hospitals`와 좌표로 연결됨을 확인
+- 이번 라운드 프로덕션 URL 확인: `https://pet-restaurant-site-starter.vercel.app` 확인 완료
+	- Vercel deployment: `https://pet-restaurant-site-starter-fg8tm3grn-larchides-projects.vercel.app` Ready, production alias 연결 확인
+	- 확인 경로: `/`, `/search?q=동물병원`, `/restaurants`, `/hospitals`
+	- 모바일 viewport 390px에서 홈/검색/식당/병원 목록 가로 overflow 없음 확인
+	- 검색 결과 병원 카드의 지도 링크가 `category=hospitals`와 좌표로 연결됨을 확인
 - 후속 라운드 `npm test`: 통과 (22개 테스트)
 - 후속 라운드 `npm run build`: 통과 (Next.js 15.5.15 production build)
 - 후속 라운드 `business-enrichment.json` 안전 검증: total 663, targetTypes PLACE/RESTAURANT, bad 0
@@ -43,7 +48,7 @@
 	- 보호동물 상세 이미지 URL은 HTTPS로 렌더링됨을 확인
 
 ## 커밋 hash
-- 이번 홈/검색/목록 카드 기능 변경 커밋: `배포 전`
+- 이번 홈/검색/목록 카드 기능 변경 커밋: `350fb341bdbf76a9229b3af46e1fde1850b3d821`
 - 후속 P1/P2 기능 변경 커밋: `5395fd8a01767194dc4581b902fd274420cf5e7b`
 - 후속 보고서 hash 반영 커밋: `aa19486c795d9326c1f7fd0906991b4b06ec09fe`
 - 기능 변경 커밋: `43df261f10f2fc5b2ae86c0517370db99eb81175`
