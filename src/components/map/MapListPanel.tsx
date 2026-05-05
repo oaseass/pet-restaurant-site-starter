@@ -1,5 +1,6 @@
 import { MapPin, ShieldCheck } from "lucide-react";
 import { clsx } from "clsx";
+import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import type { MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { SmartLink } from "@/components/SmartLink";
 
@@ -99,12 +100,13 @@ export function MapListPanel({
                             공식 등록
                           </span>
                         ) : null}
-                        <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.businessType}</span>
+                        {item.businessType ? <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.businessType}</span> : null}
                         {item.coordinateStatus === "ready" && (
                           <span className="rounded-full bg-[#dff3ec] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
                             핀 표시
                           </span>
                         )}
+                        <span className="rounded-full bg-[#f3f4f6] px-2.5 py-1 text-[11px] font-black text-[var(--muted)]">{item.phone ? "전화 가능" : "전화 제보"}</span>
                       </div>
                       <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
                       <p className="mt-2 text-sm font-bold text-[var(--muted)]">
@@ -119,17 +121,23 @@ export function MapListPanel({
                         <MapPin className="mt-0.5 shrink-0" size={15} />
                         <span>{item.address}</span>
                       </p>
-                    </SmartLink>
-                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-[var(--line)] pt-3">
-                      <p className="text-xs font-bold text-[var(--muted)]">기준일 {item.dataUpdatedLabel}</p>
-                      <div className="flex flex-wrap gap-2">
-                        <button type="button" onClick={() => onSelect(item.id)} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] px-4 py-2 text-sm font-black text-[var(--brand)]">
-                          지도에서 보기
-                        </button>
-                        <SmartLink href={item.href} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--ink)] px-4 py-2 text-sm font-black text-white">
-                          상세보기
-                        </SmartLink>
+                      <div className="mt-3 grid gap-1.5 text-xs font-bold text-[#7b746d]">
+                        <span>{item.externalCategory ?? item.sourceLabel ?? "공공 데이터"}</span>
+                        <span>{item.reviewLabel ?? "첫 리뷰 대기"}</span>
                       </div>
+                    </SmartLink>
+                    <div className="mt-4 border-t border-[var(--line)] pt-3">
+                      <p className="text-xs font-bold text-[var(--muted)]">기준일 {item.dataUpdatedLabel}</p>
+                      <DiscoveryCardActions
+                        className="mt-3"
+                        detailHref={item.href}
+                        onMapSelect={() => onSelect(item.id)}
+                        mapLabel={item.coordinateStatus === "ready" ? "지도에서 보기" : "주소 확인"}
+                        phone={item.phone}
+                        externalHref={item.externalHref}
+                        reviewHref={item.reviewHref}
+                        detailLabel="상세보기"
+                      />
                     </div>
                   </article>
                 );

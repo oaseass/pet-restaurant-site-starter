@@ -3,6 +3,7 @@ import { PublicPageShell } from "@/components/PublicPageShell";
 import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 import { LocationSearchButton } from "@/components/LocationSearchButton";
 import { SmartLink } from "@/components/SmartLink";
+import { AdSlot } from "@/components/AdSlot";
 import { HomeQuickActions } from "@/components/home/HomeQuickActions";
 import { HomeStartPaths } from "@/components/home/HomeStartPaths";
 import { HomeCategoryCards } from "@/components/home/HomeCategoryCards";
@@ -77,6 +78,35 @@ export default async function HomePage() {
             지도에서 보기
           </SmartLink>
         </div>
+
+        <div style={{ display: "flex", gap: "6px", marginTop: "9px", overflowX: "auto", paddingBottom: "2px" }}>
+          {[
+            { label: "동물병원", href: "/search?q=%EB%8F%99%EB%AC%BC%EB%B3%91%EC%9B%90" },
+            { label: "동물약국", href: "/search?q=%EB%8F%99%EB%AC%BC%EC%95%BD%EA%B5%AD" },
+            { label: "식당", href: "/restaurants" },
+            { label: "미용", href: "/grooming" },
+            { label: "유치원", href: "/daycare" },
+          ].map((item) => (
+            <SmartLink
+              key={item.href}
+              href={item.href}
+              pendingLabel="이동 중..."
+              style={{
+                flexShrink: 0,
+                border: "1px solid var(--line)",
+                borderRadius: "999px",
+                background: "#fff",
+                color: "var(--ink)",
+                fontSize: "11px",
+                fontWeight: 800,
+                padding: "6px 10px",
+                textDecoration: "none",
+              }}
+            >
+              {item.label}
+            </SmartLink>
+          ))}
+        </div>
       </div>
 
       {/* QuickActions */}
@@ -86,6 +116,8 @@ export default async function HomePage() {
 
       {/* CategoryCards */}
       <HomeCategoryCards counts={counts} />
+
+      <AdSlot label="홈 탐색 광고 영역" className="mx-3" />
 
       {/* RestaurantHighlights */}
       <HomeRestaurantHighlights restaurants={restaurants} />

@@ -5,6 +5,8 @@ import { MapLocationButton } from "@/components/map/MapLocationButton";
 import { MapShell } from "@/components/map/MapShell";
 import { PendingSubmitButton } from "@/components/PendingSubmitButton";
 import { SmartLink } from "@/components/SmartLink";
+import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
+import { buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getExternalInfoLabel, getReviewSummaryLabel, getTrustedBusinessEnrichment } from "@/lib/discovery-cards";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { REGION_OPTIONS } from "@/lib/platform-content";
 import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesByCategorySnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
@@ -297,7 +299,7 @@ export default async function MapPage({
   const needsRestaurants = shouldLoadData && (isRestaurantView || isAllView);
   const needsPlaces = shouldLoadData && (isAllView || Boolean(activePlaceCategory));
 
-  const [categoryCounts, restaurantsLight, categoryPlaces] = await Promise.all([
+  const [categoryCounts, restaurantsLight, categoryPlaces, enrichmentSnapshot] = await Promise.all([
     getCategoryCountsSnapshot(),
     needsRestaurants ? getRestaurantsLightSnapshot() : Promise.resolve([]),
     needsPlaces
@@ -305,6 +307,7 @@ export default async function MapPage({
           ? Promise.all(ALL_PLACE_DB_CATS.map((c) => getPlacesByCategorySnapshot(c))).then((arrays) => arrays.flat())
           : getPlacesByCategorySnapshot(activePlaceCategory!))
       : Promise.resolve([]),
+    shouldLoadData ? getBusinessEnrichmentSnapshot() : Promise.resolve({}),
   ]);
 
   // 카테고리별 건수 — categoryCounts.placeCategoryCounts 우선, fallback은 0
@@ -388,40 +391,58 @@ export default async function MapPage({
   const rawListItems: MapRestaurantListItem[] = (isAllView
     ? (() => {
         const combined: MapRestaurantListItem[] = [
-          ...restaurantsFiltered.map((r) => ({
-            id: `r_${r.id}`,
-            name: r.name,
-            address: r.address,
-            businessType: r.businessType,
-            categoryLabel: "식당",
-            regionLabel: [r.sido, r.sigungu].filter(Boolean).join(" · "),
-            href: `/restaurants/${r.id}`,
-            officialRegistered: r.officialRegistered,
-            lat: r.lat,
-            lng: r.lng,
-            coordinateStatus: (r.lat !== null && r.lng !== null ? "ready" : "pending") as "ready" | "pending",
-            dataUpdatedLabel: new Date(r.updatedAt).toLocaleDateString("ko-KR"),
-            distanceKm: hasUserLocation && r.lat !== null && r.lng !== null
-              ? getDistanceKm(userLat, userLng, r.lat, r.lng)
-              : undefined,
-          })),
-          ...placesForCategorySliced.map((p) => ({
-            id: `p_${p.id}`,
-            name: sanitizePlaceName(p.name),
-            address: formatPublicAddress(p),
-            businessType: p.businessStatus ?? "",
-            categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? p.category,
-            regionLabel: [p.sido, p.sigungu].filter(Boolean).join(" · "),
-            href: `/places/${p.id}`,
-            officialRegistered: false,
-            lat: p.lat,
-            lng: p.lng,
-            coordinateStatus: (p.lat !== null && p.lng !== null ? "ready" : "pending") as "ready" | "pending",
-            dataUpdatedLabel: new Date(p.updatedAt).toLocaleDateString("ko-KR"),
-            distanceKm: hasUserLocation && p.lat !== null && p.lng !== null
-              ? getDistanceKm(userLat, userLng, p.lat, p.lng)
-              : undefined,
-          })),
+          ...restaurantsFiltered.map((r) => {
+            const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", r.id);
+            return {
+              id: `r_${r.id}`,
+              name: r.name,
+              address: r.address,
+              businessType: r.businessType,
+              categoryLabel: "식당",
+              regionLabel: [r.sido, r.sigungu].filter(Boolean).join(" · "),
+              href: `/restaurants/${r.id}`,
+              officialRegistered: r.officialRegistered,
+              lat: r.lat,
+              lng: r.lng,
+              coordinateStatus: (r.lat !== null && r.lng !== null ? "ready" : "pending") as "ready" | "pending",
+              dataUpdatedLabel: new Date(r.updatedAt).toLocaleDateString("ko-KR"),
+              distanceKm: hasUserLocation && r.lat !== null && r.lng !== null
+                ? getDistanceKm(userLat, userLng, r.lat, r.lng)
+                : undefined,
+              phone: getBusinessPhone(null, enrichment),
+              externalCategory: getBusinessExternalCategory(enrichment),
+              externalHref: getBusinessExternalHref(enrichment),
+              reviewLabel: getReviewSummaryLabel(),
+              reviewHref: buildReviewHref("RESTAURANT", r.id),
+              sourceLabel: getExternalInfoLabel(enrichment),
+            };
+          }),
+          ...placesForCategorySliced.map((p) => {
+            const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", p.id, p.category);
+            return {
+              id: `p_${p.id}`,
+              name: sanitizePlaceName(p.name),
+              address: formatPublicAddress(p),
+              businessType: p.businessStatus ?? "방문 전 확인",
+              categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? "시설",
+              regionLabel: [p.sido, p.sigungu].filter(Boolean).join(" · "),
+              href: `/places/${p.id}`,
+              officialRegistered: false,
+              lat: p.lat,
+              lng: p.lng,
+              coordinateStatus: (p.lat !== null && p.lng !== null ? "ready" : "pending") as "ready" | "pending",
+              dataUpdatedLabel: new Date(p.updatedAt).toLocaleDateString("ko-KR"),
+              distanceKm: hasUserLocation && p.lat !== null && p.lng !== null
+                ? getDistanceKm(userLat, userLng, p.lat, p.lng)
+                : undefined,
+              phone: getBusinessPhone(p.phone, enrichment),
+              externalCategory: getBusinessExternalCategory(enrichment),
+              externalHref: getBusinessExternalHref(enrichment),
+              reviewLabel: getReviewSummaryLabel(),
+              reviewHref: buildReviewHref("PLACE", p.id),
+              sourceLabel: getExternalInfoLabel(enrichment),
+            };
+          }),
         ];
         if (hasUserLocation) {
           combined.sort((a, b) => {
@@ -444,40 +465,59 @@ export default async function MapPage({
         return combined;
       })()
     : isRestaurantView
-    ? restaurants.map((restaurant) => ({
-        id: restaurant.id,
-        name: restaurant.name,
-        address: restaurant.address,
-        businessType: restaurant.businessType,
-        regionLabel: [restaurant.sido, restaurant.sigungu].filter(Boolean).join(" · "),
-        href: `/restaurants/${restaurant.id}`,
-        officialRegistered: restaurant.officialRegistered,
-        lat: restaurant.lat,
-        lng: restaurant.lng,
-        coordinateStatus: restaurant.lat !== null && restaurant.lng !== null ? "ready" : "pending",
-        dataUpdatedLabel: new Date(restaurant.updatedAt).toLocaleDateString("ko-KR"),
-        distanceKm:
-          hasUserLocation && restaurant.lat !== null && restaurant.lng !== null
-            ? getDistanceKm(userLat, userLng, restaurant.lat, restaurant.lng)
-            : undefined,
-      }))
-    : placesForCategory.slice(0, 120).map((place) => ({
-        id: place.id,
-        name: sanitizePlaceName(place.name),
-        address: formatPublicAddress(place),
-        businessType: place.businessStatus ?? "",
-        regionLabel: [place.sido, place.sigungu].filter(Boolean).join(" · "),
-        href: `/places/${place.id}`,
-        officialRegistered: false,
-        lat: place.lat,
-        lng: place.lng,
-        coordinateStatus: place.lat !== null && place.lng !== null ? "ready" : "pending",
-        dataUpdatedLabel: new Date(place.updatedAt).toLocaleDateString("ko-KR"),
-        distanceKm:
-          hasUserLocation && place.lat !== null && place.lng !== null
-            ? getDistanceKm(userLat, userLng, place.lat, place.lng)
-            : undefined,
-      }))) as MapRestaurantListItem[];
+    ? restaurants.map((restaurant) => {
+        const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
+        return {
+          id: restaurant.id,
+          name: restaurant.name,
+          address: restaurant.address,
+          businessType: restaurant.businessType,
+          regionLabel: [restaurant.sido, restaurant.sigungu].filter(Boolean).join(" · "),
+          href: `/restaurants/${restaurant.id}`,
+          officialRegistered: restaurant.officialRegistered,
+          lat: restaurant.lat,
+          lng: restaurant.lng,
+          coordinateStatus: restaurant.lat !== null && restaurant.lng !== null ? "ready" : "pending",
+          dataUpdatedLabel: new Date(restaurant.updatedAt).toLocaleDateString("ko-KR"),
+          distanceKm:
+            hasUserLocation && restaurant.lat !== null && restaurant.lng !== null
+              ? getDistanceKm(userLat, userLng, restaurant.lat, restaurant.lng)
+              : undefined,
+          phone: getBusinessPhone(null, enrichment),
+          externalCategory: getBusinessExternalCategory(enrichment),
+          externalHref: getBusinessExternalHref(enrichment),
+          reviewLabel: getReviewSummaryLabel(),
+          reviewHref: buildReviewHref("RESTAURANT", restaurant.id),
+          sourceLabel: getExternalInfoLabel(enrichment),
+        };
+      })
+    : placesForCategory.slice(0, 120).map((place) => {
+        const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
+        return {
+          id: place.id,
+          name: sanitizePlaceName(place.name),
+          address: formatPublicAddress(place),
+          businessType: place.businessStatus ?? "방문 전 확인",
+          categoryLabel: PLACE_CATEGORY_LABEL[place.category] ?? "시설",
+          regionLabel: [place.sido, place.sigungu].filter(Boolean).join(" · "),
+          href: `/places/${place.id}`,
+          officialRegistered: false,
+          lat: place.lat,
+          lng: place.lng,
+          coordinateStatus: place.lat !== null && place.lng !== null ? "ready" : "pending",
+          dataUpdatedLabel: new Date(place.updatedAt).toLocaleDateString("ko-KR"),
+          distanceKm:
+            hasUserLocation && place.lat !== null && place.lng !== null
+              ? getDistanceKm(userLat, userLng, place.lat, place.lng)
+              : undefined,
+          phone: getBusinessPhone(place.phone, enrichment),
+          externalCategory: getBusinessExternalCategory(enrichment),
+          externalHref: getBusinessExternalHref(enrichment),
+          reviewLabel: getReviewSummaryLabel(),
+          reviewHref: buildReviewHref("PLACE", place.id),
+          sourceLabel: getExternalInfoLabel(enrichment),
+        };
+      })) as MapRestaurantListItem[];
 
   const listItems = limitKnownNameFirst(rawListItems, MAX_LIST);
 

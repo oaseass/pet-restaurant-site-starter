@@ -24,6 +24,12 @@ export type MapRestaurantListItem = {
   coordinateStatus: "ready" | "pending";
   dataUpdatedLabel: string;
   distanceKm?: number;
+  phone?: string | null;
+  externalCategory?: string | null;
+  externalHref?: string | null;
+  reviewLabel?: string;
+  reviewHref?: string;
+  sourceLabel?: string;
 };
 
 export type PreparedCategoryState = {

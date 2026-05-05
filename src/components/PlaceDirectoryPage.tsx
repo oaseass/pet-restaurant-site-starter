@@ -12,6 +12,8 @@ import { RestaurantCard } from "@/components/RestaurantCard";
 import { MedicalDisclaimer } from "@/components/MedicalDisclaimer";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
 import { AdSlot } from "@/components/AdSlot";
+import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
+import { getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getTrustedBusinessEnrichment } from "@/lib/discovery-cards";
 import { getCategoryCountsSnapshot, getRegionsSnapshot, getRestaurantsLightSnapshot, sortRestaurantsLight, toRestaurantCardItem } from "@/lib/public-data";
 import {
   PLACE_CATEGORY_LABELS,
@@ -68,7 +70,7 @@ export async function PlaceDirectoryPage({
 
   const isRestaurant = category === "PET_RESTAURANT";
 
-  const [categoryCounts, restaurantsLight, regions, placeCount, places] = await Promise.all([
+  const [categoryCounts, restaurantsLight, regions, placeCount, places, enrichmentSnapshot] = await Promise.all([
     getCategoryCountsSnapshot(),
     isRestaurant ? getRestaurantsLightSnapshot() : Promise.resolve([]),
     isRestaurant ? getRegionsSnapshot() : Promise.resolve(null),
@@ -80,6 +82,7 @@ export async function PlaceDirectoryPage({
           orderBy: [{ ownerVerified: "desc" }, { updatedAt: "desc" }],
           take: 18,
         }),
+            getBusinessEnrichmentSnapshot(),
   ]);
 
   const restaurants = isRestaurant ? sortRestaurantsLight(restaurantsLight).slice(0, 18).map(toRestaurantCardItem) : [];
@@ -150,30 +153,50 @@ export async function PlaceDirectoryPage({
             <>
               {isRestaurant ? (
                 restaurants.length > 0 ? (
-                  restaurants.map((restaurant) => <RestaurantCard key={restaurant.id} restaurant={restaurant} />)
+                  restaurants.map((restaurant) => {
+                    const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
+                    return (
+                      <RestaurantCard
+                        key={restaurant.id}
+                        restaurant={{
+                          ...restaurant,
+                          phone: getBusinessPhone(null, enrichment),
+                          externalCategory: getBusinessExternalCategory(enrichment),
+                          externalHref: getBusinessExternalHref(enrichment),
+                        }}
+                      />
+                    );
+                  })
                 ) : (
                   <EmptyState title="아직 식당 데이터가 비어 있습니다." description="다음 배치 동기화 이후 다시 확인해 주세요." character="dog-hoodie" />
                 )
               ) : places.length > 0 ? (
-                places.map((place) => (
-                  <PlaceCard
-                    key={place.id}
-                    item={{
-                      id: place.id,
-                      name: place.name,
-                      address: place.address,
-                      phone: place.phone,
-                      lat: place.lat,
-                      lng: place.lng,
-                      ownerVerified: place.ownerVerified,
-                      sourceType: place.sourceType,
-                      category: place.category,
-                      businessStatus: place.businessStatus,
-                      categoryLabel: PLACE_CATEGORY_LABELS[place.category],
-                      href: `/places/${place.id}`,
-                    }}
-                  />
-                ))
+                places.map((place) => {
+                  const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
+                  return (
+                    <PlaceCard
+                      key={place.id}
+                      item={{
+                        id: place.id,
+                        name: place.name,
+                        address: place.address,
+                        phone: getBusinessPhone(place.phone, enrichment),
+                        lat: place.lat,
+                        lng: place.lng,
+                        ownerVerified: place.ownerVerified,
+                        sourceType: place.sourceType,
+                        sourceName: place.sourceName,
+                        category: place.category,
+                        businessStatus: place.businessStatus,
+                        externalCategory: getBusinessExternalCategory(enrichment),
+                        externalHref: getBusinessExternalHref(enrichment),
+                        dataUpdatedAt: place.updatedAt,
+                        categoryLabel: PLACE_CATEGORY_LABELS[place.category],
+                        href: `/places/${place.id}`,
+                      }}
+                    />
+                  );
+                })
               ) : (
                 <EmptyState
                   title={getCategoryReadinessCopy(category, count).title}

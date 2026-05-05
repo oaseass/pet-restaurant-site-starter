@@ -1,7 +1,11 @@
-import { CalendarDays, MapPin, Navigation, Search } from "lucide-react";
+import { CalendarDays, MapPin, Search } from "lucide-react";
+import { AdSlot } from "@/components/AdSlot";
+import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import type { SearchRestaurantResult, SearchPlaceResult } from "@/lib/public-search";
 import { PLACE_CATEGORY_LABELS as GUIDE_CATEGORY_LABELS, type GuideDoc } from "@/lib/platform-content";
 import { SmartLink } from "@/components/SmartLink";
+import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getExternalInfoLabel, getPlaceMapCategoryKey, getReviewSummaryLabel, getTrustedBusinessEnrichment } from "@/lib/discovery-cards";
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
@@ -9,14 +13,6 @@ const PLACE_CATEGORY_LABELS: Record<string, string> = {
   GROOMING: "미용",
   DAYCARE: "유치원·호텔",
   FUNERAL: "장례",
-};
-
-const PLACE_CATEGORY_MAP_KEY: Record<string, string> = {
-  ANIMAL_HOSPITAL: "hospitals",
-  PHARMACY: "pharmacy",
-  GROOMING: "grooming",
-  DAYCARE: "daycare",
-  FUNERAL: "funeral",
 };
 
 interface SearchResultsListProps {
@@ -46,25 +42,12 @@ function getDisplayPlaceName(place: SearchPlaceResult) {
   return region ? `${region} ${label}` : `${label} 업체`;
 }
 
-function formatDate(value: string) {
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "기준일 확인 필요";
-  return date.toLocaleDateString("ko-KR");
-}
-
 function restaurantMapHref(restaurant: SearchRestaurantResult) {
-  if (restaurant.lat !== null && restaurant.lng !== null) {
-    return `/map?category=restaurants&lat=${restaurant.lat.toFixed(6)}&lng=${restaurant.lng.toFixed(6)}`;
-  }
-  return `/map?category=restaurants&q=${encodeURIComponent(restaurant.name)}`;
+  return buildDiscoveryMapHref({ categoryKey: "restaurants", name: restaurant.name, lat: restaurant.lat, lng: restaurant.lng });
 }
 
 function placeMapHref(place: SearchPlaceResult) {
-  const category = PLACE_CATEGORY_MAP_KEY[place.category] ?? "all";
-  if (place.lat !== null && place.lng !== null) {
-    return `/map?category=${category}&lat=${place.lat.toFixed(6)}&lng=${place.lng.toFixed(6)}`;
-  }
-  return `/map?category=${category}&q=${encodeURIComponent(getDisplayPlaceName(place))}`;
+  return buildDiscoveryMapHref({ categoryKey: getPlaceMapCategoryKey(place.category), name: getDisplayPlaceName(place), lat: place.lat, lng: place.lng });
 }
 
 function regionLabel(item: { sido?: string | null; sigungu?: string | null }) {
@@ -83,8 +66,9 @@ function SectionHeader({ title, count, description }: { title: string; count: nu
   );
 }
 
-export function SearchResultsList({ restaurants, places = [], guides, keyword, mapHref }: SearchResultsListProps) {
+export async function SearchResultsList({ restaurants, places = [], guides, keyword, mapHref }: SearchResultsListProps) {
   const total = restaurants.length + places.length + guides.length;
+  const enrichmentSnapshot = total > 0 ? await getBusinessEnrichmentSnapshot() : {};
 
   return (
     <div>
@@ -112,6 +96,8 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword, m
         ) : null}
       </section>
 
+      {total > 0 ? <AdSlot label="검색 결과 광고 영역" className="mx-3" /> : null}
+
       {total === 0 && keyword ? (
         <section className="px-4 py-10 text-center">
           <Search className="mx-auto text-[var(--muted)]" size={24} />
@@ -131,30 +117,40 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword, m
         <section>
           <SectionHeader title="식당" count={restaurants.length} description="반려동물 동반 식당은 방문 전 좌석, 대형견, 피크타임 조건을 확인하세요." />
           <div className="grid gap-2 p-3 sm:grid-cols-2">
-            {restaurants.map((restaurant) => (
-              <article key={restaurant.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
-                <SmartLink href={`/restaurants/${restaurant.id}`} className="block text-[var(--ink)] no-underline">
-                  <div className="flex flex-wrap gap-1.5">
-                    <span className="rounded bg-[var(--brand-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--brand)]">식당</span>
-                    <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.businessType}</span>
-                    <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.lat !== null ? "지도 가능" : "주소 검색"}</span>
-                  </div>
-                  <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{restaurant.name}</h3>
-                  <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(restaurant)}</p>
-                  <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{restaurant.address}</p>
-                  <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-[#9ca3af]"><CalendarDays size={12} /> 기준 {formatDate(restaurant.updatedAt)}</p>
-                </SmartLink>
-                <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
-                  <SmartLink href={restaurantMapHref(restaurant)} pendingLabel="지도 여는 중..." className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[var(--brand)] px-3 text-xs font-black text-[var(--brand)]">
-                    <Navigation size={13} />
-                    지도
+            {restaurants.map((restaurant) => {
+              const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
+              const phone = getBusinessPhone(null, enrichment);
+              const externalCategory = getBusinessExternalCategory(enrichment);
+              const externalHref = getBusinessExternalHref(enrichment);
+              return (
+                <article key={restaurant.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
+                  <SmartLink href={`/restaurants/${restaurant.id}`} className="block text-[var(--ink)] no-underline">
+                    <div className="flex flex-wrap gap-1.5">
+                      <span className="rounded bg-[var(--brand-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--brand)]">식당</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.businessType}</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.lat !== null ? "지도 가능" : "주소 검색"}</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화 가능" : "전화 제보"}</span>
+                    </div>
+                    <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{restaurant.name}</h3>
+                    <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(restaurant)}</p>
+                    <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{restaurant.address}</p>
+                    <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
+                      <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
+                      <span>{getReviewSummaryLabel()}</span>
+                      <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(restaurant.updatedAt)}</span>
+                    </div>
                   </SmartLink>
-                  <SmartLink href={`/restaurants/${restaurant.id}`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--ink)] px-3 text-xs font-black text-white">
-                    상세
-                  </SmartLink>
-                </div>
-              </article>
-            ))}
+                  <DiscoveryCardActions
+                    className="mt-3 border-t border-[var(--line)] pt-3"
+                    detailHref={`/restaurants/${restaurant.id}`}
+                    mapHref={restaurantMapHref(restaurant)}
+                    phone={phone}
+                    externalHref={externalHref}
+                    reviewHref={buildReviewHref("RESTAURANT", restaurant.id)}
+                  />
+                </article>
+              );
+            })}
           </div>
         </section>
       ) : null}
@@ -165,32 +161,37 @@ export function SearchResultsList({ restaurants, places = [], guides, keyword, m
           <div className="grid gap-2 p-3 sm:grid-cols-2">
             {places.map((place) => {
               const displayName = getDisplayPlaceName(place);
-              const categoryLabel = place.categoryLabel ?? PLACE_CATEGORY_LABELS[place.category] ?? place.category;
+              const categoryLabel = place.categoryLabel ?? PLACE_CATEGORY_LABELS[place.category] ?? "시설";
+              const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
+              const phone = getBusinessPhone(place.phone, enrichment);
+              const externalCategory = getBusinessExternalCategory(enrichment);
+              const externalHref = getBusinessExternalHref(enrichment);
               return (
                 <article key={place.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
                   <SmartLink href={`/places/${place.id}`} className="block text-[var(--ink)] no-underline">
                     <div className="flex flex-wrap gap-1.5">
                       <span className="rounded bg-[#e0f2fe] px-2 py-0.5 text-[10px] font-black text-[#0369a1]">{categoryLabel}</span>
                       <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.lat !== null ? "지도 가능" : "주소 검색"}</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화 가능" : "전화 제보"}</span>
                       {place.businessStatus ? <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.businessStatus}</span> : null}
                     </div>
                     <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{displayName}</h3>
                     <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(place)}</p>
-                    {(place.roadAddress ?? place.address) ? <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address}</p> : null}
-                    <p className="mt-1 flex items-center gap-1 text-[11px] font-bold text-[#9ca3af]"><CalendarDays size={12} /> 기준 {formatDate(place.updatedAt)}</p>
+                    <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소 확인 필요"}</p>
+                    <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
+                      <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
+                      <span>{getReviewSummaryLabel()}</span>
+                      <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(place.updatedAt)}</span>
+                    </div>
                   </SmartLink>
-                  <div className="mt-3 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
-                    <SmartLink href={placeMapHref(place)} pendingLabel="지도 여는 중..." className="inline-flex min-h-9 items-center gap-1 rounded-full border border-[var(--brand)] px-3 text-xs font-black text-[var(--brand)]">
-                      <Navigation size={13} />
-                      지도
-                    </SmartLink>
-                    {place.phone ? (
-                      <a href={`tel:${place.phone.replace(/\s+/g, "")}`} className="inline-flex min-h-9 items-center rounded-full border border-[var(--line)] px-3 text-xs font-black text-[var(--ink)]">전화</a>
-                    ) : null}
-                    <SmartLink href={`/places/${place.id}`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--ink)] px-3 text-xs font-black text-white">
-                      상세
-                    </SmartLink>
-                  </div>
+                  <DiscoveryCardActions
+                    className="mt-3 border-t border-[var(--line)] pt-3"
+                    detailHref={`/places/${place.id}`}
+                    mapHref={placeMapHref(place)}
+                    phone={phone}
+                    externalHref={externalHref}
+                    reviewHref={buildReviewHref("PLACE", place.id)}
+                  />
                 </article>
               );
             })}

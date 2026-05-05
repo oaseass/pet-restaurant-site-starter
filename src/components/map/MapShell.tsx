@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Crosshair, MapPin, MapPinned } from "lucide-react";
+import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import { MapBottomSheet } from "@/components/map/MapBottomSheet";
 import { MapFallback } from "@/components/map/MapFallback";
 import { MapListPanel } from "@/components/map/MapListPanel";
@@ -419,8 +420,20 @@ export function MapShell({
             {selectedItem ? (
               <div className="mt-3">
                 <p className="text-lg font-black text-[var(--ink)]">{selectedItem.name}</p>
-                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType}</p>
+                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
+                <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
+                  <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "공공 데이터"}</span>
+                  <span>{selectedItem.reviewLabel ?? "첫 리뷰 대기"}</span>
+                </div>
+                <DiscoveryCardActions
+                  className="mt-3 border-t border-[var(--line)] pt-3"
+                  detailHref={selectedItem.href}
+                  phone={selectedItem.phone}
+                  externalHref={selectedItem.externalHref}
+                  reviewHref={selectedItem.reviewHref}
+                  detailLabel="상세보기"
+                />
               </div>
             ) : (
               <p className="mt-3 text-sm leading-7 text-[var(--muted)]">리스트에서 장소를 고르면 이 영역에 위치 정보가 표시됩니다.</p>
@@ -483,8 +496,20 @@ export function MapShell({
             {selectedItem ? (
               <div className="mt-3">
                 <p className="text-lg font-black text-[var(--ink)]">{selectedItem.name}</p>
-                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType}</p>
+                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
+                <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
+                  <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "공공 데이터"}</span>
+                  <span>{selectedItem.reviewLabel ?? "첫 리뷰 대기"}</span>
+                </div>
+                <DiscoveryCardActions
+                  className="mt-3 border-t border-[var(--line)] pt-3"
+                  detailHref={selectedItem.href}
+                  phone={selectedItem.phone}
+                  externalHref={selectedItem.externalHref}
+                  reviewHref={selectedItem.reviewHref}
+                  detailLabel="상세보기"
+                />
               </div>
             ) : (
               <p className="mt-3 text-sm leading-7 text-[var(--muted)]">지도를 누르거나 리스트에서 장소를 선택하면 이곳에 현재 선택이 표시됩니다.</p>
