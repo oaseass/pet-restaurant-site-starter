@@ -74,7 +74,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       </div>
 
       <div className="mt-6">
-        <BusinessEnrichmentPanel enrichment={enrichment} reportHref={reportHref} reviewHref={reviewHref} />
+        <BusinessEnrichmentPanel enrichment={enrichment} category="RESTAURANT" reportHref={reportHref} reviewHref={reviewHref} />
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">

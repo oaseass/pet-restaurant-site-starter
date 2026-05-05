@@ -210,7 +210,7 @@ export default async function PlaceSlugPage({
 
       <div className="mt-8 grid gap-5 lg:grid-cols-[1fr_0.9fr]">
         <VisitInfoPanel category={type} />
-        <BusinessEnrichmentPanel enrichment={enrichment} reportHref={reportHref} reviewHref={reviewHref} />
+        <BusinessEnrichmentPanel enrichment={enrichment} category={type} reportHref={reportHref} reviewHref={reviewHref} />
       </div>
 
       <ReviewSection

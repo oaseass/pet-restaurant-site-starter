@@ -1,7 +1,13 @@
 import { loadEnvConfig } from "@next/env";
 import { promises as fs } from "node:fs";
 import path from "node:path";
-import { calculateBusinessMatchScore, buildBusinessEnrichmentKey, type BusinessEnrichmentEntry, type BusinessEnrichmentSnapshot } from "../src/lib/business-enrichment";
+import {
+  calculateBusinessMatchScoreDetailed,
+  buildBusinessEnrichmentKey,
+  type BusinessEnrichmentEntry,
+  type BusinessEnrichmentSnapshot,
+  type BusinessMatchScoreDetails,
+} from "../src/lib/business-enrichment";
 
 loadEnvConfig(process.cwd());
 
@@ -35,8 +41,13 @@ type ExternalCandidate = {
   roadAddress?: string | null;
   address?: string | null;
   url?: string | null;
+  lat?: number | null;
+  lng?: number | null;
   score: number;
+  assessment: BusinessMatchScoreDetails;
 };
+
+type ExternalCandidateDraft = Omit<ExternalCandidate, "score" | "assessment">;
 
 const SOURCE_PRIORITY: Record<ExternalCandidate["source"], number> = {
   KAKAO: 0,
@@ -45,7 +56,7 @@ const SOURCE_PRIORITY: Record<ExternalCandidate["source"], number> = {
 };
 
 function printHelp() {
-  console.log(`댕냥지도 업체 외부 장소 정보 보강\n\n사용법:\n  npm run enrich:businesses -- --target=ALL --limit=20 --dry-run\n  npm run enrich:businesses -- --target=ANIMAL_HOSPITAL --limit=50 --dry-run\n  npm run enrich:businesses -- --validate-only\n\n옵션:\n  --target=ALL|RESTAURANT|ANIMAL_HOSPITAL|PHARMACY|GROOMING|DAYCARE|FUNERAL\n  --limit=1..100\n  --dry-run       API 조회와 매칭 결과만 출력하고 파일을 쓰지 않습니다.\n  --validate-only 인자와 스크립트 구조만 검증합니다. API 키와 DB 연결이 없어도 실행됩니다.\n\n환경변수:\n  KAKAO_REST_API_KEY\n  NAVER_CLIENT_ID\n  NAVER_CLIENT_SECRET\n  GOOGLE_PLACES_API_KEY`);
+  console.log(`댕냥지도 업체 외부 장소 정보 보강\n\n사용법:\n  npm run enrich:businesses -- --target=ALL --limit=20 --dry-run\n  npm run enrich:businesses -- --target=ANIMAL_HOSPITAL --limit=50 --dry-run\n  npm run enrich:businesses -- --validate-only\n\n옵션:\n  --target=ALL|RESTAURANT|ANIMAL_HOSPITAL|PHARMACY|GROOMING|DAYCARE|FUNERAL\n  --limit=1..100\n  --dry-run       API 조회와 매칭 결과만 출력하고 파일을 쓰지 않습니다. 원본/후보/matchScore/반영 가능 여부/거절 사유를 확인합니다.\n  --validate-only 인자, 스크립트 구조, API 키 존재 여부만 검증합니다. DB 연결이 없어도 실행됩니다.\n\n저장 정책:\n  matchScore 0.85 이상이면서 이름·주소 지역·카테고리 조건을 통과한 후보만 public/data/business-enrichment.json에 반영합니다.\n  matchScore 0.65~0.84 후보는 관리자 확인 필요 후보로만 dry-run에 기록하고 상세 페이지에는 자동 표시하지 않습니다.\n  matchScore 0.65 미만 후보는 저장하지 않습니다.\n\n환경변수:\n  KAKAO_REST_API_KEY\n  NAVER_CLIENT_ID\n  NAVER_CLIENT_SECRET\n  GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY`);
 }
 
 function readOption(args: string[], name: string) {
@@ -86,6 +97,19 @@ function buildQuery(target: BusinessTarget) {
   return `${region} ${target.name}`.trim();
 }
 
+function parseFiniteNumber(value: unknown) {
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : null;
+}
+
+function assessCandidate(target: BusinessTarget, candidate: ExternalCandidateDraft): ExternalCandidate {
+  const assessment = calculateBusinessMatchScoreDetailed(
+    { name: target.name, address: target.address, category: target.category, lat: target.lat, lng: target.lng },
+    candidate,
+  );
+  return { ...candidate, score: assessment.score, assessment };
+}
+
 async function fetchKakaoCandidates(target: BusinessTarget, apiKey: string | undefined): Promise<ExternalCandidate[]> {
   if (!apiKey) return [];
   const url = new URL("https://dapi.kakao.com/v2/local/search/keyword.json");
@@ -102,7 +126,7 @@ async function fetchKakaoCandidates(target: BusinessTarget, apiKey: string | und
     signal: AbortSignal.timeout(8000),
   });
   if (!response.ok) throw new Error(`[enrich-businesses] Kakao Local API 오류: ${response.status} ${response.statusText}`);
-  const json = await response.json() as { documents?: Array<{ place_name?: string; category_name?: string; phone?: string; road_address_name?: string; address_name?: string; place_url?: string }> };
+  const json = await response.json() as { documents?: Array<{ place_name?: string; category_name?: string; phone?: string; road_address_name?: string; address_name?: string; place_url?: string; x?: string; y?: string }> };
 
   return (json.documents ?? []).map((item) => {
     const candidate = {
@@ -113,9 +137,10 @@ async function fetchKakaoCandidates(target: BusinessTarget, apiKey: string | und
       roadAddress: item.road_address_name ?? null,
       address: item.address_name ?? null,
       url: item.place_url ?? null,
-      score: 0,
+      lat: parseFiniteNumber(item.y),
+      lng: parseFiniteNumber(item.x),
     };
-    return { ...candidate, score: calculateBusinessMatchScore({ name: target.name, address: target.address }, candidate) };
+    return assessCandidate(target, candidate);
   });
 }
 
@@ -144,9 +169,10 @@ async function fetchNaverCandidates(target: BusinessTarget, clientId: string | u
       roadAddress: item.roadAddress ?? null,
       address: item.address ?? null,
       url: item.link ?? null,
-      score: 0,
+      lat: null,
+      lng: null,
     };
-    return { ...candidate, score: calculateBusinessMatchScore({ name: target.name, address: target.address }, candidate) };
+    return assessCandidate(target, candidate);
   });
 }
 
@@ -172,7 +198,7 @@ async function fetchGoogleCandidates(target: BusinessTarget, apiKey: string | un
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
-      "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.googleMapsUri,places.primaryType,places.primaryTypeDisplayName,places.nationalPhoneNumber",
+      "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.googleMapsUri,places.primaryType,places.primaryTypeDisplayName,places.nationalPhoneNumber,places.location",
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(8000),
@@ -186,6 +212,7 @@ async function fetchGoogleCandidates(target: BusinessTarget, apiKey: string | un
       primaryType?: string;
       primaryTypeDisplayName?: { text?: string };
       nationalPhoneNumber?: string;
+      location?: { latitude?: number; longitude?: number };
     }>;
   };
 
@@ -198,9 +225,10 @@ async function fetchGoogleCandidates(target: BusinessTarget, apiKey: string | un
       roadAddress: item.formattedAddress ?? null,
       address: item.formattedAddress ?? null,
       url: item.googleMapsUri ?? null,
-      score: 0,
+      lat: parseFiniteNumber(item.location?.latitude),
+      lng: parseFiniteNumber(item.location?.longitude),
     };
-    return { ...candidate, score: calculateBusinessMatchScore({ name: target.name, address: target.address }, candidate) };
+    return assessCandidate(target, candidate);
   });
 }
 
@@ -216,6 +244,85 @@ function sortCandidates(left: ExternalCandidate, right: ExternalCandidate) {
   const priorityDiff = SOURCE_PRIORITY[left.source] - SOURCE_PRIORITY[right.source];
   if (priorityDiff !== 0) return priorityDiff;
   return right.score - left.score;
+}
+
+function getApiKeyStatus() {
+  const naverReady = Boolean(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET);
+  const googleReady = Boolean(process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY);
+  return {
+    keys: {
+      KAKAO_REST_API_KEY: Boolean(process.env.KAKAO_REST_API_KEY),
+      NAVER_CLIENT_ID: Boolean(process.env.NAVER_CLIENT_ID),
+      NAVER_CLIENT_SECRET: Boolean(process.env.NAVER_CLIENT_SECRET),
+      GOOGLE_PLACES_API_KEY: Boolean(process.env.GOOGLE_PLACES_API_KEY),
+      GOOGLE_MAPS_API_KEY: Boolean(process.env.GOOGLE_MAPS_API_KEY),
+    },
+    providers: {
+      KAKAO: Boolean(process.env.KAKAO_REST_API_KEY),
+      NAVER: naverReady,
+      GOOGLE: googleReady,
+    },
+    missing: [
+      process.env.KAKAO_REST_API_KEY ? null : "KAKAO_REST_API_KEY",
+      process.env.NAVER_CLIENT_ID ? null : "NAVER_CLIENT_ID",
+      process.env.NAVER_CLIENT_SECRET ? null : "NAVER_CLIENT_SECRET",
+      googleReady ? null : "GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY",
+    ].filter(Boolean),
+    hasAnyProvider: Boolean(process.env.KAKAO_REST_API_KEY || naverReady || googleReady),
+  };
+}
+
+function toCandidateReport(candidate: ExternalCandidate) {
+  return {
+    source: candidate.source,
+    candidateName: candidate.name,
+    candidateCategory: candidate.category ?? null,
+    candidatePhone: candidate.phone ?? null,
+    candidateRoadAddress: candidate.roadAddress ?? null,
+    candidateAddress: candidate.address ?? null,
+    candidateUrl: candidate.url ?? null,
+    candidateLat: candidate.lat ?? null,
+    candidateLng: candidate.lng ?? null,
+    matchScore: candidate.score,
+    nameScore: candidate.assessment.nameScore,
+    addressScore: candidate.assessment.addressScore,
+    regionMatches: candidate.assessment.regionMatches,
+    categoryMatches: candidate.assessment.categoryMatches,
+    distanceKm: candidate.assessment.distanceKm,
+    autoApplicable: candidate.assessment.autoApplicable,
+    decision: candidate.assessment.decision,
+    rejectReasons: candidate.assessment.rejectReasons,
+  };
+}
+
+function groupCandidateReports(candidates: ExternalCandidate[]) {
+  return {
+    KAKAO: candidates.filter((candidate) => candidate.source === "KAKAO").map(toCandidateReport),
+    NAVER: candidates.filter((candidate) => candidate.source === "NAVER").map(toCandidateReport),
+    GOOGLE: candidates.filter((candidate) => candidate.source === "GOOGLE").map(toCandidateReport),
+  };
+}
+
+function toTargetReport(target: BusinessTarget, candidates: ExternalCandidate[], selected: ExternalCandidate | undefined) {
+  return {
+    original: {
+      targetType: target.targetType,
+      targetId: target.targetId,
+      category: target.category,
+      name: target.name,
+      address: target.address,
+      lat: target.lat,
+      lng: target.lng,
+    },
+    autoApply: selected ? toCandidateReport(selected) : null,
+    needsReviewCandidates: candidates
+      .filter((candidate) => candidate.assessment.decision === "NEEDS_REVIEW")
+      .map(toCandidateReport),
+    rejectedCandidates: candidates
+      .filter((candidate) => candidate.assessment.decision === "REJECT")
+      .map(toCandidateReport),
+    candidatesBySource: groupCandidateReports(candidates),
+  };
 }
 
 async function collectTargets(target: Target, limit: number): Promise<BusinessTarget[]> {
@@ -313,20 +420,23 @@ async function main() {
   }
 
   if (args.validateOnly) {
-    console.log(JSON.stringify({ ok: true, target: args.target, limit: args.limit, dryRun: args.dryRun, targets: TARGETS }, null, 2));
+    const apiKeyStatus = getApiKeyStatus();
+    console.log(JSON.stringify({ ok: true, target: args.target, limit: args.limit, dryRun: args.dryRun, targets: TARGETS, apiKeyStatus }, null, 2));
     return;
   }
 
   const kakaoKey = process.env.KAKAO_REST_API_KEY;
   const naverClientId = process.env.NAVER_CLIENT_ID;
   const naverClientSecret = process.env.NAVER_CLIENT_SECRET;
-  const googlePlacesKey = process.env.GOOGLE_PLACES_API_KEY;
-  if (!kakaoKey && (!naverClientId || !naverClientSecret) && !googlePlacesKey) {
-    throw new Error("[enrich-businesses] 외부 로컬 검색 API 키가 없습니다. KAKAO_REST_API_KEY, NAVER_CLIENT_ID/NAVER_CLIENT_SECRET, GOOGLE_PLACES_API_KEY 중 하나를 설정한 뒤 --dry-run으로 먼저 확인하세요. 키 없이 구조만 확인하려면 --validate-only를 사용하세요.");
+  const googlePlacesKey = process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
+  const apiKeyStatus = getApiKeyStatus();
+  if (!apiKeyStatus.hasAnyProvider) {
+    throw new Error(`[enrich-businesses] 외부 로컬 검색 API 키가 없습니다. 누락: ${apiKeyStatus.missing.join(", ")}. KAKAO_REST_API_KEY, NAVER_CLIENT_ID/NAVER_CLIENT_SECRET, GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY 중 하나를 설정한 뒤 --dry-run으로 먼저 확인하세요. 키 없이 구조만 확인하려면 --validate-only를 사용하세요.`);
   }
 
   const targets = await collectTargets(args.target, args.limit);
   const entries: BusinessEnrichmentSnapshot = {};
+  const reports: ReturnType<typeof toTargetReport>[] = [];
 
   for (const target of targets) {
     const candidates = [
@@ -334,12 +444,35 @@ async function main() {
       ...(await fetchNaverCandidates(target, naverClientId, naverClientSecret)),
       ...(await fetchGoogleCandidates(target, googlePlacesKey)),
     ].sort(sortCandidates);
-    const best = candidates[0];
+    const best = candidates.find((candidate) => candidate.assessment.autoApplicable);
+    reports.push(toTargetReport(target, candidates, best));
     if (best) entries[buildBusinessEnrichmentKey(target.targetType, target.targetId)] = toEntry(target, best);
   }
 
   if (args.dryRun) {
-    console.log(JSON.stringify({ target: args.target, limit: args.limit, checked: targets.length, entries }, null, 2));
+    console.log(JSON.stringify({
+      target: args.target,
+      limit: args.limit,
+      checked: targets.length,
+      apiKeyStatus,
+      autoApplicableCount: Object.keys(entries).length,
+      policy: {
+        autoApply: "matchScore >= 0.85 && 이름/주소 지역/카테고리 조건 통과",
+        needsReview: "0.65 <= matchScore < 0.85: 관리자 확인 필요 후보, 상세 페이지 자동 표시 금지",
+        reject: "matchScore < 0.65: 저장하지 않음",
+      },
+      entries,
+      reports,
+    }, null, 2));
+    return;
+  }
+
+  if (Object.keys(entries).length === 0) {
+    console.log(JSON.stringify({
+      written: 0,
+      skipped: targets.length,
+      reason: "자동 반영 기준(matchScore >= 0.85 및 필수 조건)을 통과한 후보가 없습니다.",
+    }, null, 2));
     return;
   }
 
