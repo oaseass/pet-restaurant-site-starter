@@ -5,6 +5,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
+import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
 import { VisitInfoPanel } from "@/components/detail/VisitInfoPanel";
 import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
@@ -44,6 +45,14 @@ const SOURCE_LABELS: Record<string, string> = {
   LOCALDATA_PHARMACY: "지자체 공개 데이터 (동물약국)",
   MANUAL_DATA: "직접 등록 데이터",
   OFFICIAL_DATA: "공공 데이터",
+};
+
+const DECISION_QUESTIONS: Record<string, string[]> = {
+  ANIMAL_HOSPITAL: ["오늘 진료 가능한 동물과 증상 범위가 어떻게 되나요?", "예약이 필요한가요?", "야간·응급 대응이 가능한가요?", "주차나 대기 방식이 어떻게 되나요?"],
+  PHARMACY: ["필요한 동물의약품 재고가 있나요?", "처방전이 필요한 품목인가요?", "강아지·고양이 용량 구분 안내가 가능한가요?", "오늘 영업시간이 어떻게 되나요?"],
+  GROOMING: ["예약 가능한 가장 빠른 시간이 언제인가요?", "견종·묘종·체중 제한이 있나요?", "발톱·귀·항문낭 관리가 포함되나요?", "노령견이나 피부 질환이 있어도 가능한가요?"],
+  DAYCARE: ["입소 전 예방접종 증명이 필요한가요?", "사회성 테스트나 적응 시간이 있나요?", "호텔·장기 위탁이 가능한가요?", "픽업이나 CCTV 확인을 제공하나요?"],
+  FUNERAL: ["상담과 운구가 가능한 시간이 언제인가요?", "화장·봉안·유골함 절차가 어떻게 되나요?", "총 비용에 포함되는 항목은 무엇인가요?", "장례 후 서류 제공이 가능한가요?"],
 };
 
 function normalizeDisplayName(name: string) {
@@ -139,6 +148,7 @@ export default async function PlaceSlugPage({
   ]);
   const reliableEnrichment = enrichment && enrichment.matchScore >= 0.85 ? enrichment : null;
   const bestPhone = place.phone ?? reliableEnrichment?.phone ?? null;
+  const decisionQuestions = DECISION_QUESTIONS[type] ?? ["오늘 운영 여부를 확인할 수 있나요?", "예약이나 방문 제한이 있나요?", "비용과 준비물이 어떻게 되나요?", "주차나 대기 방식이 어떻게 되나요?"];
   const nearby = allSameCategory
     .filter((p) => p.id !== place.id && p.sido === place.sido && p.sigungu === place.sigungu)
     .slice(0, 5);
@@ -237,6 +247,21 @@ export default async function PlaceSlugPage({
           />
         </div>
       </section>
+
+      <DetailDecisionPanel
+        categoryLabel={categoryLabel}
+        regionLabel={[place.sido, place.sigungu].filter(Boolean).join(" ") || "지역 미상"}
+        addressLabel={displayAddress}
+        phone={bestPhone}
+        hasCoordinates={place.lat !== null && place.lng !== null}
+        businessStatus={place.businessStatus ?? null}
+        dataUpdatedLabel={new Date(place.updatedAt).toLocaleDateString("ko-KR")}
+        sourceLabel={sourceLabel}
+        reviewCount={reviewSummary.count}
+        questions={decisionQuestions}
+        reportHref={reportHref}
+        reviewHref={reviewHref}
+      />
 
       {reliableEnrichment ? (
         <div className="mt-8">

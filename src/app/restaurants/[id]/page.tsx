@@ -3,6 +3,7 @@ import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { AdSlot } from "@/components/AdSlot";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
+import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
 import { VisitInfoPanel } from "@/components/detail/VisitInfoPanel";
 import { VisitChecklist } from "@/components/detail/VisitChecklist";
@@ -48,6 +49,12 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
   const mapHref = restaurant.lat !== null && restaurant.lng !== null
     ? `/map?category=restaurants&lat=${restaurant.lat.toFixed(6)}&lng=${restaurant.lng.toFixed(6)}`
     : `/map?category=restaurants&q=${encodeURIComponent(restaurant.name)}`;
+  const decisionQuestions = [
+    "오늘 반려동물 동반 좌석을 운영하나요?",
+    "실내·야외·이동장 조건이 따로 있나요?",
+    "대형견이나 다견 방문 제한이 있나요?",
+    "피크타임 또는 주말 입장 제한이 있나요?",
+  ];
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
@@ -80,6 +87,21 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           />
         </div>
       </section>
+
+      <DetailDecisionPanel
+        categoryLabel="반려동물 동반 식당"
+        regionLabel={regionLabel}
+        addressLabel={restaurant.address}
+        phone={bestPhone}
+        hasCoordinates={restaurant.lat !== null && restaurant.lng !== null}
+        businessStatus="공공데이터 등록"
+        dataUpdatedLabel={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")}
+        sourceLabel="식품안전나라"
+        reviewCount={reviewSummary.count}
+        questions={decisionQuestions}
+        reportHref={reportHref}
+        reviewHref={reviewHref}
+      />
 
       <div className="mt-8">
         <BusinessEnrichmentPanel enrichment={enrichment} category="RESTAURANT" reportHref={reportHref} reviewHref={reviewHref} />
@@ -122,7 +144,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
         <section className="mt-10">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Nearby</p>
+              <p className="eyebrow">주변 식당</p>
               <h2 className="mt-4 text-2xl font-black tracking-tight">같은 지역 반려동물 동반 식당</h2>
             </div>
           </div>
@@ -158,7 +180,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
         <section className="mt-10">
           <div className="mb-4 flex items-end justify-between gap-4">
             <div>
-              <p className="eyebrow">Care Nearby</p>
+              <p className="eyebrow">주변 케어</p>
               <h2 className="mt-4 text-2xl font-black tracking-tight">같은 지역 병원·약국</h2>
             </div>
           </div>
