@@ -105,6 +105,14 @@ export function normalizeBusinessText(value: string | null | undefined) {
     .trim();
 }
 
+function normalizeCategoryText(value: string | null | undefined) {
+  return (value ?? "")
+    .toLowerCase()
+    .replace(/<[^>]+>/g, "")
+    .replace(/[\s\-_.()\[\],/]+/g, "")
+    .trim();
+}
+
 function bigrams(value: string) {
   if (value.length <= 1) return value ? [value] : [];
   const chunks: string[] = [];
@@ -181,9 +189,12 @@ function calculateRegionScore(inputAddress?: string | null, candidateAddress?: s
 
 function calculateCategoryScore(inputCategory?: string | null, candidateCategory?: string | null) {
   if (!inputCategory || !candidateCategory) return { score: 0, matches: null };
-  const normalizedCategory = normalizeBusinessText(candidateCategory);
+  const normalizedCategory = normalizeCategoryText(candidateCategory);
   const terms = CATEGORY_MATCH_TERMS[inputCategory] ?? [];
-  const matches = terms.some((term) => normalizedCategory.includes(normalizeBusinessText(term)));
+  const matches = terms
+    .map((term) => normalizeCategoryText(term))
+    .filter(Boolean)
+    .some((term) => normalizedCategory.includes(term));
   return { score: matches ? 1 : 0, matches };
 }
 
