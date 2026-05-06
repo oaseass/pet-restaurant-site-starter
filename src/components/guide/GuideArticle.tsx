@@ -1,11 +1,83 @@
+import { Fragment } from "react";
+import type { PlaceCategory } from "@prisma/client";
 import { AdSlot } from "@/components/AdSlot";
 import { CharacterImage } from "@/components/CharacterImage";
+import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import { SmartLink } from "@/components/SmartLink";
 import { SourceBadge } from "@/components/SourceBadge";
+import { buildDiscoveryMapHref, buildReviewHref, getPlaceMapCategoryKey, hasUsableCoordinates } from "@/lib/discovery-cards";
 import { GUIDE_DOCS, type GuideDoc } from "@/lib/guide-content";
 import { PLACE_CATEGORY_LABELS, QUICK_CATEGORIES } from "@/lib/platform-content";
+import { getPlacesByCategorySnapshot, getRestaurantsLightSnapshot, type PlaceDbCategory, type PublicPlaceLight, type PublicRestaurantLight } from "@/lib/public-data";
 
 const COMMON_NOTICE = "법령, 항공사·선사 규정, 병원 비용, 업체 운영정책은 시점과 업체에 따라 달라질 수 있습니다. 실제 이용 전 공식 기관 또는 업체에 다시 확인하세요.";
+
+type GuideRelatedPlaceTarget =
+  | {
+      kind: "restaurants";
+      title: string;
+      description: string;
+      href: string;
+    }
+  | {
+      kind: "places";
+      category: PlaceDbCategory;
+      title: string;
+      description: string;
+      href: string;
+    };
+
+type GuideRelatedPlaceCard = {
+  id: string;
+  name: string;
+  meta: string;
+  address: string;
+  detailHref: string;
+  mapHref: string;
+  phone?: string | null;
+  reviewHref: string;
+};
+
+type GuideRelatedPlaceSection = {
+  title: string;
+  description: string;
+  href: string;
+  items: GuideRelatedPlaceCard[];
+};
+
+const GUIDE_RELATED_PLACE_TARGETS: Partial<Record<PlaceCategory, GuideRelatedPlaceTarget[]>> = {
+  TRAVEL: [
+    { kind: "restaurants", title: "여행 중 들를 식당", description: "지도와 상세 화면으로 바로 이어지는 최근 등록 식당입니다.", href: "/map?category=restaurants" },
+    { kind: "places", category: "ANIMAL_HOSPITAL", title: "여행지 주변 병원", description: "이동 전 저장해두기 좋은 동물병원입니다.", href: "/map?category=hospitals" },
+  ],
+  FLIGHT: [
+    { kind: "places", category: "ANIMAL_HOSPITAL", title: "탑승 전 상담 병원", description: "이동장, 접종, 건강 상태를 확인할 때 연결됩니다.", href: "/map?category=hospitals" },
+  ],
+  SHIP: [
+    { kind: "places", category: "ANIMAL_HOSPITAL", title: "출항 전 확인할 병원", description: "멀미와 장거리 이동 상담이 필요할 때 먼저 봅니다.", href: "/map?category=hospitals" },
+  ],
+  VACCINATION: [
+    { kind: "places", category: "ANIMAL_HOSPITAL", title: "접종 상담 병원", description: "예방접종 일정과 이상반응 기준을 확인할 수 있는 병원입니다.", href: "/map?category=hospitals" },
+    { kind: "places", category: "PHARMACY", title: "동물약국", description: "처방·구입 전 전화 확인이 필요한 약국입니다.", href: "/map?category=pharmacy" },
+  ],
+  SURGERY: [
+    { kind: "places", category: "ANIMAL_HOSPITAL", title: "수술 상담 병원", description: "검사, 마취, 회복 설명을 비교할 때 참고합니다.", href: "/map?category=hospitals" },
+  ],
+  REGISTRATION: [
+    { kind: "places", category: "ANIMAL_HOSPITAL", title: "동물등록 상담 병원", description: "등록 방식과 변경신고를 확인할 때 연결됩니다.", href: "/map?category=hospitals" },
+  ],
+  PET_FOOD: [
+    { kind: "places", category: "ANIMAL_HOSPITAL", title: "급여 상담 병원", description: "질환, 알레르기, 체중 관리가 필요할 때 먼저 확인합니다.", href: "/map?category=hospitals" },
+    { kind: "places", category: "PHARMACY", title: "동물약국", description: "구입 가능 품목은 방문 전 전화 확인이 필요합니다.", href: "/map?category=pharmacy" },
+  ],
+  FUNERAL: [
+    { kind: "places", category: "FUNERAL", title: "장례 상담 시설", description: "운구, 화장, 봉안 절차를 확인할 수 있는 시설입니다.", href: "/map?category=funeral" },
+  ],
+};
+
+const DEFAULT_RELATED_PLACE_TARGETS: GuideRelatedPlaceTarget[] = [
+  { kind: "places", category: "ANIMAL_HOSPITAL", title: "가까운 동물병원", description: "방문 전 전화와 위치를 함께 확인하세요.", href: "/map?category=hospitals" },
+];
 
 const GUIDE_QUESTION_PROMPTS: Partial<Record<GuideDoc["category"], string[]>> = {
   TRAVEL: ["숙소의 체중·견종 제한과 추가 비용은 어떻게 되나요?", "동반 가능한 공용 공간과 객실 대기 규칙은 무엇인가요?", "가까운 동물병원과 야간 진료 가능 병원이 어디인가요?"],
@@ -46,11 +118,161 @@ function getRelatedGuides(guide: GuideDoc) {
   return [...preferred, ...fallback].slice(0, 3);
 }
 
-export function GuideArticle({ guide }: { guide: GuideDoc }) {
+function pickRestaurantsForGuide(restaurants: PublicRestaurantLight[], limit = 3) {
+  return pickDiverseItems(
+    [...restaurants].sort((leftRestaurant, rightRestaurant) => {
+      const coordinateDiff = Number(hasUsableCoordinates(rightRestaurant.lat, rightRestaurant.lng)) - Number(hasUsableCoordinates(leftRestaurant.lat, leftRestaurant.lng));
+      if (coordinateDiff !== 0) return coordinateDiff;
+
+      const rightUpdatedAt = new Date(rightRestaurant.updatedAt).getTime();
+      const leftUpdatedAt = new Date(leftRestaurant.updatedAt).getTime();
+      return rightUpdatedAt - leftUpdatedAt;
+    }),
+    (restaurant) => `${restaurant.sido} ${restaurant.sigungu ?? ""}`.trim(),
+    limit,
+  );
+}
+
+function pickPlacesForGuide(places: PublicPlaceLight[], limit = 3) {
+  return pickDiverseItems(
+    [...places].sort((leftPlace, rightPlace) => {
+      const phoneDiff = Number(Boolean(rightPlace.phone)) - Number(Boolean(leftPlace.phone));
+      if (phoneDiff !== 0) return phoneDiff;
+
+      const coordinateDiff = Number(hasUsableCoordinates(rightPlace.lat, rightPlace.lng)) - Number(hasUsableCoordinates(leftPlace.lat, leftPlace.lng));
+      if (coordinateDiff !== 0) return coordinateDiff;
+
+      const rightUpdatedAt = new Date(rightPlace.updatedAt).getTime();
+      const leftUpdatedAt = new Date(leftPlace.updatedAt).getTime();
+      return rightUpdatedAt - leftUpdatedAt;
+    }),
+    (place) => `${place.sido ?? ""} ${place.sigungu ?? ""}`.trim(),
+    limit,
+  );
+}
+
+function pickDiverseItems<T>(items: T[], getRegion: (item: T) => string, limit: number) {
+  const selectedItems: T[] = [];
+  const selectedRegions = new Set<string>();
+
+  for (const item of items) {
+    const region = getRegion(item);
+    if (region && selectedRegions.has(region)) continue;
+    selectedItems.push(item);
+    if (region) selectedRegions.add(region);
+    if (selectedItems.length >= limit) return selectedItems;
+  }
+
+  for (const item of items) {
+    if (selectedItems.includes(item)) continue;
+    selectedItems.push(item);
+    if (selectedItems.length >= limit) break;
+  }
+
+  return selectedItems;
+}
+
+async function getGuideRelatedPlaceSections(guide: GuideDoc): Promise<GuideRelatedPlaceSection[]> {
+  const targets = GUIDE_RELATED_PLACE_TARGETS[guide.category] ?? DEFAULT_RELATED_PLACE_TARGETS;
+
+  const sections = await Promise.all(
+    targets.map(async (target) => {
+      if (target.kind === "restaurants") {
+        const restaurants = pickRestaurantsForGuide(await getRestaurantsLightSnapshot()).map((restaurant) => ({
+          id: restaurant.id,
+          name: restaurant.name,
+          meta: `${restaurant.sido} ${restaurant.sigungu ?? ""}`.trim() || restaurant.businessType,
+          address: restaurant.address,
+          detailHref: `/restaurants/${restaurant.id}`,
+          mapHref: buildDiscoveryMapHref({ categoryKey: "restaurants", name: restaurant.name, lat: restaurant.lat, lng: restaurant.lng }),
+          phone: null,
+          reviewHref: buildReviewHref("RESTAURANT", restaurant.id),
+        }));
+
+        return { title: target.title, description: target.description, href: target.href, items: restaurants };
+      }
+
+      const places = pickPlacesForGuide(await getPlacesByCategorySnapshot(target.category)).map((place) => {
+        const address = place.roadAddress ?? place.address ?? "주소 확인 필요";
+
+        return {
+          id: place.id,
+          name: place.name,
+          meta: `${PLACE_CATEGORY_LABELS[place.category as PlaceCategory] ?? "장소"} · ${place.sido ?? "지역 확인"}`,
+          address,
+          detailHref: `/places/${place.id}`,
+          mapHref: buildDiscoveryMapHref({ categoryKey: getPlaceMapCategoryKey(place.category), name: place.name, lat: place.lat, lng: place.lng }),
+          phone: place.phone,
+          reviewHref: buildReviewHref("PLACE", place.id),
+        };
+      });
+
+      return { title: target.title, description: target.description, href: target.href, items: places };
+    }),
+  );
+
+  return sections.filter((section) => section.items.length > 0).slice(0, 2);
+}
+
+function GuideRelatedPlaces({ sections }: { sections: GuideRelatedPlaceSection[] }) {
+  if (sections.length === 0) return null;
+
+  return (
+    <section className="mt-6">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">같이 확인할 장소</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight">읽은 뒤 바로 움직일 수 있게</h2>
+        </div>
+        <SmartLink href="/map" pendingLabel="지도 여는 중..." className="inline-flex min-h-10 items-center justify-center rounded-full border border-[var(--line)] bg-white px-4 text-xs font-black text-[var(--ink)]">
+          지도 전체 보기
+        </SmartLink>
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        {sections.map((section) => (
+          <div key={section.title} className="rounded-lg border border-[var(--line)] bg-[#fbfcfb] p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-black tracking-tight text-[var(--ink)]">{section.title}</h3>
+                <p className="mt-1 text-xs leading-5 text-[var(--muted)]">{section.description}</p>
+              </div>
+              <SmartLink href={section.href} pendingLabel="지도 여는 중..." className="shrink-0 rounded-full bg-[var(--brand)] px-3 py-2 text-[11px] font-black text-white">
+                더 보기
+              </SmartLink>
+            </div>
+
+            <div className="mt-4 grid gap-3">
+              {section.items.map((item) => (
+                <article key={item.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
+                  <SmartLink href={item.detailHref} className="block text-[var(--ink)] no-underline">
+                    <p className="text-[11px] font-black text-[var(--brand)]">{item.meta}</p>
+                    <h4 className="mt-1 line-clamp-2 text-sm font-black leading-snug">{item.name}</h4>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-[var(--muted)]">{item.address}</p>
+                  </SmartLink>
+                  <DiscoveryCardActions
+                    className="mt-3 border-t border-[var(--line)] pt-3"
+                    detailHref={item.detailHref}
+                    mapHref={item.mapHref}
+                    phone={item.phone}
+                    reviewHref={item.reviewHref}
+                  />
+                </article>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+export async function GuideArticle({ guide }: { guide: GuideDoc }) {
   const character = QUICK_CATEGORIES.find((item) => item.category === guide.category)?.character ?? "cat-peeking";
   const categoryLabel = PLACE_CATEGORY_LABELS[guide.category] ?? "가이드";
   const relatedGuides = getRelatedGuides(guide);
   const guideQuestions = getGuideQuestions(guide);
+  const relatedPlaceSections = await getGuideRelatedPlaceSections(guide);
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
@@ -113,6 +335,8 @@ export function GuideArticle({ guide }: { guide: GuideDoc }) {
         </ul>
       </section>
 
+      <GuideRelatedPlaces sections={relatedPlaceSections} />
+
       <section className="mt-6 card rounded-[1.25rem] p-6">
         <h2 className="text-xl font-black tracking-tight">핵심 체크리스트</h2>
         <ul className="mt-4 grid gap-3 text-sm leading-7 text-[#5f5550] sm:grid-cols-2">
@@ -126,14 +350,17 @@ export function GuideArticle({ guide }: { guide: GuideDoc }) {
 
       <section className="mt-6 space-y-4">
         {guide.sections.map((section, index) => (
-          <article key={section.heading} id={getSectionId(index)} className="scroll-mt-24 card rounded-[1.25rem] p-6">
-            <h2 className="text-2xl font-black tracking-tight">{section.heading}</h2>
-            <div className="mt-4 space-y-4 text-sm leading-8 text-[#5f5550] sm:text-[15px]">
-              {section.body.map((paragraph) => (
-                <p key={paragraph}>{paragraph}</p>
-              ))}
-            </div>
-          </article>
+          <Fragment key={section.heading}>
+            <article id={getSectionId(index)} className="scroll-mt-24 card rounded-[1.25rem] p-6">
+              <h2 className="text-2xl font-black tracking-tight">{section.heading}</h2>
+              <div className="mt-4 space-y-4 text-sm leading-8 text-[#5f5550] sm:text-[15px]">
+                {section.body.map((paragraph) => (
+                  <p key={paragraph}>{paragraph}</p>
+                ))}
+              </div>
+            </article>
+            {index === 1 ? <AdSlot label={`${guide.title} 본문 광고 영역`} className="mx-0" /> : null}
+          </Fragment>
         ))}
       </section>
 
@@ -168,8 +395,6 @@ export function GuideArticle({ guide }: { guide: GuideDoc }) {
           ))}
         </div>
       </section>
-
-      <AdSlot label={`${guide.title} 광고 영역`} />
 
       <section className="mt-6 rounded-lg border border-[var(--line)] bg-white p-5 text-sm leading-7 text-[var(--muted)]">
         <h2 className="text-base font-black text-[var(--ink)]">하단 공통 고지</h2>
