@@ -1,5 +1,15 @@
 # Codex Report
 
+## 홈 첫 화면 및 광고/수익화 라운드 진행 결과
+
+- 이번에 실제로 좋아진 화면: 홈(`/`) 첫 화면에서 검색창, 현재 위치, 지도, 병원, 약국, 식당, 보호동물, 여행 가이드 진입이 한 번에 보이도록 상단 구조를 압축했습니다. 기존의 큰 퀵액션/상황별 카드 묶음은 첫 화면에서 제거해 390px 모바일에서 시작 화면이 덜 답답하게 보이도록 했습니다.
+- 광고/수익화 흐름: 홈 광고 슬롯은 카테고리 바로 뒤가 아니라 최근 등록 식당 다음으로 옮겨, 사용자가 먼저 탐색 진입과 실제 콘텐츠를 본 뒤 광고를 만나도록 했습니다. `AdSlot` 자체도 큰 장식형 카드에서 8px radius의 얇은 콘텐츠 사이 슬롯으로 낮춰 광고가 활성화되어도 화면 흐름을 덜 끊게 정리했습니다.
+- 모바일 확인: 로컬 production과 공개 production 모두 390px 기준으로 `/`, `/search?q=동물병원`, `/map?lat=35.190605&lng=126.815636&category=all`, `/lost-pets`, `/guide/travel`을 확인했습니다. 확인 경로 모두 200 응답, 가로 overflow 없음, 홈 첫 화면에서 검색/지도/카테고리/보호동물/가이드 진입 노출 확인, 개발자용 enum 노출 없음.
+- 검증 결과: `npm test` 통과(25개), `npm run build` 통과. build/export 후 생성된 기존 `public/data/**` 변경은 커밋 대상에서 제외했습니다.
+- 금지사항 준수: Prisma schema 변경 없음, migration 생성 없음, DB reset 없음, `.env.local` 변경/커밋 없음, 외부 리뷰/블로그/메뉴판 크롤링 없음, `GROOMING`/`DAYCARE` enrichment 실제 반영 없음, `business-enrichment.json` 삭제/초기화 없음.
+- production 배포 확인: `https://pet-restaurant-site-starter-m8rdank96-larchides-projects.vercel.app` Ready, `https://pet-restaurant-site-starter.vercel.app` alias 연결 확인.
+- 현재 한계: 실제 AdSense 노출은 Vercel 환경변수 `NEXT_PUBLIC_ADSENSE_ENABLED=true`, `NEXT_PUBLIC_ADSENSE_CLIENT_ID`, `NEXT_PUBLIC_ADSENSE_DEFAULT_SLOT_ID`가 설정된 뒤에만 확인할 수 있습니다. 이번 변경은 광고가 켜졌을 때 들어갈 위치와 컴포넌트 밀도를 정리한 것입니다.
+
 ## 다음 라운드 진행 결과
 
 - 이번에 실제로 좋아진 화면: 검색 결과, 식당/장소 목록, 지도 목록이 `review-summaries.json` 공개 스냅샷을 읽도록 바뀌었습니다. 승인 리뷰가 생기면 카드에서 `리뷰 n건 · 평점 n.n`으로 표시되고, 현재처럼 승인 리뷰가 0건인 경우에는 `첫 리뷰 대기`를 유지합니다.

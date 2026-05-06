@@ -1,15 +1,21 @@
-﻿import { MapPin } from "lucide-react";
+﻿import { BookOpen, HeartPulse, MapPin, PawPrint, Pill, Utensils } from "lucide-react";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { InstantSearchBox } from "@/components/search/InstantSearchBox";
 import { LocationSearchButton } from "@/components/LocationSearchButton";
 import { SmartLink } from "@/components/SmartLink";
 import { AdSlot } from "@/components/AdSlot";
-import { HomeQuickActions } from "@/components/home/HomeQuickActions";
-import { HomeStartPaths } from "@/components/home/HomeStartPaths";
 import { HomeCategoryCards } from "@/components/home/HomeCategoryCards";
 import { HomeRestaurantHighlights } from "@/components/home/HomeRestaurantHighlights";
 import { HomeGuideSection } from "@/components/home/HomeGuideSection";
 import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot } from "@/lib/public-data";
+
+const HOME_ENTRY_LINKS = [
+  { label: "병원", href: "/hospitals", icon: HeartPulse },
+  { label: "약국", href: "/pharmacy", icon: Pill },
+  { label: "식당", href: "/restaurants", icon: Utensils },
+  { label: "보호동물", href: "/lost-pets?tab=shelter", icon: PawPrint },
+  { label: "가이드", href: "/guide/travel", icon: BookOpen },
+] as const;
 
 export default async function HomePage() {
   const [counts, restaurants] = await Promise.all([
@@ -25,7 +31,7 @@ export default async function HomePage() {
       {/* SearchHero */}
       <div
         style={{
-          padding: "16px 14px 14px",
+          padding: "14px 14px 12px",
           borderBottom: "1px solid var(--line)",
           background: "#fff",
         }}
@@ -39,13 +45,13 @@ export default async function HomePage() {
             lineHeight: 1.3,
           }}
         >
-          반려동물 동반 장소, 빠르게 찾기
+          우리 동네 반려생활, 바로 찾기
         </h1>
         <p style={{ fontSize: "12px", color: "var(--muted)", margin: "0 0 10px" }}>
-          식당명, 지역, 업종을 검색하거나 현재 위치로 가까운 장소를 찾아보세요.
+          식당·병원·약국부터 보호동물 공고와 여행 가이드까지 연결합니다.
         </p>
 
-        <InstantSearchBox placeholder="식당명, 지역, 업종으로 검색" />
+        <InstantSearchBox placeholder="지역, 업종, 업체명 검색" />
 
         <div
           style={{
@@ -79,48 +85,66 @@ export default async function HomePage() {
           </SmartLink>
         </div>
 
-        <div style={{ display: "flex", gap: "6px", marginTop: "9px", overflowX: "auto", paddingBottom: "2px" }}>
-          {[
-            { label: "동물병원", href: "/search?q=%EB%8F%99%EB%AC%BC%EB%B3%91%EC%9B%90" },
-            { label: "동물약국", href: "/search?q=%EB%8F%99%EB%AC%BC%EC%95%BD%EA%B5%AD" },
-            { label: "식당", href: "/restaurants" },
-            { label: "미용", href: "/grooming" },
-            { label: "유치원", href: "/daycare" },
-          ].map((item) => (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+            gap: "6px",
+            marginTop: "9px",
+          }}
+        >
+          {HOME_ENTRY_LINKS.map(({ label, href, icon: Icon }) => (
             <SmartLink
-              key={item.href}
-              href={item.href}
+              key={href}
+              href={href}
               pendingLabel="이동 중..."
               style={{
-                flexShrink: 0,
+                display: "flex",
+                minWidth: 0,
+                minHeight: "58px",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "4px",
                 border: "1px solid var(--line)",
-                borderRadius: "999px",
+                borderRadius: "8px",
                 background: "#fff",
                 color: "var(--ink)",
-                fontSize: "11px",
+                fontSize: "10.5px",
                 fontWeight: 800,
-                padding: "6px 10px",
+                lineHeight: 1.15,
+                padding: "7px 4px",
                 textDecoration: "none",
+                whiteSpace: "nowrap",
               }}
             >
-              {item.label}
+              <span
+                style={{
+                  display: "inline-flex",
+                  width: "24px",
+                  height: "24px",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: "7px",
+                  background: "var(--brand-soft)",
+                  color: "var(--brand)",
+                }}
+              >
+                <Icon size={14} />
+              </span>
+              {label}
             </SmartLink>
           ))}
         </div>
       </div>
 
-      {/* QuickActions */}
-      <HomeQuickActions />
-
-      <HomeStartPaths />
-
       {/* CategoryCards */}
       <HomeCategoryCards counts={counts} />
 
-      <AdSlot label="홈 탐색 광고 영역" className="mx-3" />
-
       {/* RestaurantHighlights */}
       <HomeRestaurantHighlights restaurants={restaurants} />
+
+      <AdSlot label="홈 추천 흐름 광고" className="mx-3 sm:mx-4" />
 
       {/* GuideSection */}
       <HomeGuideSection />

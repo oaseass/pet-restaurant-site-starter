@@ -40,14 +40,14 @@ export function AdSlot({ label = "광고 영역", slotId, className, format = "a
   }
 
   return (
-    <aside className={clsx("my-8", className)} aria-label={label}>
-      <div className="card rounded-[2rem] p-4 sm:p-5">
-        <div className="relative z-10 mb-3 flex items-center justify-between gap-3">
-          <span className="inline-flex h-8 items-center rounded-full bg-[#1f2d29] px-3 text-xs font-black uppercase tracking-[0.2em] text-white">Ad</span>
-          <p className="text-right text-xs font-semibold text-[#9d8f83]">{label}</p>
+    <aside className={clsx("my-5 sm:my-6", className)} aria-label={label}>
+      <div className="rounded-lg border border-[var(--line)] bg-white p-3 sm:p-4">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center rounded bg-[#eef3f1] px-2 py-1 text-[10px] font-black uppercase text-[var(--brand)]">광고</span>
+          <p className="text-right text-[11px] font-bold text-[var(--muted)]">{label}</p>
         </div>
         <ins
-          className="adsbygoogle block min-h-28 w-full overflow-hidden rounded-[1.6rem] bg-white/85"
+          className="adsbygoogle block min-h-24 w-full overflow-hidden rounded-md bg-[#f6f7f8] sm:min-h-28"
           style={{ display: "block" }}
           data-ad-client={adsenseClientId}
           data-ad-slot={resolvedSlotId}
