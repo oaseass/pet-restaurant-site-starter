@@ -1,10 +1,20 @@
 # Codex Report
 
+## 다음 라운드 진행 결과
+
+- 이번에 실제로 좋아진 화면: 검색 결과, 식당/장소 목록, 지도 목록이 `review-summaries.json` 공개 스냅샷을 읽도록 바뀌었습니다. 승인 리뷰가 생기면 카드에서 `리뷰 n건 · 평점 n.n`으로 표시되고, 현재처럼 승인 리뷰가 0건인 경우에는 `첫 리뷰 대기`를 유지합니다.
+- 정렬 개선: 검색/카테고리/지도 기본 목록에서 전화 가능, 외부 장소정보, 승인 리뷰, 좌표가 있는 항목을 같은 검색 관련도 안에서 조금 더 위로 올리도록 품질 점수를 추가했습니다.
+- lost-pets 개선: 보호동물 공고 카드에 `전화`, `상세`, `보호소 지도` CTA를 명확히 추가했고, 실종 제보 카드에는 `자세히 보기`, `목격 제보` CTA를 분리했습니다.
+- 검증 결과: `npm test` 통과(25개), `npm run build` 통과, `business-enrichment.json` 손상 없음(`total 663`, `bad 0`), `.env.local`/Prisma schema/migration/business-enrichment 변경 없음.
+- 로컬 production 확인: `http://localhost:3000`에서 `/search?q=동물병원`, `/search?q=동물약국`, `/restaurants`, `/hospitals`, `/pharmacy`, `/map?lat=35.190605&lng=126.815636&category=all`, `/lost-pets`, `/lost-pets?tab=pets`를 390px 기준 확인했습니다. 확인 경로 모두 200 응답, 가로 overflow 없음, 개발자용 enum 노출 없음.
+- 현재 한계: 이번 DB 기준 승인 리뷰 요약은 0건이라 build 로그의 `reviewSummaries`는 0입니다. 구조는 준비됐고, 승인 리뷰가 생기면 다음 export/build부터 카드에 실제 수치가 표시됩니다.
+- production 확인: 배포 후 최종 갱신 예정입니다.
+
 ## 대표 검수 요약
 
 - 이번에 실제로 좋아진 화면: 홈(`/`), 검색(`/search?q=동물병원`, `/search?q=동물약국`), 식당/병원/약국 목록(`/restaurants`, `/hospitals`, `/pharmacy`), 지도 목록(`/map?lat=35.190605&lng=126.815636&category=all`)은 카드 안에서 카테고리, 주소, 전화, 외부정보, 리뷰, 지도, 상세 CTA가 더 명확해졌습니다.
-- 아직 부족한 화면: `/lost-pets`와 `/guide/travel`은 production에서 정상 동작하지만 이번 discovery card 개선 범위와는 별개라 목록 카드의 리뷰/지도/외부정보 CTA 밀도는 아직 장소 탐색 화면만큼 강하지 않습니다. 광고는 슬롯 배치 여지는 있으나 production 환경변수 미설정 상태라 실제 노출은 확인되지 않습니다.
-- 다음에 바로 고쳐야 할 P0/P1: P0는 발견하지 못했습니다. P1은 목록 카드에 실제 승인 리뷰 수/평점 스냅샷을 붙이는 작업, lost-pets 카드의 CTA 밀도 보강, guide 상세 하단의 장소 추천/광고 위치 보강입니다.
+- 아직 부족한 화면: `/guide/travel`은 production에서 정상 동작하지만 장소 카드형 추천과 광고 배치가 아직 하단 링크 중심입니다. 광고는 슬롯 배치 여지는 있으나 production 환경변수 미설정 상태라 실제 노출은 확인되지 않습니다.
+- 다음에 바로 고쳐야 할 P0/P1: P0는 발견하지 못했습니다. P1은 승인 리뷰 확보/검수 운영, guide 상세 중간의 관련 장소 추천/광고 슬롯 보강, lost-pets 지역 필터 고도화입니다.
 - 대표가 직접 확인할 production URL: https://pet-restaurant-site-starter.vercel.app, https://pet-restaurant-site-starter.vercel.app/search?q=%EB%8F%99%EB%AC%BC%EB%B3%91%EC%9B%90, https://pet-restaurant-site-starter.vercel.app/search?q=%EB%8F%99%EB%AC%BC%EC%95%BD%EA%B5%AD, https://pet-restaurant-site-starter.vercel.app/restaurants, https://pet-restaurant-site-starter.vercel.app/hospitals, https://pet-restaurant-site-starter.vercel.app/pharmacy, https://pet-restaurant-site-starter.vercel.app/map?lat=35.190605&lng=126.815636&category=all, https://pet-restaurant-site-starter.vercel.app/restaurants/9bbc43ee-d9c5-4fac-a593-116d3cced8d6, https://pet-restaurant-site-starter.vercel.app/places/33e00bc4-44eb-4e88-a866-e1a3a868832b, https://pet-restaurant-site-starter.vercel.app/places/bd5eeb9b-cfb6-4bcb-a9fe-38f9a7556b31, https://pet-restaurant-site-starter.vercel.app/places/6f1e8b76-e33e-4dad-9692-05bc9bddb9a7, https://pet-restaurant-site-starter.vercel.app/lost-pets, https://pet-restaurant-site-starter.vercel.app/guide/travel
 
 ### URL별 3줄 검수 메모

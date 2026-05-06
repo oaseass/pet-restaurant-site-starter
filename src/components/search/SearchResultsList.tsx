@@ -5,7 +5,8 @@ import type { SearchRestaurantResult, SearchPlaceResult } from "@/lib/public-sea
 import { PLACE_CATEGORY_LABELS as GUIDE_CATEGORY_LABELS, type GuideDoc } from "@/lib/platform-content";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
-import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getExternalInfoLabel, getPlaceMapCategoryKey, getReviewSummaryLabel, getTrustedBusinessEnrichment } from "@/lib/discovery-cards";
+import { getReviewSummariesSnapshot } from "@/lib/public-data";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceMapCategoryKey, getPublicReviewSummary, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
@@ -68,7 +69,53 @@ function SectionHeader({ title, count, description }: { title: string; count: nu
 
 export async function SearchResultsList({ restaurants, places = [], guides, keyword, mapHref }: SearchResultsListProps) {
   const total = restaurants.length + places.length + guides.length;
-  const enrichmentSnapshot = total > 0 ? await getBusinessEnrichmentSnapshot() : {};
+  const [enrichmentSnapshot, reviewSnapshot] = total > 0
+    ? await Promise.all([getBusinessEnrichmentSnapshot(), getReviewSummariesSnapshot()])
+    : [{}, {}];
+  const sortedRestaurants = [...restaurants].sort((left, right) => {
+    const leftEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", left.id);
+    const rightEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", right.id);
+    const leftReview = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", left.id);
+    const rightReview = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", right.id);
+    const leftScore = left.score + getDiscoveryQualityScore({
+      phone: getBusinessPhone(null, leftEnrichment),
+      externalHref: getBusinessExternalHref(leftEnrichment),
+      externalCategory: getBusinessExternalCategory(leftEnrichment),
+      reviewCount: leftReview?.count,
+      hasCoordinates: hasUsableCoordinates(left.lat, left.lng),
+    }) * 0.25;
+    const rightScore = right.score + getDiscoveryQualityScore({
+      phone: getBusinessPhone(null, rightEnrichment),
+      externalHref: getBusinessExternalHref(rightEnrichment),
+      externalCategory: getBusinessExternalCategory(rightEnrichment),
+      reviewCount: rightReview?.count,
+      hasCoordinates: hasUsableCoordinates(right.lat, right.lng),
+    }) * 0.25;
+    if (leftScore !== rightScore) return rightScore - leftScore;
+    return left.name.localeCompare(right.name, "ko-KR");
+  });
+  const sortedPlaces = [...places].sort((left, right) => {
+    const leftEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", left.id, left.category);
+    const rightEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", right.id, right.category);
+    const leftReview = getPublicReviewSummary(reviewSnapshot, "PLACE", left.id);
+    const rightReview = getPublicReviewSummary(reviewSnapshot, "PLACE", right.id);
+    const leftScore = left.score + getDiscoveryQualityScore({
+      phone: getBusinessPhone(left.phone, leftEnrichment),
+      externalHref: getBusinessExternalHref(leftEnrichment),
+      externalCategory: getBusinessExternalCategory(leftEnrichment),
+      reviewCount: leftReview?.count,
+      hasCoordinates: hasUsableCoordinates(left.lat, left.lng),
+    }) * 0.25;
+    const rightScore = right.score + getDiscoveryQualityScore({
+      phone: getBusinessPhone(right.phone, rightEnrichment),
+      externalHref: getBusinessExternalHref(rightEnrichment),
+      externalCategory: getBusinessExternalCategory(rightEnrichment),
+      reviewCount: rightReview?.count,
+      hasCoordinates: hasUsableCoordinates(right.lat, right.lng),
+    }) * 0.25;
+    if (leftScore !== rightScore) return rightScore - leftScore;
+    return getDisplayPlaceName(left).localeCompare(getDisplayPlaceName(right), "ko-KR");
+  });
 
   return (
     <div>
@@ -117,11 +164,12 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
         <section>
           <SectionHeader title="식당" count={restaurants.length} description="반려동물 동반 식당은 방문 전 좌석, 대형견, 피크타임 조건을 확인하세요." />
           <div className="grid gap-2 p-3 sm:grid-cols-2">
-            {restaurants.map((restaurant) => {
+            {sortedRestaurants.map((restaurant) => {
               const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
               const phone = getBusinessPhone(null, enrichment);
               const externalCategory = getBusinessExternalCategory(enrichment);
               const externalHref = getBusinessExternalHref(enrichment);
+              const reviewSummary = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", restaurant.id);
               return (
                 <article key={restaurant.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
                   <SmartLink href={`/restaurants/${restaurant.id}`} className="block text-[var(--ink)] no-underline">
@@ -136,7 +184,7 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
                     <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{restaurant.address}</p>
                     <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                       <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
-                      <span>{getReviewSummaryLabel()}</span>
+                      <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
                       <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(restaurant.updatedAt)}</span>
                     </div>
                   </SmartLink>
@@ -159,13 +207,14 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
         <section>
           <SectionHeader title="시설" count={places.length} description="병원, 약국, 미용, 유치원, 장례 시설은 전화·운영 상태·서비스 조건을 먼저 확인하세요." />
           <div className="grid gap-2 p-3 sm:grid-cols-2">
-            {places.map((place) => {
+            {sortedPlaces.map((place) => {
               const displayName = getDisplayPlaceName(place);
               const categoryLabel = place.categoryLabel ?? PLACE_CATEGORY_LABELS[place.category] ?? "시설";
               const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
               const phone = getBusinessPhone(place.phone, enrichment);
               const externalCategory = getBusinessExternalCategory(enrichment);
               const externalHref = getBusinessExternalHref(enrichment);
+              const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
               return (
                 <article key={place.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
                   <SmartLink href={`/places/${place.id}`} className="block text-[var(--ink)] no-underline">
@@ -180,7 +229,7 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
                     <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소 확인 필요"}</p>
                     <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                       <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
-                      <span>{getReviewSummaryLabel()}</span>
+                      <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
                       <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(place.updatedAt)}</span>
                     </div>
                   </SmartLink>

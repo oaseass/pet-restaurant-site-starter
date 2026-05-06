@@ -39,6 +39,7 @@ function AnimalNoticeCard({ notice, index }: { notice: PublicAnimalNotice; index
   const noticeEnd = formatNoticeDate(notice.noticeEdt);
   const detailHref = `/lost-pets/notices/${encodeURIComponent(notice.desertionNo)}`;
   const imageUrl = notice.popfile ? normalizeNoticeImageUrl(notice.popfile) : "";
+  const mapQuery = encodeURIComponent(notice.careAddr || notice.careNm || notice.happenPlace || "");
 
   return (
     <div style={{ border: "1px solid #e5e7eb", borderRadius: "8px", overflow: "hidden", background: "#fff", fontSize: "12px" }}>
@@ -70,13 +71,20 @@ function AnimalNoticeCard({ notice, index }: { notice: PublicAnimalNotice; index
         </SmartLink>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: "10px", color: "#9ca3af" }}>공고 {noticeStart}{noticeEnd ? ` ~ ${noticeEnd}` : ""}</span>
-          {notice.careTel && (
-            <a href={`tel:${notice.careTel}`} style={{ fontSize: "11px", color: "#2563eb", textDecoration: "none", fontWeight: 600 }}>{notice.careTel}</a>
-          )}
         </div>
-        <SmartLink href={detailHref} prefetch={false} style={{ display: "inline-flex", marginTop: "8px", fontSize: "11px", color: "#2563eb", fontWeight: 800, textDecoration: "none" }}>
-          자세히 보기 →
-        </SmartLink>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "6px", marginTop: "8px" }}>
+          {notice.careTel ? (
+            <a href={`tel:${notice.careTel}`} style={{ minHeight: "32px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", background: "#2563eb", color: "#fff", textDecoration: "none", fontSize: "11px", fontWeight: 800 }}>전화</a>
+          ) : (
+            <span style={{ minHeight: "32px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", background: "#f3f4f6", color: "#6b7280", fontSize: "11px", fontWeight: 800 }}>전화 확인</span>
+          )}
+          <SmartLink href={detailHref} prefetch={false} style={{ minHeight: "32px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", border: "1px solid #2563eb", color: "#2563eb", fontSize: "11px", fontWeight: 800, textDecoration: "none" }}>
+            상세
+          </SmartLink>
+          {mapQuery ? (
+            <a href={`https://map.kakao.com/link/search/${mapQuery}`} target="_blank" rel="noreferrer" style={{ gridColumn: "1 / -1", minHeight: "32px", display: "inline-flex", alignItems: "center", justifyContent: "center", borderRadius: "999px", border: "1px solid #dbeafe", color: "#1d4ed8", textDecoration: "none", fontSize: "11px", fontWeight: 800 }}>보호소 지도</a>
+          ) : null}
+        </div>
       </div>
     </div>
   );

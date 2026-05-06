@@ -6,10 +6,10 @@ import { MapShell } from "@/components/map/MapShell";
 import { PendingSubmitButton } from "@/components/PendingSubmitButton";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
-import { buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getExternalInfoLabel, getReviewSummaryLabel, getTrustedBusinessEnrichment } from "@/lib/discovery-cards";
+import { buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPublicReviewSummary, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { REGION_OPTIONS } from "@/lib/platform-content";
-import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesByCategorySnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
+import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesByCategorySnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, getReviewSummariesSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
 
 const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   all: "전체",
@@ -299,7 +299,7 @@ export default async function MapPage({
   const needsRestaurants = shouldLoadData && (isRestaurantView || isAllView);
   const needsPlaces = shouldLoadData && (isAllView || Boolean(activePlaceCategory));
 
-  const [categoryCounts, restaurantsLight, categoryPlaces, enrichmentSnapshot] = await Promise.all([
+  const [categoryCounts, restaurantsLight, categoryPlaces, enrichmentSnapshot, reviewSnapshot] = await Promise.all([
     getCategoryCountsSnapshot(),
     needsRestaurants ? getRestaurantsLightSnapshot() : Promise.resolve([]),
     needsPlaces
@@ -308,6 +308,7 @@ export default async function MapPage({
           : getPlacesByCategorySnapshot(activePlaceCategory!))
       : Promise.resolve([]),
     shouldLoadData ? getBusinessEnrichmentSnapshot() : Promise.resolve({}),
+    shouldLoadData ? getReviewSummariesSnapshot() : Promise.resolve({}),
   ]);
 
   // 카테고리별 건수 — categoryCounts.placeCategoryCounts 우선, fallback은 0
@@ -393,6 +394,11 @@ export default async function MapPage({
         const combined: MapRestaurantListItem[] = [
           ...restaurantsFiltered.map((r) => {
             const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", r.id);
+            const phone = getBusinessPhone(null, enrichment);
+            const externalCategory = getBusinessExternalCategory(enrichment);
+            const externalHref = getBusinessExternalHref(enrichment);
+            const reviewSummary = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", r.id);
+            const hasCoordinates = hasUsableCoordinates(r.lat, r.lng);
             return {
               id: `r_${r.id}`,
               name: r.name,
@@ -404,21 +410,27 @@ export default async function MapPage({
               officialRegistered: r.officialRegistered,
               lat: r.lat,
               lng: r.lng,
-              coordinateStatus: (r.lat !== null && r.lng !== null ? "ready" : "pending") as "ready" | "pending",
+              coordinateStatus: (hasCoordinates ? "ready" : "pending") as "ready" | "pending",
               dataUpdatedLabel: new Date(r.updatedAt).toLocaleDateString("ko-KR"),
               distanceKm: hasUserLocation && r.lat !== null && r.lng !== null
                 ? getDistanceKm(userLat, userLng, r.lat, r.lng)
                 : undefined,
-              phone: getBusinessPhone(null, enrichment),
-              externalCategory: getBusinessExternalCategory(enrichment),
-              externalHref: getBusinessExternalHref(enrichment),
-              reviewLabel: getReviewSummaryLabel(),
+              phone,
+              externalCategory,
+              externalHref,
+              reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
               reviewHref: buildReviewHref("RESTAURANT", r.id),
               sourceLabel: getExternalInfoLabel(enrichment),
+              qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
             };
           }),
           ...placesForCategorySliced.map((p) => {
             const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", p.id, p.category);
+            const phone = getBusinessPhone(p.phone, enrichment);
+            const externalCategory = getBusinessExternalCategory(enrichment);
+            const externalHref = getBusinessExternalHref(enrichment);
+            const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", p.id);
+            const hasCoordinates = hasUsableCoordinates(p.lat, p.lng);
             return {
               id: `p_${p.id}`,
               name: sanitizePlaceName(p.name),
@@ -430,17 +442,18 @@ export default async function MapPage({
               officialRegistered: false,
               lat: p.lat,
               lng: p.lng,
-              coordinateStatus: (p.lat !== null && p.lng !== null ? "ready" : "pending") as "ready" | "pending",
+              coordinateStatus: (hasCoordinates ? "ready" : "pending") as "ready" | "pending",
               dataUpdatedLabel: new Date(p.updatedAt).toLocaleDateString("ko-KR"),
               distanceKm: hasUserLocation && p.lat !== null && p.lng !== null
                 ? getDistanceKm(userLat, userLng, p.lat, p.lng)
                 : undefined,
-              phone: getBusinessPhone(p.phone, enrichment),
-              externalCategory: getBusinessExternalCategory(enrichment),
-              externalHref: getBusinessExternalHref(enrichment),
-              reviewLabel: getReviewSummaryLabel(),
+              phone,
+              externalCategory,
+              externalHref,
+              reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
               reviewHref: buildReviewHref("PLACE", p.id),
               sourceLabel: getExternalInfoLabel(enrichment),
+              qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
             };
           }),
         ];
@@ -467,6 +480,11 @@ export default async function MapPage({
     : isRestaurantView
     ? restaurants.map((restaurant) => {
         const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
+      const phone = getBusinessPhone(null, enrichment);
+      const externalCategory = getBusinessExternalCategory(enrichment);
+      const externalHref = getBusinessExternalHref(enrichment);
+      const reviewSummary = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", restaurant.id);
+      const hasCoordinates = hasUsableCoordinates(restaurant.lat, restaurant.lng);
         return {
           id: restaurant.id,
           name: restaurant.name,
@@ -477,22 +495,28 @@ export default async function MapPage({
           officialRegistered: restaurant.officialRegistered,
           lat: restaurant.lat,
           lng: restaurant.lng,
-          coordinateStatus: restaurant.lat !== null && restaurant.lng !== null ? "ready" : "pending",
+          coordinateStatus: hasCoordinates ? "ready" : "pending",
           dataUpdatedLabel: new Date(restaurant.updatedAt).toLocaleDateString("ko-KR"),
           distanceKm:
             hasUserLocation && restaurant.lat !== null && restaurant.lng !== null
               ? getDistanceKm(userLat, userLng, restaurant.lat, restaurant.lng)
               : undefined,
-          phone: getBusinessPhone(null, enrichment),
-          externalCategory: getBusinessExternalCategory(enrichment),
-          externalHref: getBusinessExternalHref(enrichment),
-          reviewLabel: getReviewSummaryLabel(),
+          phone,
+          externalCategory,
+          externalHref,
+          reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
           reviewHref: buildReviewHref("RESTAURANT", restaurant.id),
           sourceLabel: getExternalInfoLabel(enrichment),
+          qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
         };
       })
     : placesForCategory.slice(0, 120).map((place) => {
         const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
+        const phone = getBusinessPhone(place.phone, enrichment);
+        const externalCategory = getBusinessExternalCategory(enrichment);
+        const externalHref = getBusinessExternalHref(enrichment);
+        const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
+        const hasCoordinates = hasUsableCoordinates(place.lat, place.lng);
         return {
           id: place.id,
           name: sanitizePlaceName(place.name),
@@ -504,22 +528,34 @@ export default async function MapPage({
           officialRegistered: false,
           lat: place.lat,
           lng: place.lng,
-          coordinateStatus: place.lat !== null && place.lng !== null ? "ready" : "pending",
+          coordinateStatus: hasCoordinates ? "ready" : "pending",
           dataUpdatedLabel: new Date(place.updatedAt).toLocaleDateString("ko-KR"),
           distanceKm:
             hasUserLocation && place.lat !== null && place.lng !== null
               ? getDistanceKm(userLat, userLng, place.lat, place.lng)
               : undefined,
-          phone: getBusinessPhone(place.phone, enrichment),
-          externalCategory: getBusinessExternalCategory(enrichment),
-          externalHref: getBusinessExternalHref(enrichment),
-          reviewLabel: getReviewSummaryLabel(),
+          phone,
+          externalCategory,
+          externalHref,
+          reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
           reviewHref: buildReviewHref("PLACE", place.id),
           sourceLabel: getExternalInfoLabel(enrichment),
+          qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
         };
       })) as MapRestaurantListItem[];
 
-  const listItems = limitKnownNameFirst(rawListItems, MAX_LIST);
+  const rankedRawListItems = hasUserLocation ? rawListItems : [...rawListItems].sort((a, b) => {
+    const nameCompare = compareKnownName(a.name, b.name);
+    if (nameCompare !== 0) return nameCompare;
+    const qualityCompare = (b.qualityScore ?? 0) - (a.qualityScore ?? 0);
+    if (qualityCompare !== 0) return qualityCompare;
+    const aHasCoord = a.coordinateStatus === "ready";
+    const bHasCoord = b.coordinateStatus === "ready";
+    if (aHasCoord !== bHasCoord) return Number(bHasCoord) - Number(aHasCoord);
+    return a.name.localeCompare(b.name, "ko-KR");
+  });
+
+  const listItems = limitKnownNameFirst(rankedRawListItems, MAX_LIST);
 
   const locationForHref = hasUserLocation ? { lat: userLat, lng: userLng, radiusKm } : undefined;
 

@@ -18,6 +18,7 @@ export type RestaurantCardItem = {
   externalCategory?: string | null;
   externalHref?: string | null;
   reviewCount?: number | null;
+  reviewAverage?: number | null;
 };
 
 export function RestaurantCard({ restaurant }: { restaurant: RestaurantCardItem }) {
@@ -27,7 +28,7 @@ export function RestaurantCard({ restaurant }: { restaurant: RestaurantCardItem 
   const hasCoordinates = hasUsableCoordinates(restaurant.lat, restaurant.lng);
   const mapHref = buildDiscoveryMapHref({ categoryKey: "restaurants", name: restaurant.name, lat: restaurant.lat, lng: restaurant.lng });
   const reviewHref = buildReviewHref("RESTAURANT", restaurant.id);
-  const reviewLabel = getReviewSummaryLabel(restaurant.reviewCount);
+  const reviewLabel = getReviewSummaryLabel(restaurant.reviewCount, restaurant.reviewAverage);
   const externalLabel = restaurant.externalCategory ?? (restaurant.externalHref ? "외부정보 있음" : "공공 데이터");
 
   return (

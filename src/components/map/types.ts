@@ -30,6 +30,7 @@ export type MapRestaurantListItem = {
   reviewLabel?: string;
   reviewHref?: string;
   sourceLabel?: string;
+  qualityScore?: number;
 };
 
 export type PreparedCategoryState = {

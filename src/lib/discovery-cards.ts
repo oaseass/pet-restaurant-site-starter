@@ -1,4 +1,5 @@
 import type { BusinessEnrichmentEntry, BusinessEnrichmentSnapshot, BusinessEnrichmentTargetType } from "@/lib/business-enrichment";
+import type { PublicReviewSummarySnapshot } from "@/lib/public-data";
 
 export const PLACE_CATEGORY_MAP_KEY: Record<string, string> = {
   ANIMAL_HOSPITAL: "hospitals",
@@ -44,12 +45,43 @@ export function buildReviewHref(targetType: "RESTAURANT" | "PLACE", targetId: st
   return `/reviews/new?targetType=${targetType}&targetId=${encodeURIComponent(targetId)}`;
 }
 
-export function getReviewSummaryLabel(reviewCount?: number | null) {
-  return reviewCount && reviewCount > 0 ? `리뷰 ${reviewCount.toLocaleString("ko-KR")}건` : "첫 리뷰 대기";
+export function getReviewSummaryLabel(reviewCount?: number | null, averageOverall?: number | null) {
+  if (!reviewCount || reviewCount <= 0) return "첫 리뷰 대기";
+  const countLabel = `리뷰 ${reviewCount.toLocaleString("ko-KR")}건`;
+  return averageOverall && averageOverall > 0 ? `${countLabel} · 평점 ${averageOverall.toFixed(1)}` : countLabel;
 }
 
 export function buildDiscoveryEnrichmentKey(targetType: BusinessEnrichmentTargetType, targetId: string) {
   return `${targetType}:${targetId}`;
+}
+
+export function getPublicReviewSummary(
+  snapshot: PublicReviewSummarySnapshot,
+  targetType: "RESTAURANT" | "PLACE",
+  targetId: string,
+) {
+  return snapshot[`${targetType}:${targetId}`] ?? null;
+}
+
+export function getDiscoveryQualityScore({
+  phone,
+  externalHref,
+  externalCategory,
+  reviewCount,
+  hasCoordinates,
+}: {
+  phone?: string | null;
+  externalHref?: string | null;
+  externalCategory?: string | null;
+  reviewCount?: number | null;
+  hasCoordinates?: boolean;
+}) {
+  return (
+    (reviewCount && reviewCount > 0 ? 8 : 0) +
+    (phone ? 5 : 0) +
+    (externalHref || externalCategory ? 4 : 0) +
+    (hasCoordinates ? 2 : 0)
+  );
 }
 
 export function getTrustedBusinessEnrichment(

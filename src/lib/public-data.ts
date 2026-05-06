@@ -38,6 +38,17 @@ export type PublicCategoryCounts = {
   placeCategoryCounts?: Partial<Record<PlaceDbCategory, number>>;
 };
 
+export type PublicReviewSummaryItem = {
+  targetType: "RESTAURANT" | "PLACE";
+  targetId: string;
+  count: number;
+  averageOverall: number | null;
+  averagePetFriendly: number | null;
+  latestReviewAt: string | null;
+};
+
+export type PublicReviewSummarySnapshot = Record<string, PublicReviewSummaryItem>;
+
 export type PublicRegions = {
   bySido: Array<{ sido: string; count: number }>;
   bySigungu: Array<{ sido: string; sigungu: string; count: number }>;
@@ -73,6 +84,7 @@ export const getRestaurantsLightSnapshot = cache(async () => readPublicJsonFile<
 export const getMapPointsSnapshot = cache(async () => readPublicJsonFile<PublicMapPoint[]>("map-points.json", []));
 export const getCategoryCountsSnapshot = cache(async () => readPublicJsonFile<PublicCategoryCounts>("category-counts.json", EMPTY_CATEGORY_COUNTS));
 export const getRegionsSnapshot = cache(async () => readPublicJsonFile<PublicRegions>("regions.json", EMPTY_REGIONS));
+export const getReviewSummariesSnapshot = cache(async () => readPublicJsonFile<PublicReviewSummarySnapshot>("review-summaries.json", {}));
 
 // ─── Place 공개 스냅샷 타입 ───────────────────────────────────────────────
 

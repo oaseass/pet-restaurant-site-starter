@@ -27,13 +27,14 @@ export function PlaceCard({
     externalCategory?: string | null;
     externalHref?: string | null;
     reviewCount?: number | null;
+    reviewAverage?: number | null;
     dataUpdatedAt?: string | Date | null;
   };
 }) {
   const mapCategoryKey = getPlaceMapCategoryKey(item.category);
   const hasCoordinates = hasUsableCoordinates(item.lat, item.lng);
   const mapHref = buildDiscoveryMapHref({ categoryKey: mapCategoryKey, name: item.name, lat: item.lat, lng: item.lng });
-  const reviewLabel = getReviewSummaryLabel(item.reviewCount);
+  const reviewLabel = getReviewSummaryLabel(item.reviewCount, item.reviewAverage);
   const externalLabel = item.externalCategory ?? (item.externalHref ? "외부정보 있음" : "공공 데이터");
   const reviewHref = item.href ? buildReviewHref("PLACE", item.id) : undefined;
   const body = (

@@ -13,8 +13,8 @@ import { MedicalDisclaimer } from "@/components/MedicalDisclaimer";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
 import { AdSlot } from "@/components/AdSlot";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
-import { getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getTrustedBusinessEnrichment } from "@/lib/discovery-cards";
-import { getCategoryCountsSnapshot, getRegionsSnapshot, getRestaurantsLightSnapshot, sortRestaurantsLight, toRestaurantCardItem } from "@/lib/public-data";
+import { getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getPublicReviewSummary, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { getCategoryCountsSnapshot, getRegionsSnapshot, getRestaurantsLightSnapshot, getReviewSummariesSnapshot, sortRestaurantsLight, toRestaurantCardItem } from "@/lib/public-data";
 import {
   PLACE_CATEGORY_LABELS,
   QUICK_CATEGORIES,
@@ -70,7 +70,7 @@ export async function PlaceDirectoryPage({
 
   const isRestaurant = category === "PET_RESTAURANT";
 
-  const [categoryCounts, restaurantsLight, regions, placeCount, places, enrichmentSnapshot] = await Promise.all([
+  const [categoryCounts, restaurantsLight, regions, placeCount, places, enrichmentSnapshot, reviewSnapshot] = await Promise.all([
     getCategoryCountsSnapshot(),
     isRestaurant ? getRestaurantsLightSnapshot() : Promise.resolve([]),
     isRestaurant ? getRegionsSnapshot() : Promise.resolve(null),
@@ -80,12 +80,56 @@ export async function PlaceDirectoryPage({
       : prisma.place.findMany({
           where: { category, isActive: true },
           orderBy: [{ ownerVerified: "desc" }, { updatedAt: "desc" }],
-          take: 18,
+          take: 36,
         }),
-            getBusinessEnrichmentSnapshot(),
+    getBusinessEnrichmentSnapshot(),
+    getReviewSummariesSnapshot(),
   ]);
 
-  const restaurants = isRestaurant ? sortRestaurantsLight(restaurantsLight).slice(0, 18).map(toRestaurantCardItem) : [];
+  const restaurants = isRestaurant ? sortRestaurantsLight(restaurantsLight).map(toRestaurantCardItem).sort((a, b) => {
+    const aEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", a.id);
+    const bEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", b.id);
+    const aReview = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", a.id);
+    const bReview = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", b.id);
+    const aScore = getDiscoveryQualityScore({
+      phone: getBusinessPhone(null, aEnrichment),
+      externalHref: getBusinessExternalHref(aEnrichment),
+      externalCategory: getBusinessExternalCategory(aEnrichment),
+      reviewCount: aReview?.count,
+      hasCoordinates: hasUsableCoordinates(a.lat, a.lng),
+    });
+    const bScore = getDiscoveryQualityScore({
+      phone: getBusinessPhone(null, bEnrichment),
+      externalHref: getBusinessExternalHref(bEnrichment),
+      externalCategory: getBusinessExternalCategory(bEnrichment),
+      reviewCount: bReview?.count,
+      hasCoordinates: hasUsableCoordinates(b.lat, b.lng),
+    });
+    if (aScore !== bScore) return bScore - aScore;
+    return b.dataUpdatedAt.getTime() - a.dataUpdatedAt.getTime();
+  }).slice(0, 18) : [];
+  const displayPlaces = isRestaurant ? [] : [...places].sort((a, b) => {
+    const aEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", a.id, a.category);
+    const bEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", b.id, b.category);
+    const aReview = getPublicReviewSummary(reviewSnapshot, "PLACE", a.id);
+    const bReview = getPublicReviewSummary(reviewSnapshot, "PLACE", b.id);
+    const aScore = getDiscoveryQualityScore({
+      phone: getBusinessPhone(a.phone, aEnrichment),
+      externalHref: getBusinessExternalHref(aEnrichment),
+      externalCategory: getBusinessExternalCategory(aEnrichment),
+      reviewCount: aReview?.count,
+      hasCoordinates: hasUsableCoordinates(a.lat, a.lng),
+    });
+    const bScore = getDiscoveryQualityScore({
+      phone: getBusinessPhone(b.phone, bEnrichment),
+      externalHref: getBusinessExternalHref(bEnrichment),
+      externalCategory: getBusinessExternalCategory(bEnrichment),
+      reviewCount: bReview?.count,
+      hasCoordinates: hasUsableCoordinates(b.lat, b.lng),
+    });
+    if (aScore !== bScore) return bScore - aScore;
+    return Number(b.ownerVerified) - Number(a.ownerVerified) || b.updatedAt.getTime() - a.updatedAt.getTime();
+  }).slice(0, 18);
   const count = isRestaurant ? categoryCounts.restaurantCount : placeCount;
 
   const mapItems = isRestaurant
@@ -98,7 +142,7 @@ export async function PlaceDirectoryPage({
         categoryLabel: restaurant.businessType,
         href: `/restaurants/${restaurant.id}`,
       }))
-    : places.map((place) => ({
+    : displayPlaces.map((place) => ({
         id: place.id,
         name: place.name,
         address: place.address,
@@ -155,6 +199,7 @@ export async function PlaceDirectoryPage({
                 restaurants.length > 0 ? (
                   restaurants.map((restaurant) => {
                     const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
+                    const reviewSummary = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", restaurant.id);
                     return (
                       <RestaurantCard
                         key={restaurant.id}
@@ -163,6 +208,8 @@ export async function PlaceDirectoryPage({
                           phone: getBusinessPhone(null, enrichment),
                           externalCategory: getBusinessExternalCategory(enrichment),
                           externalHref: getBusinessExternalHref(enrichment),
+                          reviewCount: reviewSummary?.count,
+                          reviewAverage: reviewSummary?.averageOverall,
                         }}
                       />
                     );
@@ -170,9 +217,10 @@ export async function PlaceDirectoryPage({
                 ) : (
                   <EmptyState title="아직 식당 데이터가 비어 있습니다." description="다음 배치 동기화 이후 다시 확인해 주세요." character="dog-hoodie" />
                 )
-              ) : places.length > 0 ? (
-                places.map((place) => {
+              ) : displayPlaces.length > 0 ? (
+                displayPlaces.map((place) => {
                   const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
+                  const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
                   return (
                     <PlaceCard
                       key={place.id}
@@ -190,6 +238,8 @@ export async function PlaceDirectoryPage({
                         businessStatus: place.businessStatus,
                         externalCategory: getBusinessExternalCategory(enrichment),
                         externalHref: getBusinessExternalHref(enrichment),
+                        reviewCount: reviewSummary?.count,
+                        reviewAverage: reviewSummary?.averageOverall,
                         dataUpdatedAt: place.updatedAt,
                         categoryLabel: PLACE_CATEGORY_LABELS[place.category],
                         href: `/places/${place.id}`,

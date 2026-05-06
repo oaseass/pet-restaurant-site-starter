@@ -82,7 +82,7 @@ export default async function LostPetDetailPage({
           </article>
         </div>
 
-        <form action={submitReport} className="card rounded-[2rem] p-6">
+        <form id="report" action={submitReport} className="card rounded-[2rem] p-6 scroll-mt-24">
           <h2 className="text-xl font-black">목격 제보 남기기</h2>
           <div className="mt-4 grid gap-4">
             <label className="space-y-2 text-sm font-bold text-[#4b423c]">이름<input name="reporterName" required className="input" /></label>

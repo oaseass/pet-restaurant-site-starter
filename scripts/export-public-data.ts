@@ -7,7 +7,7 @@ loadEnvConfig(process.cwd());
 async function main() {
   const { prisma } = await import("../src/lib/prisma");
 
-  const [restaurants, placeCount, lostPetCount, nonRestaurantPlaces] = await Promise.all([
+  const [restaurants, placeCount, lostPetCount, nonRestaurantPlaces, reviewGroups] = await Promise.all([
     prisma.restaurant.findMany({
       where: { status: "ACTIVE" },
       select: {
@@ -48,6 +48,13 @@ async function main() {
         updatedAt: true,
       },
       orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+    }),
+    prisma.review.groupBy({
+      by: ["targetType", "targetId"],
+      where: { status: "APPROVED" },
+      _count: { _all: true },
+      _avg: { ratingOverall: true, ratingPetFriendly: true },
+      _max: { createdAt: true },
     }),
   ]);
 
@@ -161,6 +168,20 @@ async function main() {
 
   const categoryCountsWithPlaces = { ...categoryCounts, placeCategoryCounts };
 
+  const reviewSummaries = Object.fromEntries(
+    reviewGroups.map((group) => [
+      `${group.targetType}:${group.targetId}`,
+      {
+        targetType: group.targetType,
+        targetId: group.targetId,
+        count: group._count._all,
+        averageOverall: group._avg.ratingOverall,
+        averagePetFriendly: group._avg.ratingPetFriendly,
+        latestReviewAt: group._max.createdAt?.toISOString() ?? null,
+      },
+    ]),
+  );
+
   // 카테고리별 분리 디렉터리
   const placesByCategoryDir = path.join(outputDirectory, "places", "by-category");
   const placeMapPointsByCategoryDir = path.join(outputDirectory, "place-map-points", "by-category");
@@ -196,6 +217,7 @@ async function main() {
     fs.writeFile(path.join(outputDirectory, "regions.json"), JSON.stringify(regions, null, 2)),
     fs.writeFile(path.join(outputDirectory, "places-light.json"), JSON.stringify(placesLight, null, 2)),
     fs.writeFile(path.join(outputDirectory, "place-map-points.json"), JSON.stringify(placeMapPoints, null, 2)),
+    fs.writeFile(path.join(outputDirectory, "review-summaries.json"), JSON.stringify(reviewSummaries, null, 2)),
     ...byCategoryWrites,
   ]);
 
@@ -204,6 +226,7 @@ async function main() {
     mapPoints: mapPoints.length,
     placesLight: placesLight.length,
     placeMapPoints: placeMapPoints.length,
+    reviewSummaries: Object.keys(reviewSummaries).length,
     placeCategoryCounts,
     regionsBySido: regions.bySido.length,
     regionsBySigungu: regions.bySigungu.length,

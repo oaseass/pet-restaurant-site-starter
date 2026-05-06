@@ -3,8 +3,8 @@ import { AdSlot } from "@/components/AdSlot";
 import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
-import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getExternalInfoLabel, getPlaceMapCategoryKey, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
-import type { PublicPlaceLight } from "@/lib/public-data";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceMapCategoryKey, getPublicReviewSummary, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { getReviewSummariesSnapshot, type PublicPlaceLight } from "@/lib/public-data";
 
 type Props = {
   places: PublicPlaceLight[];
@@ -42,8 +42,31 @@ function getDisplayPlaceName(place: PublicPlaceLight, categoryLabel: string) {
 export async function PlaceListSection({ places, categoryLabel, mapHref }: Props) {
   if (places.length === 0) return null;
 
-  const enrichmentSnapshot = await getBusinessEnrichmentSnapshot();
-  const displayPlaces = [...places].sort((a, b) => Number(isLowConfidencePlaceName(a.name)) - Number(isLowConfidencePlaceName(b.name)));
+  const [enrichmentSnapshot, reviewSnapshot] = await Promise.all([getBusinessEnrichmentSnapshot(), getReviewSummariesSnapshot()]);
+  const displayPlaces = [...places].sort((a, b) => {
+    const confidenceCompare = Number(isLowConfidencePlaceName(a.name)) - Number(isLowConfidencePlaceName(b.name));
+    if (confidenceCompare !== 0) return confidenceCompare;
+    const aEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", a.id, a.category);
+    const bEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", b.id, b.category);
+    const aReview = getPublicReviewSummary(reviewSnapshot, "PLACE", a.id);
+    const bReview = getPublicReviewSummary(reviewSnapshot, "PLACE", b.id);
+    const aScore = getDiscoveryQualityScore({
+      phone: getBusinessPhone(a.phone, aEnrichment),
+      externalHref: getBusinessExternalHref(aEnrichment),
+      externalCategory: getBusinessExternalCategory(aEnrichment),
+      reviewCount: aReview?.count,
+      hasCoordinates: hasUsableCoordinates(a.lat, a.lng),
+    });
+    const bScore = getDiscoveryQualityScore({
+      phone: getBusinessPhone(b.phone, bEnrichment),
+      externalHref: getBusinessExternalHref(bEnrichment),
+      externalCategory: getBusinessExternalCategory(bEnrichment),
+      reviewCount: bReview?.count,
+      hasCoordinates: hasUsableCoordinates(b.lat, b.lng),
+    });
+    if (aScore !== bScore) return bScore - aScore;
+    return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+  });
   const withCoords = places.filter((p) => p.lat !== null);
   const sidoCounts = new Map<string, number>();
   for (const p of places) {
@@ -93,6 +116,7 @@ export async function PlaceListSection({ places, categoryLabel, mapHref }: Props
           const phone = getBusinessPhone(place.phone, enrichment);
           const externalCategory = getBusinessExternalCategory(enrichment);
           const externalHref = getBusinessExternalHref(enrichment);
+          const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
           const hasCoordinates = hasUsableCoordinates(place.lat, place.lng);
           const placeMapHref = buildDiscoveryMapHref({
             categoryKey: getPlaceMapCategoryKey(place.category),
@@ -124,7 +148,7 @@ export async function PlaceListSection({ places, categoryLabel, mapHref }: Props
                 <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소 확인 필요"}</p>
                 <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                   <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
-                  <span>{getReviewSummaryLabel()}</span>
+                  <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
                   <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(place.updatedAt)}</span>
                 </div>
               </SmartLink>
