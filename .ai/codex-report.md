@@ -8,7 +8,9 @@
 - 검증 결과: `npm test` 통과(25개), `npm run build` 통과, `business-enrichment.json` 손상 없음(`total 663`, `bad 0`), `.env.local`/Prisma schema/migration/business-enrichment 변경 없음.
 - 로컬 production 확인: `http://localhost:3000`에서 `/search?q=동물병원`, `/search?q=동물약국`, `/restaurants`, `/hospitals`, `/pharmacy`, `/map?lat=35.190605&lng=126.815636&category=all`, `/lost-pets`, `/lost-pets?tab=pets`를 390px 기준 확인했습니다. 확인 경로 모두 200 응답, 가로 overflow 없음, 개발자용 enum 노출 없음.
 - 현재 한계: 이번 DB 기준 승인 리뷰 요약은 0건이라 build 로그의 `reviewSummaries`는 0입니다. 구조는 준비됐고, 승인 리뷰가 생기면 다음 export/build부터 카드에 실제 수치가 표시됩니다.
-- production 확인: 배포 후 최종 갱신 예정입니다.
+- production 확인: `https://pet-restaurant-site-starter.vercel.app`에서 `/search?q=동물병원`, `/search?q=동물약국`, `/restaurants`, `/hospitals`, `/pharmacy`, `/map?lat=35.190605&lng=126.815636&category=all`, `/lost-pets` 확인 완료. 확인 경로 모두 200 응답, 390px 기준 가로 overflow 없음, 리뷰 라벨/전화·외부정보 신호/lost-pets CTA 노출 확인, 개발자용 enum 노출 없음.
+- Vercel deployment: `https://pet-restaurant-site-starter-66zzsfckh-larchides-projects.vercel.app` Ready.
+- 이번 라운드 기능 커밋: `2cee33b51e120cc3f65a010fb25ac2e3106cfcb6`.
 
 ## 대표 검수 요약
 
