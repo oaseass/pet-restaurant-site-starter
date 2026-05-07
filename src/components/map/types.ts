@@ -1,3 +1,5 @@
+import type { DiscoveryVisualKind } from "@/lib/discovery-cards";
+
 export type MapCategoryKey = "all" | "restaurants" | "hospitals" | "grooming" | "daycare" | "funeral" | "pharmacy" | "lost-pets";
 
 export type MapCategoryOption = {
@@ -30,6 +32,10 @@ export type MapRestaurantListItem = {
   reviewLabel?: string;
   reviewHref?: string;
   sourceLabel?: string;
+  identityLabel?: string;
+  identityDescription?: string;
+  serviceLabel?: string;
+  visualKind?: DiscoveryVisualKind;
   qualityScore?: number;
 };
 

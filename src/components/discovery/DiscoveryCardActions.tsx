@@ -36,7 +36,7 @@ export function DiscoveryCardActions({
   detailLabel = "자세히 보기",
   externalLabel = "카카오에서 보기",
   reviewLabel = "후기 남기기",
-  phoneUnavailableLabel = "전화번호 제보하기",
+  phoneUnavailableLabel = "전화번호 알려주기",
   className,
 }: DiscoveryCardActionsProps) {
   const cleanedPhone = phone?.trim();

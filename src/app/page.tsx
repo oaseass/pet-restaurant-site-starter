@@ -58,10 +58,10 @@ export default async function HomePage() {
             lineHeight: 1.3,
           }}
         >
-          오늘 갈 곳, 동네에서 바로 찾기
+          강아지 데리고 갈 곳 찾기
         </h1>
         <p style={{ fontSize: "12px", color: "var(--muted)", margin: "0 0 10px" }}>
-          식당, 병원, 약국, 보호동물 공고까지 필요한 것부터 살펴보세요.
+          지도, 카테고리, 보호동물 공고, 가이드까지 오늘 필요한 것부터 보세요.
         </p>
 
         <InstantSearchBox placeholder="동네, 업종, 업체명 검색" />

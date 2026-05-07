@@ -135,12 +135,10 @@ export function HomeCategoryCards({ counts }: HomeCategoryCardsProps) {
                 {c.label}
               </div>
               <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>
-                {c.count !== undefined
-                  ? `${c.count.toLocaleString("ko-KR")}건`
-                  : c.desc}
+                {c.desc}
               </div>
               {c.count !== undefined ? (
-                <div style={{ fontSize: "10px", color: "#999", marginTop: "1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.desc}</div>
+                <div style={{ fontSize: "10px", color: "#999", marginTop: "1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.count.toLocaleString("ko-KR")}곳 정리 중</div>
               ) : null}
             </div>
             <span

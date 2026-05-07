@@ -1,12 +1,13 @@
 import { CalendarDays, MapPin, Search } from "lucide-react";
 import { AdSlot } from "@/components/AdSlot";
+import { CategoryVisualBlock } from "@/components/discovery/CategoryVisualBlock";
 import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import type { SearchRestaurantResult, SearchPlaceResult } from "@/lib/public-search";
 import { PLACE_CATEGORY_LABELS as GUIDE_CATEGORY_LABELS, type GuideDoc } from "@/lib/platform-content";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
 import { getReviewSummariesSnapshot } from "@/lib/public-data";
-import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceMapCategoryKey, getPlaceVisitHint, getPublicReviewSummary, getRestaurantVisitHint, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceIdentity, getPlaceMapCategoryKey, getPublicReviewSummary, getRestaurantIdentity, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
@@ -170,22 +171,29 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
               const externalCategory = getBusinessExternalCategory(enrichment);
               const externalHref = getBusinessExternalHref(enrichment);
               const reviewSummary = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", restaurant.id);
+              const identity = getRestaurantIdentity({ businessType: restaurant.businessType, externalCategory });
               return (
                 <article key={restaurant.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
                   <SmartLink href={`/restaurants/${restaurant.id}`} className="block text-[var(--ink)] no-underline">
-                    <div className="flex flex-wrap gap-1.5">
-                      <span className="rounded bg-[var(--brand-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--brand)]">식당</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.businessType}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.lat !== null ? "지도에서 보기" : "주소로 찾기"}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호 제보"}</span>
+                    <div className="grid gap-3 sm:grid-cols-[104px_minmax(0,1fr)]">
+                      <CategoryVisualBlock kind={identity.visualKind} title={identity.identityLabel} description={identity.serviceLabel} compact />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="rounded bg-[var(--brand-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--brand)]">{identity.eyebrow}</span>
+                          <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{identity.identityLabel}</span>
+                          <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.lat !== null ? "지도에서 보기" : "주소로 찾기"}</span>
+                          <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호를 기다려요"}</span>
+                        </div>
+                        <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{restaurant.name}</h3>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{identity.description}</p>
+                      </div>
                     </div>
-                    <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{restaurant.name}</h3>
                     <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(restaurant)}</p>
                     <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{restaurant.address}</p>
-                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{getRestaurantVisitHint()}</p>
                     <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                       <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
                       <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
+                      <span>{identity.serviceLabel}</span>
                       <span className="flex items-center gap-1"><CalendarDays size={12} />업데이트 {formatDiscoveryDate(restaurant.updatedAt)}</span>
                     </div>
                   </SmartLink>
@@ -216,22 +224,30 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
               const externalCategory = getBusinessExternalCategory(enrichment);
               const externalHref = getBusinessExternalHref(enrichment);
               const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
+              const identity = getPlaceIdentity({ category: place.category, name: displayName, externalCategory });
               return (
                 <article key={place.id} className="rounded-lg border border-[var(--line)] bg-white p-4">
                   <SmartLink href={`/places/${place.id}`} className="block text-[var(--ink)] no-underline">
-                    <div className="flex flex-wrap gap-1.5">
-                      <span className="rounded bg-[#e0f2fe] px-2 py-0.5 text-[10px] font-black text-[#0369a1]">{categoryLabel}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.lat !== null ? "지도에서 보기" : "주소로 찾기"}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호 제보"}</span>
-                      {place.businessStatus ? <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.businessStatus}</span> : null}
+                    <div className="grid gap-3 sm:grid-cols-[104px_minmax(0,1fr)]">
+                      <CategoryVisualBlock kind={identity.visualKind} title={identity.identityLabel} description={identity.serviceLabel} compact />
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap gap-1.5">
+                          <span className="rounded bg-[#e0f2fe] px-2 py-0.5 text-[10px] font-black text-[#0369a1]">{categoryLabel}</span>
+                          <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{identity.identityLabel}</span>
+                          <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.lat !== null ? "지도에서 보기" : "주소로 찾기"}</span>
+                          <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호를 기다려요"}</span>
+                          {place.businessStatus ? <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.businessStatus}</span> : null}
+                        </div>
+                        <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{displayName}</h3>
+                        <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{identity.description}</p>
+                      </div>
                     </div>
-                    <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{displayName}</h3>
                     <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(place)}</p>
                     <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소는 정리 중이에요"}</p>
-                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{getPlaceVisitHint(place.category)}</p>
                     <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                       <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
                       <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
+                      <span>{identity.serviceLabel}</span>
                       <span className="flex items-center gap-1"><CalendarDays size={12} />업데이트 {formatDiscoveryDate(place.updatedAt)}</span>
                     </div>
                   </SmartLink>

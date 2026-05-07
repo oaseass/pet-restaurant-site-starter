@@ -19,7 +19,7 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
         }}
       >
         <div style={{ fontSize: "11px", fontWeight: 800, color: "#999", letterSpacing: "0.05em" }}>
-          최근 등록 식당
+          최근 업데이트된 장소
         </div>
         <SmartLink
           href="/restaurants"
@@ -66,20 +66,20 @@ export function HomeRestaurantHighlights({ restaurants }: HomeRestaurantHighligh
               >
                 {r.name}
               </div>
-              <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
-                {r.sigungu ?? r.sido} · {r.businessType}
+              <div style={{ fontSize: "11px", color: "var(--brand)", fontWeight: 800, marginTop: "4px" }}>
+                반려동물 동반 식당
               </div>
               <div
                 style={{
                   fontSize: "11px",
-                  color: "#bbb",
+                  color: "var(--muted)",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                   whiteSpace: "nowrap",
                   marginTop: "4px",
                 }}
               >
-                {r.address}
+                {r.sigungu ?? r.sido} · 좌석은 방문 전 확인
               </div>
             </SmartLink>
             <div style={{ display: "flex", gap: "4px", marginTop: "4px" }}>

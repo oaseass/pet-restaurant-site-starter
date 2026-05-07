@@ -1,9 +1,22 @@
 import { CalendarDays, MapPin, Phone } from "lucide-react";
+import { CategoryVisualBlock } from "@/components/discovery/CategoryVisualBlock";
 import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
-import { SourceBadge } from "@/components/SourceBadge";
 import { SmartLink } from "@/components/SmartLink";
-import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getExternalInfoLabel, getPlaceMapCategoryKey, getPlaceVisitHint, getReviewSummaryLabel, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getExternalInfoLabel, getPlaceIdentity, getPlaceMapCategoryKey, getReviewSummaryLabel, hasUsableCoordinates } from "@/lib/discovery-cards";
 import type { PlaceCategory, SourceType } from "@prisma/client";
+
+const LOW_CONFIDENCE_NAME_PATTERNS = [/^#?grooming$/i, /^#?daycare$/i, /^#?funeral$/i, /^#?pharmacy$/i, /^#?hospital$/i, /^#?animal[-_\s]?hospital$/i];
+
+function normalizeDisplayName(name: string) {
+  return name.trim().replace(/^#+\s*/, "").trim();
+}
+
+function getDisplayPlaceName(item: { name: string; categoryLabel: string; sido?: string | null; sigungu?: string | null }) {
+  const cleanedName = normalizeDisplayName(item.name);
+  if (cleanedName && !LOW_CONFIDENCE_NAME_PATTERNS.some((pattern) => pattern.test(cleanedName))) return cleanedName;
+  const region = [item.sido, item.sigungu].filter(Boolean).join(" ");
+  return region ? `${region} ${item.categoryLabel}` : `${item.categoryLabel} 업체`;
+}
 
 export function PlaceCard({
   item,
@@ -31,26 +44,31 @@ export function PlaceCard({
     dataUpdatedAt?: string | Date | null;
   };
 }) {
+  const displayName = getDisplayPlaceName(item);
   const mapCategoryKey = getPlaceMapCategoryKey(item.category);
   const hasCoordinates = hasUsableCoordinates(item.lat, item.lng);
-  const mapHref = buildDiscoveryMapHref({ categoryKey: mapCategoryKey, name: item.name, lat: item.lat, lng: item.lng });
+  const mapHref = buildDiscoveryMapHref({ categoryKey: mapCategoryKey, name: displayName, lat: item.lat, lng: item.lng });
   const reviewLabel = getReviewSummaryLabel(item.reviewCount, item.reviewAverage);
   const externalLabel = item.externalCategory ?? (item.externalHref ? "지도 정보와 비교했어요" : getExternalInfoLabel(null));
   const reviewHref = item.href ? buildReviewHref("PLACE", item.id) : undefined;
+  const identity = getPlaceIdentity({ category: item.category, name: displayName, externalCategory: item.externalCategory });
   const body = (
     <>
-      <div className="flex flex-wrap gap-2">
-        <SourceBadge
-          label={item.sourceType === "OWNER_SUBMISSION" ? "업체 등록" : item.sourceType === "USER_REPORT" ? "사용자 제보" : item.sourceType === "ADMIN_VERIFIED" ? "관리자 확인" : "공식 데이터"}
-          tone={item.sourceType === "OWNER_SUBMISSION" ? "owner" : item.sourceType === "USER_REPORT" ? "user" : item.sourceType === "ADMIN_VERIFIED" ? "admin" : "official"}
-        />
-        <span className="badge">{item.categoryLabel}</span>
-        <span className="badge">{hasCoordinates ? "지도에서 보기" : "주소로 찾기"}</span>
-        <span className="badge">{item.phone ? "전화 가능" : "전화번호 제보하기"}</span>
-        {item.businessStatus ? <span className="badge">{item.businessStatus}</span> : null}
-        {item.ownerVerified ? <SourceBadge label="업체 인증" tone="owner" /> : null}
+      <div className="grid gap-4 sm:grid-cols-[118px_minmax(0,1fr)]">
+        <CategoryVisualBlock kind={identity.visualKind} title={identity.identityLabel} description={identity.serviceLabel} compact />
+        <div className="min-w-0">
+          <div className="flex flex-wrap gap-2">
+            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{identity.eyebrow}</span>
+            <span className="badge">{identity.identityLabel}</span>
+            <span className="badge">{hasCoordinates ? "지도에서 보기" : "주소로 찾기"}</span>
+            <span className="badge">{item.phone ? "전화 가능" : "전화번호를 기다려요"}</span>
+            {item.businessStatus ? <span className="badge">{item.businessStatus}</span> : null}
+            {item.ownerVerified ? <span className="badge bg-[#ecf8f3] text-[#1a463f]">업체 인증</span> : null}
+          </div>
+          <h3 className="mt-3 text-xl font-black tracking-tight">{displayName}</h3>
+          <p className="mt-2 line-clamp-2 text-sm leading-7 text-[#5f5550]">{identity.description}</p>
+        </div>
       </div>
-      <h3 className="mt-4 text-xl font-black tracking-tight">{item.name}</h3>
       {item.address ? (
         <p className="mt-3 flex gap-2 text-sm leading-7 text-[var(--muted)]">
           <MapPin className="mt-1 shrink-0" size={16} />
@@ -63,12 +81,12 @@ export function PlaceCard({
           <span>{item.phone}</span>
         </p>
       ) : null}
-      <p className="mt-3 text-sm leading-7 text-[#5f5550]">{getPlaceVisitHint(item.category)}</p>
       <div className="mt-3 grid gap-1.5 text-xs font-bold text-[#7b746d] sm:grid-cols-2">
         <span>{externalLabel}</span>
         <span>{reviewLabel}</span>
+        <span>{identity.serviceLabel}</span>
         {item.dataUpdatedAt ? <span className="flex items-center gap-1"><CalendarDays size={13} />업데이트 {formatDiscoveryDate(item.dataUpdatedAt)}</span> : null}
-        {!item.phone ? <span>전화번호를 알고 있다면 제보해주세요</span> : null}
+        {!item.phone ? <span>{identity.missingInfoLabel}</span> : null}
       </div>
       {!item.address && !item.phone ? <p className="mt-3 text-sm leading-7 text-[var(--muted)]">아직 비어 있는 정보가 있어요. 방문 전에 업체에 한 번 더 물어보세요.</p> : null}
     </>

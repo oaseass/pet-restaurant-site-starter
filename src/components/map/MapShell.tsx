@@ -420,11 +420,13 @@ export function MapShell({
             {selectedItem ? (
               <div className="mt-3">
                 <p className="text-lg font-black text-[var(--ink)]">{selectedItem.name}</p>
-                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
+                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.identityLabel || selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
+                {selectedItem.identityDescription ? <p className="mt-2 text-sm leading-7 text-[#5f5550]">{selectedItem.identityDescription}</p> : null}
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
                 <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
                   <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
                   <span>{selectedItem.reviewLabel ?? "아직 후기가 없어요"}</span>
+                  {selectedItem.serviceLabel ? <span>{selectedItem.serviceLabel}</span> : null}
                 </div>
                 <DiscoveryCardActions
                   className="mt-3 border-t border-[var(--line)] pt-3"
@@ -496,11 +498,13 @@ export function MapShell({
             {selectedItem ? (
               <div className="mt-3">
                 <p className="text-lg font-black text-[var(--ink)]">{selectedItem.name}</p>
-                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
+                <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.identityLabel || selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
+                {selectedItem.identityDescription ? <p className="mt-2 text-sm leading-7 text-[#5f5550]">{selectedItem.identityDescription}</p> : null}
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
                 <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
                   <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
                   <span>{selectedItem.reviewLabel ?? "아직 후기가 없어요"}</span>
+                  {selectedItem.serviceLabel ? <span>{selectedItem.serviceLabel}</span> : null}
                 </div>
                 <DiscoveryCardActions
                   className="mt-3 border-t border-[var(--line)] pt-3"

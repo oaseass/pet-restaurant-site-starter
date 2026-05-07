@@ -6,7 +6,7 @@ import { MapShell } from "@/components/map/MapShell";
 import { PendingSubmitButton } from "@/components/PendingSubmitButton";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
-import { buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPublicReviewSummary, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceIdentity, getPublicReviewSummary, getRestaurantIdentity, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { REGION_OPTIONS } from "@/lib/platform-content";
 import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesByCategorySnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, getReviewSummariesSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
@@ -399,6 +399,7 @@ export default async function MapPage({
             const externalHref = getBusinessExternalHref(enrichment);
             const reviewSummary = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", r.id);
             const hasCoordinates = hasUsableCoordinates(r.lat, r.lng);
+            const identity = getRestaurantIdentity({ businessType: r.businessType, externalCategory });
             return {
               id: `r_${r.id}`,
               name: r.name,
@@ -421,6 +422,10 @@ export default async function MapPage({
               reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
               reviewHref: buildReviewHref("RESTAURANT", r.id),
               sourceLabel: getExternalInfoLabel(enrichment),
+              identityLabel: identity.identityLabel,
+              identityDescription: identity.description,
+              serviceLabel: identity.serviceLabel,
+              visualKind: identity.visualKind,
               qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
             };
           }),
@@ -431,9 +436,11 @@ export default async function MapPage({
             const externalHref = getBusinessExternalHref(enrichment);
             const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", p.id);
             const hasCoordinates = hasUsableCoordinates(p.lat, p.lng);
+            const displayName = sanitizePlaceName(p.name);
+            const identity = getPlaceIdentity({ category: p.category, name: displayName, externalCategory });
             return {
               id: `p_${p.id}`,
-              name: sanitizePlaceName(p.name),
+              name: displayName,
               address: formatPublicAddress(p),
               businessType: p.businessStatus ?? "운영은 업체마다 달라요",
               categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? "시설",
@@ -453,6 +460,10 @@ export default async function MapPage({
               reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
               reviewHref: buildReviewHref("PLACE", p.id),
               sourceLabel: getExternalInfoLabel(enrichment),
+              identityLabel: identity.identityLabel,
+              identityDescription: identity.description,
+              serviceLabel: identity.serviceLabel,
+              visualKind: identity.visualKind,
               qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
             };
           }),
@@ -485,6 +496,7 @@ export default async function MapPage({
       const externalHref = getBusinessExternalHref(enrichment);
       const reviewSummary = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", restaurant.id);
       const hasCoordinates = hasUsableCoordinates(restaurant.lat, restaurant.lng);
+      const identity = getRestaurantIdentity({ businessType: restaurant.businessType, externalCategory });
         return {
           id: restaurant.id,
           name: restaurant.name,
@@ -507,6 +519,10 @@ export default async function MapPage({
           reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
           reviewHref: buildReviewHref("RESTAURANT", restaurant.id),
           sourceLabel: getExternalInfoLabel(enrichment),
+          identityLabel: identity.identityLabel,
+          identityDescription: identity.description,
+          serviceLabel: identity.serviceLabel,
+          visualKind: identity.visualKind,
           qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
         };
       })
@@ -517,9 +533,11 @@ export default async function MapPage({
         const externalHref = getBusinessExternalHref(enrichment);
         const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
         const hasCoordinates = hasUsableCoordinates(place.lat, place.lng);
+        const displayName = sanitizePlaceName(place.name);
+        const identity = getPlaceIdentity({ category: place.category, name: displayName, externalCategory });
         return {
           id: place.id,
-          name: sanitizePlaceName(place.name),
+          name: displayName,
           address: formatPublicAddress(place),
           businessType: place.businessStatus ?? "운영은 업체마다 달라요",
           categoryLabel: PLACE_CATEGORY_LABEL[place.category] ?? "시설",
@@ -540,6 +558,10 @@ export default async function MapPage({
           reviewLabel: getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall),
           reviewHref: buildReviewHref("PLACE", place.id),
           sourceLabel: getExternalInfoLabel(enrichment),
+          identityLabel: identity.identityLabel,
+          identityDescription: identity.description,
+          serviceLabel: identity.serviceLabel,
+          visualKind: identity.visualKind,
           qualityScore: getDiscoveryQualityScore({ phone, externalHref, externalCategory, reviewCount: reviewSummary?.count, hasCoordinates }),
         };
       })) as MapRestaurantListItem[];

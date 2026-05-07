@@ -54,22 +54,20 @@ export function DetailDecisionPanel({
   reviewHref,
 }: DetailDecisionPanelProps) {
   const facts = [
-    { label: "전화", value: phone ? "전화로 확인 가능" : "전화번호 제보 필요", tone: phone ? "good" : "warn" },
+    { label: "전화", value: phone ? "전화로 확인 가능" : "전화번호를 기다려요", tone: phone ? "good" : "warn" },
     { label: "위치", value: hasCoordinates ? "지도에서 바로 보기" : "주소로 찾아보기", tone: hasCoordinates ? "good" : "warn" },
     { label: "운영", value: businessStatus ?? "업체마다 달라요", tone: getStatusTone(businessStatus) },
     { label: "후기", value: reviewCount > 0 ? `${reviewCount.toLocaleString("ko-KR")}건` : "아직 후기가 없어요", tone: reviewCount > 0 ? "good" : "muted" },
-    { label: "업데이트", value: dataUpdatedLabel, tone: "muted" },
-    { label: "정보", value: sourceLabel, tone: "muted" },
   ] satisfies Array<{ label: string; value: string; tone: FactTone }>;
 
   return (
     <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
-          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">가기 전에 볼 것</p>
-          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">오늘 바로 갈 수 있는지 먼저 살펴보세요</h2>
+          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">방문 판단</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">오늘 할 수 있는 행동만 모았어요</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-            {regionLabel} {categoryLabel} 정보입니다. 주소는 {addressLabel} 기준으로 보여드려요. 운영 방식이나 세부 조건은 업체마다 다를 수 있습니다.
+            {regionLabel} {categoryLabel}입니다. 주소는 {addressLabel} 기준으로 보여드리고, 운영 방식이나 세부 조건은 업체마다 다를 수 있습니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -86,14 +84,14 @@ export function DetailDecisionPanel({
         </div>
       </div>
 
-      <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {facts.map((fact) => <Fact key={fact.label} {...fact} />)}
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.75fr_1fr]">
         <div className="rounded-lg bg-[#f8faf9] p-4 text-sm leading-7 text-[var(--muted)]">
-          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 정보 기준</p>
-          <p className="mt-2">정부 공개자료, 직접 제보, 지도 정보와 잘 맞는 내용만 골라 보여드립니다.</p>
+          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 확인된 것과 비어 있는 것</p>
+          <p className="mt-2">{sourceLabel}를 바탕으로 정리했고, 마지막 반영일은 {dataUpdatedLabel}입니다. 메뉴·서비스·사진처럼 직접 확인이 필요한 정보는 제보가 들어온 뒤 보여드립니다.</p>
         </div>
         <div className="rounded-lg bg-[#fcfbf8] p-4">
           <p className="flex items-center gap-2 text-sm font-black text-[var(--ink)]"><Phone size={16} /> 전화할 때 물어볼 것</p>
