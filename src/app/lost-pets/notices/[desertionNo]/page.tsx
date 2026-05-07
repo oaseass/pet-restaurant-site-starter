@@ -12,13 +12,13 @@ function formatNoticeDate(value: string) {
 function sexLabel(value: string) {
   if (value === "M") return "수컷";
   if (value === "F") return "암컷";
-  return "미상";
+  return "성별 확인 중";
 }
 
 function neuterLabel(value: string) {
   if (value === "Y") return "예";
   if (value === "N") return "아니오";
-  return "미상";
+  return "확인 중";
 }
 
 function normalizeNoticeImageUrl(value: string) {
@@ -29,7 +29,7 @@ function DetailItem({ label, value }: { label: string; value?: string | null }) 
   return (
     <div className="rounded-xl border border-[#e5e7eb] bg-white px-4 py-3">
       <p className="text-[11px] font-black text-[#6b7280]">{label}</p>
-      <p className="mt-1 text-sm font-bold leading-6 text-[#111827]">{value?.trim() || "미상"}</p>
+      <p className="mt-1 text-sm font-bold leading-6 text-[#111827]">{value?.trim() || "확인 중"}</p>
     </div>
   );
 }
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ desertion
 
   return {
     title: notice ? `${notice.kindCd || "보호동물"} 공고 | 댕냥지도` : "보호동물 공고 | 댕냥지도",
-    description: notice ? `${notice.orgNm || "보호기관"} 보호동물 공고 상세 정보입니다.` : "보호동물 공고 상세 정보입니다.",
+    description: notice ? `${notice.orgNm || "보호기관"}에서 공개한 보호동물 공고를 확인하세요.` : "보호동물 공고를 확인하세요.",
   };
 }
 
@@ -85,12 +85,12 @@ export default async function AnimalNoticeDetailPage({ params }: { params: Promi
 
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-black text-[#2563eb]">{notice.processState || "상태 미상"}</span>
+              <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-black text-[#2563eb]">{notice.processState || "상태 확인 중"}</span>
               <span className="rounded-full bg-[#f3f4f6] px-3 py-1 text-xs font-black text-[#4b5563]">공고번호 {notice.noticeNo || notice.desertionNo}</span>
             </div>
             <h1 className="mt-4 text-3xl font-black tracking-tight text-[#111827] sm:text-4xl">{notice.kindCd || "보호동물"}</h1>
             <p className="mt-3 text-sm leading-7 text-[#6b7280]">
-              {notice.orgNm || "보호기관"} 공고입니다. 입양·인계 문의 전 공고 상태와 보호소 연락처를 다시 확인해 주세요.
+              {notice.orgNm || "보호기관"}에서 공개한 공고입니다. 입양·인계 문의 전 공고 상태와 보호소 연락처를 다시 확인해 주세요.
             </p>
 
             <div className="mt-5 flex flex-wrap gap-2">
@@ -109,9 +109,9 @@ export default async function AnimalNoticeDetailPage({ params }: { params: Promi
         </section>
 
         <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <DetailItem label="발견일" value={foundDate || "미상"} />
+          <DetailItem label="발견일" value={foundDate || "확인 중"} />
           <DetailItem label="발견장소" value={notice.happenPlace} />
-          <DetailItem label="공고기간" value={`${noticeStart || "미상"}${noticeEnd ? ` ~ ${noticeEnd}` : ""}`} />
+          <DetailItem label="공고기간" value={`${noticeStart || "확인 중"}${noticeEnd ? ` ~ ${noticeEnd}` : ""}`} />
           <DetailItem label="성별" value={sexLabel(notice.sexCd)} />
           <DetailItem label="중성화" value={neuterLabel(notice.neuterYn)} />
           <DetailItem label="나이·체중" value={[notice.age, notice.weight].filter(Boolean).join(" · ")} />
@@ -126,7 +126,7 @@ export default async function AnimalNoticeDetailPage({ params }: { params: Promi
         </section>
 
         <section className="mt-6 rounded-2xl border border-[#dbeafe] bg-[#eff6ff] p-5 text-sm leading-7 text-[#1e3a8a]">
-          보호동물 공고는 지자체·보호소 공개 자료를 바탕으로 표시됩니다. 실제 상태, 입양 가능 여부, 방문 가능 시간은 보호소에 직접 확인해 주세요.
+          보호동물 공고는 지자체와 보호소 공개자료를 바탕으로 보여드립니다. 실제 상태, 입양 가능 여부, 방문 가능 시간은 보호소에 직접 확인해 주세요.
         </section>
 
         <AdSlot label="보호동물 공고 상세 광고 영역" />

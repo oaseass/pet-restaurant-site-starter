@@ -2,7 +2,7 @@ import { CalendarDays, MapPin, Phone } from "lucide-react";
 import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import { SourceBadge } from "@/components/SourceBadge";
 import { SmartLink } from "@/components/SmartLink";
-import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getPlaceMapCategoryKey, getReviewSummaryLabel, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getExternalInfoLabel, getPlaceMapCategoryKey, getPlaceVisitHint, getReviewSummaryLabel, hasUsableCoordinates } from "@/lib/discovery-cards";
 import type { PlaceCategory, SourceType } from "@prisma/client";
 
 export function PlaceCard({
@@ -35,7 +35,7 @@ export function PlaceCard({
   const hasCoordinates = hasUsableCoordinates(item.lat, item.lng);
   const mapHref = buildDiscoveryMapHref({ categoryKey: mapCategoryKey, name: item.name, lat: item.lat, lng: item.lng });
   const reviewLabel = getReviewSummaryLabel(item.reviewCount, item.reviewAverage);
-  const externalLabel = item.externalCategory ?? (item.externalHref ? "외부정보 있음" : "공공 데이터");
+  const externalLabel = item.externalCategory ?? (item.externalHref ? "지도 정보와 비교했어요" : getExternalInfoLabel(null));
   const reviewHref = item.href ? buildReviewHref("PLACE", item.id) : undefined;
   const body = (
     <>
@@ -45,8 +45,8 @@ export function PlaceCard({
           tone={item.sourceType === "OWNER_SUBMISSION" ? "owner" : item.sourceType === "USER_REPORT" ? "user" : item.sourceType === "ADMIN_VERIFIED" ? "admin" : "official"}
         />
         <span className="badge">{item.categoryLabel}</span>
-        <span className="badge">{hasCoordinates ? "지도 가능" : "주소 검색"}</span>
-        <span className="badge">{item.phone ? "전화 가능" : "전화 제보 필요"}</span>
+        <span className="badge">{hasCoordinates ? "지도에서 보기" : "주소로 찾기"}</span>
+        <span className="badge">{item.phone ? "전화 가능" : "전화번호 제보하기"}</span>
         {item.businessStatus ? <span className="badge">{item.businessStatus}</span> : null}
         {item.ownerVerified ? <SourceBadge label="업체 인증" tone="owner" /> : null}
       </div>
@@ -63,13 +63,14 @@ export function PlaceCard({
           <span>{item.phone}</span>
         </p>
       ) : null}
+      <p className="mt-3 text-sm leading-7 text-[#5f5550]">{getPlaceVisitHint(item.category)}</p>
       <div className="mt-3 grid gap-1.5 text-xs font-bold text-[#7b746d] sm:grid-cols-2">
         <span>{externalLabel}</span>
         <span>{reviewLabel}</span>
-        {item.dataUpdatedAt ? <span className="flex items-center gap-1"><CalendarDays size={13} />기준 {formatDiscoveryDate(item.dataUpdatedAt)}</span> : null}
-        {!item.phone ? <span>방문 전 전화번호 제보 필요</span> : null}
+        {item.dataUpdatedAt ? <span className="flex items-center gap-1"><CalendarDays size={13} />업데이트 {formatDiscoveryDate(item.dataUpdatedAt)}</span> : null}
+        {!item.phone ? <span>전화번호를 알고 있다면 제보해주세요</span> : null}
       </div>
-      {!item.address && !item.phone ? <p className="mt-3 text-sm leading-7 text-[var(--muted)]">기본 정보는 순차적으로 보강하고 있습니다. 운영 여부와 위치는 방문 전 확인이 필요합니다.</p> : null}
+      {!item.address && !item.phone ? <p className="mt-3 text-sm leading-7 text-[var(--muted)]">아직 비어 있는 정보가 있어요. 방문 전에 업체에 한 번 더 물어보세요.</p> : null}
     </>
   );
 

@@ -31,7 +31,7 @@ const PET_SIZE_LABELS: Record<string, string> = {
 const ANSWER_LABELS: Record<string, string> = {
   YES: "가능 제보",
   NO: "불가 제보",
-  UNKNOWN: "확인 필요",
+  UNKNOWN: "아직 몰라요",
 };
 
 function formatRating(value: number | null) {
@@ -66,19 +66,19 @@ export function ReviewSection({ targetType, targetId, name, address, lat, lng, s
     <section className="mt-8 rounded-[1rem] border border-[var(--line)] bg-white p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">댕냥지도 리뷰</p>
-          <h2 className="mt-2 text-2xl font-black tracking-tight text-[var(--ink)]">반려동물 동반 경험 리뷰</h2>
+          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">댕냥지도 후기</p>
+          <h2 className="mt-2 text-2xl font-black tracking-tight text-[var(--ink)]">반려동물과 다녀온 후기</h2>
           <p className="mt-2 max-w-2xl text-sm leading-7 text-[var(--muted)]">
-            맛 평가보다 반려동물과 함께 방문했을 때의 좌석, 동반 편의성, 직원 응대, 청결도, 제한 조건을 중심으로 모읍니다.
+            맛보다 반려동물과 함께 갔을 때의 좌석, 응대, 청결, 제한 조건을 중심으로 모읍니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <SmartLink href={reviewHref} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">
             <MessageSquarePlus size={15} />
-            리뷰 남기기
+            후기 남기기
           </SmartLink>
           <SmartLink href={reportHref} className="inline-flex min-h-11 items-center rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--muted)]">
-            정보 수정 제보
+            정보 수정 요청
           </SmartLink>
         </div>
       </div>
@@ -92,7 +92,7 @@ export function ReviewSection({ targetType, targetId, name, address, lat, lng, s
           </div>
         </div>
         <div className="rounded-lg border border-[var(--line)] bg-white p-4">
-          <p className="text-xs font-black text-[var(--muted)]">리뷰 수</p>
+          <p className="text-xs font-black text-[var(--muted)]">후기 수</p>
           <p className="mt-2 text-2xl font-black text-[var(--ink)]">{summary.count.toLocaleString("ko-KR")}</p>
         </div>
         <div className="rounded-lg border border-[var(--line)] bg-white p-4">
@@ -108,7 +108,7 @@ export function ReviewSection({ targetType, targetId, name, address, lat, lng, s
             <p><span className="font-black text-[var(--ink)]">대형견 가능</span> 제보 비율 {formatPercent(summary.largeDogAllowedRate)}</p>
           </div>
         ) : (
-          <p className="font-bold">리뷰가 더 쌓이면 통계가 표시됩니다.</p>
+          <p className="font-bold">후기가 더 쌓이면 통계를 보여드릴게요.</p>
         )}
       </div>
 

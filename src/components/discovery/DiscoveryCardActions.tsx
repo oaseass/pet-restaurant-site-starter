@@ -32,11 +32,11 @@ export function DiscoveryCardActions({
   phone,
   externalHref,
   reviewHref,
-  mapLabel = "지도",
-  detailLabel = "상세",
-  externalLabel = "카카오",
-  reviewLabel = "리뷰",
-  phoneUnavailableLabel = "전화 제보",
+  mapLabel = "지도에서 보기",
+  detailLabel = "자세히 보기",
+  externalLabel = "카카오에서 보기",
+  reviewLabel = "후기 남기기",
+  phoneUnavailableLabel = "전화번호 제보하기",
   className,
 }: DiscoveryCardActionsProps) {
   const cleanedPhone = phone?.trim();

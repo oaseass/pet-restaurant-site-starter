@@ -12,12 +12,12 @@ type BusinessEnrichmentPanelProps = {
 };
 
 const CATEGORY_SUMMARIES: Record<BusinessCategory, string> = {
-  RESTAURANT: "외부 장소 정보 기준으로 음식점 분류가 확인되었습니다. 대표 메뉴는 아직 확인되지 않았습니다.",
-  ANIMAL_HOSPITAL: "외부 장소 정보 기준으로 동물병원 분류가 확인되었습니다. 진료시간과 야간진료 여부는 방문 전 확인해 주세요.",
-  PHARMACY: "외부 장소 정보 기준으로 약국 정보가 확인되었습니다. 동물의약품 재고는 방문 전 전화 확인을 권장합니다.",
-  GROOMING: "외부 장소 정보 기준으로 미용 관련 업체로 확인되었습니다. 견종·묘종·대형견 가능 여부는 예약 전 확인해 주세요.",
-  DAYCARE: "외부 장소 정보 기준으로 위탁·호텔·훈련 관련 업체 후보가 확인되었습니다. 운영 서비스는 업체에 직접 확인해 주세요.",
-  FUNERAL: "외부 장소 정보 기준으로 장례 관련 업체 후보가 확인되었습니다. 화장·봉안·픽업 가능 여부는 상담 전 확인해 주세요.",
+  RESTAURANT: "지도 정보와 비교해 음식점으로 보이는 곳입니다. 대표 메뉴와 동반 좌석은 매장에 물어보는 편이 좋아요.",
+  ANIMAL_HOSPITAL: "지도 정보와 비교해 동물병원으로 보이는 곳입니다. 지금 진료 가능한지는 먼저 전화해보세요.",
+  PHARMACY: "지도 정보와 비교해 약국으로 보이는 곳입니다. 찾는 동물의약품 재고는 전화가 가장 빠릅니다.",
+  GROOMING: "지도 정보와 비교해 미용 관련 업체로 보이는 곳입니다. 견종·크기에 따라 예약 조건이 달라질 수 있어요.",
+  DAYCARE: "지도 정보와 비교해 위탁·호텔·훈련 관련 업체로 보이는 곳입니다. 입소 기준은 상담 때 꼭 확인하세요.",
+  FUNERAL: "지도 정보와 비교해 장례 관련 업체로 보이는 곳입니다. 비용과 절차는 업체마다 차이가 큽니다.",
 };
 
 function getSourceLabel(source: BusinessEnrichmentEntry["source"]) {
@@ -39,11 +39,11 @@ function appendReportTopic(reportHref: string, topic: string) {
 }
 
 function getExternalName(enrichment: BusinessEnrichmentEntry) {
-  return enrichment.matchedName ?? enrichment.kakaoPlaceName ?? enrichment.naverTitle ?? enrichment.googlePlaceName ?? "확인 필요";
+  return enrichment.matchedName ?? enrichment.kakaoPlaceName ?? enrichment.naverTitle ?? enrichment.googlePlaceName ?? "지도에서 이름을 다시 확인해보세요";
 }
 
 function getExternalAddress(enrichment: BusinessEnrichmentEntry) {
-  return enrichment.roadAddress ?? enrichment.jibunAddress ?? "확인 필요";
+  return enrichment.roadAddress ?? enrichment.jibunAddress ?? "지도에서 주소를 다시 확인해보세요";
 }
 
 function DetailItem({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) {
@@ -78,9 +78,9 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
           <Info size={18} />
         </span>
         <div>
-          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">외부 장소 정보</h2>
+          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">지도 정보와 비교해봤어요</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-            카카오·네이버·Google 로컬 검색 결과는 업체명, 주소, 지역, 카테고리 유사도가 충분할 때만 보강 정보로 표시합니다. 외부 리뷰 내용은 저장하지 않습니다.
+            카카오·네이버·Google 지도에서 이름과 주소가 잘 맞는 경우만 함께 보여드립니다. 외부 리뷰 내용은 저장하지 않습니다.
           </p>
         </div>
       </div>
@@ -89,19 +89,19 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
         <div className="mt-5 rounded-xl border border-[var(--line)] bg-white p-4">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[var(--brand-soft)] px-3 py-1 text-xs font-black text-[var(--brand)]">{getSourceLabel(visibleEnrichment.source)}</span>
-            <span className="rounded-full bg-[#f3f4f6] px-3 py-1 text-xs font-black text-[var(--muted)]">일치도 높음</span>
-            <span className="rounded-full bg-[#ecfdf5] px-3 py-1 text-xs font-black text-[#047857]">자동 표시 가능</span>
+            <span className="rounded-full bg-[#f3f4f6] px-3 py-1 text-xs font-black text-[var(--muted)]">이름·주소가 잘 맞아요</span>
+            <span className="rounded-full bg-[#ecfdf5] px-3 py-1 text-xs font-black text-[#047857]">지도 링크 제공</span>
           </div>
 
           <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-            <DetailItem label="외부 장소명" value={getExternalName(visibleEnrichment)} />
-            <DetailItem label="외부 분류" value={visibleEnrichment.externalCategory ?? "확인 필요"} />
-            <DetailItem label="외부 전화번호" value={visibleEnrichment.phone ?? "확인 필요"} />
-            <DetailItem label="외부 주소" value={getExternalAddress(visibleEnrichment)} wide />
+            <DetailItem label="지도 장소명" value={getExternalName(visibleEnrichment)} />
+            <DetailItem label="지도 분류" value={visibleEnrichment.externalCategory ?? "분류는 지도에서 다시 보세요"} />
+            <DetailItem label="지도 전화번호" value={visibleEnrichment.phone ?? "전화번호는 아직 없어요"} />
+            <DetailItem label="지도 주소" value={getExternalAddress(visibleEnrichment)} wide />
             <DetailItem label="어떤 업체인지" value={CATEGORY_SUMMARIES[category]} wide />
-            <DetailItem label="영업정보" value="확인 필요" />
-            <DetailItem label="대표 메뉴/서비스" value="확인 필요" />
-            {checkedAtLabel ? <DetailItem label="외부 정보 확인일" value={checkedAtLabel} /> : null}
+            <DetailItem label="영업정보" value="오늘 운영은 업체에 물어보세요" />
+            <DetailItem label="메뉴·서비스" value="아직 제보가 더 필요해요" />
+            {checkedAtLabel ? <DetailItem label="비교한 날짜" value={checkedAtLabel} /> : null}
           </dl>
 
           {sourceLinks.length > 0 ? (
@@ -117,36 +117,36 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
         </div>
       ) : isCandidate ? (
         <div className="mt-5 rounded-xl border border-dashed border-[#fed7aa] bg-[#fff7ed] p-4">
-          <p className="text-sm font-black text-[#9a3412]">관리자 확인 필요 후보 검토 중</p>
-          <p className="mt-2 text-sm leading-7 text-[#9a3412]">외부 검색 후보가 있지만 자동 표시 기준에는 아직 도달하지 않았습니다. 장소명, 전화번호, 주소는 검토 전까지 상세 페이지에 노출하지 않습니다.</p>
+          <p className="text-sm font-black text-[#9a3412]">비슷한 지도 결과를 검토 중이에요</p>
+          <p className="mt-2 text-sm leading-7 text-[#9a3412]">이름이나 주소가 완전히 맞지 않아 아직 공개하지 않습니다. 잘못 연결되는 것보다 천천히 보여드리는 쪽을 선택했습니다.</p>
         </div>
       ) : (
         <div className="mt-5 rounded-xl border border-dashed border-[var(--line)] bg-[#f9fbfa] p-4">
-          <p className="text-sm font-black text-[var(--ink)]">외부 장소 정보 확인 전</p>
-          <p className="mt-2 text-sm leading-7 text-[var(--muted)]">현재는 공공데이터와 댕냥지도 리뷰를 기준으로 표시합니다. 전화번호, 대표 메뉴, 서비스 정보가 다르면 제보해 주세요.</p>
+          <p className="text-sm font-black text-[var(--ink)]">지도 비교 정보는 아직 없어요</p>
+          <p className="mt-2 text-sm leading-7 text-[var(--muted)]">지금은 공식 등록 정보와 댕냥지도 후기를 중심으로 보여드립니다. 전화번호나 서비스가 다르면 알려주세요.</p>
         </div>
       )}
 
       <div className="mt-4 flex flex-wrap gap-2">
         <SmartLink href={reviewHref} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--brand)] bg-[var(--brand)] px-4 text-xs font-black text-white">
           <MessageSquarePlus size={14} />
-          방문 리뷰 남기기
+          방문 후기 남기기
         </SmartLink>
         <SmartLink href={appendReportTopic(reportHref, "service")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
           <Utensils size={14} />
-          대표 메뉴/서비스 제보
+          메뉴·서비스 알려주기
         </SmartLink>
         <SmartLink href={appendReportTopic(reportHref, "photo")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
           <Camera size={14} />
-          사진 제보
+          사진 올리기
         </SmartLink>
         <SmartLink href={appendReportTopic(reportHref, "pet-policy")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
           <PawPrint size={14} />
-          동반 조건 제보
+          동반 조건 알려주기
         </SmartLink>
         <SmartLink href={reportHref} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--muted)]">
           <MessageSquareWarning size={14} />
-          정보 수정 제보
+          정보 수정 요청
         </SmartLink>
       </div>
     </section>

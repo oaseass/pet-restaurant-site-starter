@@ -1,13 +1,13 @@
 import { ShieldCheck } from "lucide-react";
 
 const POLICY_ITEMS = [
-  { label: "동반 가능 여부", value: "공공데이터 기준 등록", tone: "confirmed" },
-  { label: "실내 동반", value: "확인 필요", tone: "pending" },
-  { label: "야외 동반", value: "확인 필요", tone: "pending" },
-  { label: "대형견 가능", value: "확인 필요", tone: "pending" },
-  { label: "케이지 필요", value: "확인 필요", tone: "pending" },
-  { label: "목줄 필요", value: "확인 권장", tone: "pending" },
-  { label: "입장 제한 조건", value: "업체 확인 필요", tone: "pending" },
+  { label: "동반 등록", value: "공식 등록 정보", tone: "confirmed" },
+  { label: "실내 좌석", value: "전화로 물어보기", tone: "pending" },
+  { label: "야외 좌석", value: "매장마다 달라요", tone: "pending" },
+  { label: "대형견", value: "제한 여부 확인", tone: "pending" },
+  { label: "이동장", value: "필요 여부 확인", tone: "pending" },
+  { label: "목줄", value: "챙겨가면 좋아요", tone: "pending" },
+  { label: "입장 제한", value: "피크타임 전 전화", tone: "pending" },
 ] as const;
 
 export function PetPolicyPanel() {
@@ -18,9 +18,9 @@ export function PetPolicyPanel() {
           <ShieldCheck size={18} />
         </span>
         <div>
-          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">반려동물 동반 확인 정보</h2>
+          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">강아지랑 가기 전 체크할 점</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-            이 식당은 공공데이터상 반려동물 동반 식당으로 정리되어 있습니다. 다만 좌석 위치, 견종 제한, 케이지 조건은 별도 확인된 정보가 아니므로 방문 전 업체에 직접 확인하는 것이 좋습니다.
+            동반 가능 식당으로 등록된 곳이어도 좌석 위치, 견종 제한, 케이지 조건은 매장마다 달라요. 가기 전에 한 번만 물어보면 헛걸음을 줄일 수 있습니다.
           </p>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { getDiscoveryQualityScore, getPublicReviewSummary, getReviewSummaryLabel
 test("getReviewSummaryLabel includes count and average when reviews exist", () => {
   assert.equal(getReviewSummaryLabel(3, 4.666), "리뷰 3건 · 평점 4.7");
   assert.equal(getReviewSummaryLabel(1, null), "리뷰 1건");
-  assert.equal(getReviewSummaryLabel(0, 5), "첫 리뷰 대기");
+  assert.equal(getReviewSummaryLabel(0, 5), "아직 후기가 없어요");
 });
 
 test("getPublicReviewSummary reads target keyed summaries", () => {

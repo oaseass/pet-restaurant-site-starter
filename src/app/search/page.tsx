@@ -108,9 +108,9 @@ export default async function SearchPage({
               }}
             >
               <span style={{ fontSize: "12px", color: "#1d4ed8", fontWeight: 600 }}>
-                🐾 보호동물 공고 보기 → 보호중 4,700+건
+                보호동물 공고에서 지역별 보호 중인 아이를 볼 수 있어요
               </span>
-              <span style={{ fontSize: "11px", color: "#3b82f6", fontWeight: 700 }}>보러가기 →</span>
+              <span style={{ fontSize: "11px", color: "#3b82f6", fontWeight: 700 }}>공고 보기 →</span>
             </SmartLink>
           )}
           <SearchResultsList

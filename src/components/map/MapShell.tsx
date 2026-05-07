@@ -415,7 +415,7 @@ export function MapShell({
           <div className="relative z-10 mt-4 rounded-[1rem] border border-[var(--line)] bg-white p-4 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
             <div className="flex items-center gap-2 text-[11px] font-black text-[var(--muted)]">
               <MapPinned size={15} />
-              현재 선택 정보
+              선택한 장소
             </div>
             {selectedItem ? (
               <div className="mt-3">
@@ -423,8 +423,8 @@ export function MapShell({
                 <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
                 <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
-                  <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "공공 데이터"}</span>
-                  <span>{selectedItem.reviewLabel ?? "첫 리뷰 대기"}</span>
+                  <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
+                  <span>{selectedItem.reviewLabel ?? "아직 후기가 없어요"}</span>
                 </div>
                 <DiscoveryCardActions
                   className="mt-3 border-t border-[var(--line)] pt-3"
@@ -432,7 +432,7 @@ export function MapShell({
                   phone={selectedItem.phone}
                   externalHref={selectedItem.externalHref}
                   reviewHref={selectedItem.reviewHref}
-                  detailLabel="상세보기"
+                  detailLabel="자세히 보기"
                 />
               </div>
             ) : (
@@ -457,9 +457,9 @@ export function MapShell({
 
           <div className="relative z-10 mt-4 flex gap-2 overflow-x-auto pb-1">
             {coordinateReadyCount > 0 && (
-              <span className="shrink-0 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-black text-[var(--brand)]">지도 {coordinateReadyCount.toLocaleString("ko-KR")}건</span>
+              <span className="shrink-0 rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-black text-[var(--brand)]">지도 {coordinateReadyCount.toLocaleString("ko-KR")}곳</span>
             )}
-            <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-black text-[var(--muted)]">목록 {visibleCount.toLocaleString("ko-KR")}건</span>
+            <span className="shrink-0 rounded-full bg-white px-3 py-1.5 text-xs font-black text-[var(--muted)]">목록 {visibleCount.toLocaleString("ko-KR")}곳</span>
           </div>
 
           <div className="relative z-10 mt-4 overflow-hidden rounded-[1rem] border border-[var(--line)] bg-white shadow-[0_8px_24px_rgba(23,23,23,0.06)]">
@@ -491,7 +491,7 @@ export function MapShell({
           <div className="relative z-10 mt-4 rounded-[1rem] border border-[var(--line)] bg-white p-4 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
             <div className="flex items-center gap-2 text-[11px] font-black text-[var(--muted)]">
               <MapPinned size={15} />
-              현재 선택 정보
+              선택한 장소
             </div>
             {selectedItem ? (
               <div className="mt-3">
@@ -499,8 +499,8 @@ export function MapShell({
                 <p className="mt-1 text-sm font-bold text-[var(--brand)]">{selectedItem.businessType || selectedItem.categoryLabel || "장소"}</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
                 <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
-                  <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "공공 데이터"}</span>
-                  <span>{selectedItem.reviewLabel ?? "첫 리뷰 대기"}</span>
+                  <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
+                  <span>{selectedItem.reviewLabel ?? "아직 후기가 없어요"}</span>
                 </div>
                 <DiscoveryCardActions
                   className="mt-3 border-t border-[var(--line)] pt-3"
@@ -508,7 +508,7 @@ export function MapShell({
                   phone={selectedItem.phone}
                   externalHref={selectedItem.externalHref}
                   reviewHref={selectedItem.reviewHref}
-                  detailLabel="상세보기"
+                  detailLabel="자세히 보기"
                 />
               </div>
             ) : (

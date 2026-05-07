@@ -3,7 +3,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
-import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceMapCategoryKey, getPublicReviewSummary, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceMapCategoryKey, getPlaceVisitHint, getPublicReviewSummary, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 import { getReviewSummariesSnapshot, type PublicPlaceLight } from "@/lib/public-data";
 
 type Props = {
@@ -83,11 +83,10 @@ export async function PlaceListSection({ places, categoryLabel, mapHref }: Props
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h2 className="text-2xl font-black tracking-tight sm:text-3xl">
-            {categoryLabel} 업체 목록
+            {categoryLabel} 찾기
           </h2>
           <p className="mt-1 text-sm text-[#9d8e82]">
-            총 {places.length.toLocaleString("ko-KR")}건 · 좌표 등록{" "}
-            {withCoords.length.toLocaleString("ko-KR")}건
+            총 {places.length.toLocaleString("ko-KR")}곳 중 지도에서 바로 볼 수 있는 곳 {withCoords.length.toLocaleString("ko-KR")}곳
           </p>
         </div>
         {mapHref && (
@@ -133,8 +132,8 @@ export async function PlaceListSection({ places, categoryLabel, mapHref }: Props
               <SmartLink href={`/places/${place.id}`} className="block rounded-lg text-[var(--ink)] no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
                 <div className="flex flex-wrap gap-1.5">
                   <span className="rounded bg-[#e0f2fe] px-2 py-0.5 text-[10px] font-black text-[#0369a1]">{categoryLabel}</span>
-                  <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{hasCoordinates ? "지도 가능" : "주소 검색"}</span>
-                  <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화 가능" : "전화 제보"}</span>
+                  <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{hasCoordinates ? "지도에서 보기" : "주소로 찾기"}</span>
+                  <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호 제보"}</span>
                   {place.businessStatus ? (
                     <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.businessStatus}</span>
                   ) : null}
@@ -144,12 +143,13 @@ export async function PlaceListSection({ places, categoryLabel, mapHref }: Props
                     {displayName}
                   </span>
                 </div>
-                <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{[place.sido, place.sigungu].filter(Boolean).join(" ") || "지역 확인 필요"}</p>
-                <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소 확인 필요"}</p>
+                <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{[place.sido, place.sigungu].filter(Boolean).join(" ") || "지역 정보를 정리 중이에요"}</p>
+                <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소는 정리 중이에요"}</p>
+                <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{getPlaceVisitHint(place.category)}</p>
                 <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                   <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
                   <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
-                  <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(place.updatedAt)}</span>
+                  <span className="flex items-center gap-1"><CalendarDays size={12} />업데이트 {formatDiscoveryDate(place.updatedAt)}</span>
                 </div>
               </SmartLink>
               <DiscoveryCardActions
@@ -169,7 +169,7 @@ export async function PlaceListSection({ places, categoryLabel, mapHref }: Props
 
       {places.length > 50 && (
         <p className="mt-4 text-center text-sm text-[#9d8e82]">
-          상위 50건 표시 · 전체 {places.length.toLocaleString("ko-KR")}건 검색은 지도 또는 검색을 이용하세요.
+          먼저 보기 좋은 50곳만 보여드려요. 더 찾고 싶다면 지도나 검색을 이용해 주세요.
         </p>
       )}
     </section>

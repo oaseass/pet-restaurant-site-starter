@@ -27,9 +27,9 @@ export default async function RegionPage({ params }: { params: Promise<{ sido: s
           <CharacterImage asset="puppy-side-white" className="h-full w-full mascot-float" imageClassName="object-contain" />
         </div>
         <div className="relative z-10">
-          <p className="eyebrow">Region</p>
+          <p className="eyebrow">지역별 식당</p>
           <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{sido} 반려동물 동반 식당</h1>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#655a53] sm:text-base">내부 DB에 저장된 공식 공개 데이터 기준 {restaurants.length.toLocaleString("ko-KR")}곳을 표시합니다. 좌석 구역과 동반 조건은 업소별로 다를 수 있습니다.</p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-[#655a53] sm:text-base">식품안전나라 공개자료를 기준으로 {restaurants.length.toLocaleString("ko-KR")}곳을 정리했어요. 좌석 구역과 동반 조건은 업소별로 다를 수 있습니다.</p>
         </div>
         <div className="mt-6"><SearchBox defaultValue={sido} /></div>
 
@@ -47,8 +47,8 @@ export default async function RegionPage({ params }: { params: Promise<{ sido: s
       </div>
 
       <section className="card mt-10 rounded-[2rem] p-6 leading-7 text-[#5e544d]">
-        <h2 className="mb-3 text-xl font-black">{sido} 반려동물 동반 식당 이용 전 확인사항</h2>
-        <p>업소마다 동반 가능 좌석, 목줄·케이지 조건, 대형견 가능 여부, 혼잡 시간 운영 기준이 다를 수 있습니다. 공식 등록 업소라도 방문 전 전화 확인을 권장합니다.</p>
+        <h2 className="mb-3 text-xl font-black">{sido} 식당에 가기 전 물어볼 것</h2>
+        <p>업소마다 동반 가능 좌석, 목줄·이동장 조건, 대형견 가능 여부, 혼잡 시간 운영 기준이 다를 수 있습니다. 공식 등록 업소라도 방문 전 전화로 물어보는 편이 좋습니다.</p>
       </section>
       <OfficialDataNotice className="mt-5" />
     </main>

@@ -36,12 +36,12 @@ export function MapBottomSheet({
       >
         <div>
           <div className="mx-auto mb-2 h-1.5 w-14 rounded-full bg-[rgba(23,23,23,0.12)]" />
-          <p className="text-xs font-black text-[var(--muted)]">목록</p>
-          <p className="mt-1 text-base font-black text-[var(--ink)]">리스트 {filteredCount.toLocaleString("ko-KR")}건</p>
+          <p className="text-xs font-black text-[var(--muted)]">근처 목록</p>
+          <p className="mt-1 text-base font-black text-[var(--ink)]">{filteredCount.toLocaleString("ko-KR")}곳</p>
         </div>
         <div className="flex items-center gap-2">
           <span className="rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-[11px] font-black text-[var(--brand)]">핀 {coordinateReadyCount.toLocaleString("ko-KR")}</span>
-          <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-black text-[#b9632e]">대기 {coordinatePendingCount.toLocaleString("ko-KR")}</span>
+          <span className="rounded-full bg-[var(--accent-soft)] px-2.5 py-1 text-[11px] font-black text-[#b9632e]">주소 {coordinatePendingCount.toLocaleString("ko-KR")}</span>
           <ChevronUp className={clsx("transition", open ? "rotate-0" : "rotate-180")} size={18} />
         </div>
       </button>
@@ -50,14 +50,14 @@ export function MapBottomSheet({
         <div className="max-h-[48vh] overflow-y-auto px-4 pb-5">
           {preparedState ? (
             <div className="rounded-[1rem] border border-[var(--line)] bg-white p-5 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
-              <p className="text-[11px] font-black text-[var(--brand)]">안내</p>
+              <p className="text-[11px] font-black text-[var(--brand)]">이렇게 찾아보세요</p>
               <h3 className="mt-3 text-xl font-black tracking-tight">{preparedState.title}</h3>
               <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{preparedState.description}</p>
               <p className="mt-4 rounded-[1rem] bg-[#fcfbf8] p-3 text-sm leading-6 text-[var(--muted)]">{preparedState.note}</p>
             </div>
           ) : emptyState ? (
             <div className="rounded-[1rem] border border-[var(--line)] bg-white p-5 shadow-[0_8px_22px_rgba(23,23,23,0.05)]">
-              <p className="text-[11px] font-black text-[var(--muted)]">검색 결과 없음</p>
+              <p className="text-[11px] font-black text-[var(--muted)]">아직 못 찾았어요</p>
               <h3 className="mt-3 text-xl font-black tracking-tight text-[var(--ink)]">{emptyState.title}</h3>
               <p className="mt-4 text-sm leading-7 text-[var(--muted)]">{emptyState.description}</p>
               <SmartLink href={emptyState.href} className="mt-5 inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-4 py-2 text-sm font-black text-white">
@@ -92,12 +92,12 @@ export function MapBottomSheet({
                         {item.officialRegistered ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-[#ecf8f3] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
                             <ShieldCheck size={13} />
-                            공식 등록
+                            공식 등록 정보
                           </span>
                         ) : null}
                         {item.businessType ? <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.businessType}</span> : null}
-                        <span className={clsx("rounded-full px-2.5 py-1 text-[11px] font-black", item.coordinateStatus === "ready" ? "bg-[#dff3ec] text-[#1a463f]" : "bg-[#fff0e3] text-[#b9632e]")}>{item.coordinateStatus === "ready" ? "핀 표시" : "좌표 확인 필요"}</span>
-                        <span className="rounded-full bg-[#f3f4f6] px-2.5 py-1 text-[11px] font-black text-[var(--muted)]">{item.phone ? "전화 가능" : "전화 제보"}</span>
+                        <span className={clsx("rounded-full px-2.5 py-1 text-[11px] font-black", item.coordinateStatus === "ready" ? "bg-[#dff3ec] text-[#1a463f]" : "bg-[#fff0e3] text-[#b9632e]")}>{item.coordinateStatus === "ready" ? "지도 핀 있음" : "주소로 찾기"}</span>
+                        <span className="rounded-full bg-[#f3f4f6] px-2.5 py-1 text-[11px] font-black text-[var(--muted)]">{item.phone ? "전화로 확인" : "전화번호 제보"}</span>
                       </div>
                       <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
                       <p className="mt-2 text-sm font-bold text-[var(--muted)]">{item.regionLabel}</p>
@@ -106,21 +106,21 @@ export function MapBottomSheet({
                         <span>{item.address}</span>
                       </p>
                       <div className="mt-3 grid gap-1.5 text-xs font-bold text-[#7b746d]">
-                        <span>{item.externalCategory ?? item.sourceLabel ?? "공공 데이터"}</span>
-                        <span>{item.reviewLabel ?? "첫 리뷰 대기"}</span>
+                        <span>{item.externalCategory ?? item.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
+                        <span>{item.reviewLabel ?? "아직 후기가 없어요"}</span>
                       </div>
                     </SmartLink>
                     <div className="mt-4 border-t border-[var(--line)] pt-3">
-                      <p className="text-xs font-bold text-[var(--muted)]">기준일 {item.dataUpdatedLabel}</p>
+                      <p className="text-xs font-bold text-[var(--muted)]">업데이트 {item.dataUpdatedLabel}</p>
                       <DiscoveryCardActions
                         className="mt-3"
                         detailHref={item.href}
                         onMapSelect={() => onSelect(item.id)}
-                        mapLabel={item.coordinateStatus === "ready" ? "지도에서 보기" : "주소 확인"}
+                        mapLabel={item.coordinateStatus === "ready" ? "지도에서 보기" : "주소로 찾기"}
                         phone={item.phone}
                         externalHref={item.externalHref}
                         reviewHref={item.reviewHref}
-                        detailLabel="상세보기"
+                        detailLabel="자세히 보기"
                       />
                     </div>
                   </article>

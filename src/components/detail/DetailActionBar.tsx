@@ -30,10 +30,10 @@ export function DetailActionBar({ name, address, lat, lng, phone, reportHref, re
           <div className="flex flex-col gap-2">
             <span className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-[#f7f8f8] px-5 py-2.5 text-sm font-black text-[var(--muted)]">
               <Phone size={15} />
-              전화번호 정보 없음
+              전화번호는 아직 없어요
             </span>
             <SmartLink href={`${reportHref}&topic=phone`} className="text-xs font-black text-[var(--brand)] underline underline-offset-4">
-              전화번호 수정 제보
+              전화번호 알려주기
             </SmartLink>
           </div>
         )}
@@ -50,13 +50,13 @@ export function DetailActionBar({ name, address, lat, lng, phone, reportHref, re
         {reviewHref ? (
           <SmartLink href={reviewHref} className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">
             <MessageSquarePlus size={15} />
-            리뷰 남기기
+            후기 남기기
           </SmartLink>
         ) : null}
 
         <SmartLink href={reportHref} className="inline-flex min-h-11 items-center gap-2 rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--muted)]">
           <MessageSquareWarning size={15} />
-          정보 수정 제보
+          정보 수정 요청
         </SmartLink>
       </div>
     </div>

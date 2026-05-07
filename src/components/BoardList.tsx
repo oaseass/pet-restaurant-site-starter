@@ -7,18 +7,18 @@ const NOTICES: BoardRowItem[] = [
   {
     id: "notice-1",
     badge: "공지",
-    title: "댕냥지도 데이터는 공공데이터포털 식품안전나라를 기반으로 합니다",
+    title: "식당 정보는 식품안전나라 공개자료를 보기 쉽게 정리했어요",
     href: "/guide",
     region: "공지",
-    actionLabel: "확인",
+    actionLabel: "보기",
   },
   {
     id: "notice-2",
     badge: "공지",
-    title: "반려동물 동반 식당 제보·수정 요청은 업체등록 메뉴를 이용해주세요",
+    title: "동반 조건이나 전화번호가 다르면 업체 등록에서 알려주세요",
     href: "/business",
     region: "공지",
-    actionLabel: "등록",
+    actionLabel: "알리기",
   },
 ];
 
@@ -42,7 +42,7 @@ export async function BoardList() {
       title: r.name,
       href: `/restaurants/${r.id}`,
       region: r.sigungu ? `${r.sido} ${r.sigungu}` : r.sido,
-      actionLabel: "상세",
+      actionLabel: "자세히",
     });
   }
 
@@ -54,7 +54,7 @@ export async function BoardList() {
       title: CATEGORY_CONTENT["hospital"].title,
       href: "/hospitals",
       region: "전국",
-      actionLabel: "보기",
+      actionLabel: "찾기",
     },
     {
       id: "cat-grooming",
@@ -62,7 +62,7 @@ export async function BoardList() {
       title: CATEGORY_CONTENT["grooming"].title,
       href: "/grooming",
       region: "전국",
-      actionLabel: "보기",
+      actionLabel: "찾기",
     },
     {
       id: "cat-daycare",
@@ -70,7 +70,7 @@ export async function BoardList() {
       title: CATEGORY_CONTENT["daycare"].title,
       href: "/daycare",
       region: "전국",
-      actionLabel: "보기",
+      actionLabel: "찾기",
     },
     {
       id: "cat-funeral",
@@ -78,7 +78,7 @@ export async function BoardList() {
       title: CATEGORY_CONTENT["funeral"].title,
       href: "/funeral",
       region: "전국",
-      actionLabel: "보기",
+      actionLabel: "찾기",
     },
     {
       id: "cat-pharmacy",
@@ -86,7 +86,7 @@ export async function BoardList() {
       title: CATEGORY_CONTENT["pharmacy"].title,
       href: "/pharmacy",
       region: "전국",
-      actionLabel: "보기",
+      actionLabel: "찾기",
     },
   ];
   rows.push(...categoryGuides);
@@ -95,10 +95,10 @@ export async function BoardList() {
   rows.push({
     id: "lost-pets-cta",
     badge: "찾아요",
-    title: `${counts.lostPetCount.toLocaleString("ko-KR")}건의 실종 제보가 등록되어 있습니다 — 목격하셨나요?`,
+    title: `${counts.lostPetCount.toLocaleString("ko-KR")}건의 보호·실종 공고를 확인할 수 있어요`,
     href: "/lost-pets",
     region: "전국",
-    actionLabel: "보기",
+    actionLabel: "확인",
   });
 
   // 가이드
@@ -108,7 +108,7 @@ export async function BoardList() {
       badge: "가이드",
       title: g.title,
       href: g.href,
-      actionLabel: "보기",
+      actionLabel: "읽기",
     });
   }
 
@@ -130,7 +130,7 @@ export async function BoardList() {
         </span>
         {counts.lastUpdatedAt && (
           <span style={{ marginLeft: "auto", color: "#aaa", fontSize: "11px", flexShrink: 0 }}>
-            {new Date(counts.lastUpdatedAt).toLocaleDateString("ko-KR")} 기준
+            업데이트 {new Date(counts.lastUpdatedAt).toLocaleDateString("ko-KR")}
           </span>
         )}
       </div>

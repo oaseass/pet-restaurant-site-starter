@@ -193,7 +193,7 @@ async function getGuideRelatedPlaceSections(guide: GuideDoc): Promise<GuideRelat
       }
 
       const places = pickPlacesForGuide(await getPlacesByCategorySnapshot(target.category)).map((place) => {
-        const address = place.roadAddress ?? place.address ?? "주소 확인 필요";
+        const address = place.roadAddress ?? place.address ?? "주소는 정리 중이에요";
 
         return {
           id: place.id,
@@ -282,7 +282,7 @@ export async function GuideArticle({ guide }: { guide: GuideDoc }) {
         </div>
         <div className="relative z-10 max-w-3xl">
           <div className="flex flex-wrap gap-2">
-            <SourceBadge label="관리자 검수형 가이드" tone="manual" />
+            <SourceBadge label="직접 정리한 가이드" tone="manual" />
             <SourceBadge label={categoryLabel} tone="official" />
             <SourceBadge label={`${guide.readMinutes}분 읽기`} tone="official" />
           </div>

@@ -7,21 +7,34 @@ import { AdSlot } from "@/components/AdSlot";
 import { HomeCategoryCards } from "@/components/home/HomeCategoryCards";
 import { HomeRestaurantHighlights } from "@/components/home/HomeRestaurantHighlights";
 import { HomeGuideSection } from "@/components/home/HomeGuideSection";
-import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot } from "@/lib/public-data";
+import { getAnimalNoticeCountsSnapshot, getCategoryCountsSnapshot, getRestaurantsLightSnapshot } from "@/lib/public-data";
 
 const HOME_ENTRY_LINKS = [
   { label: "병원", href: "/hospitals", icon: HeartPulse },
   { label: "약국", href: "/pharmacy", icon: Pill },
   { label: "식당", href: "/restaurants", icon: Utensils },
-  { label: "보호동물", href: "/lost-pets?tab=shelter", icon: PawPrint },
-  { label: "가이드", href: "/guide/travel", icon: BookOpen },
+  { label: "찾아요", href: "/lost-pets?tab=shelter", icon: PawPrint },
+  { label: "챙길 것", href: "/guide/travel", icon: BookOpen },
 ] as const;
 
+function formatCompactCount(value?: number | null) {
+  if (value === undefined || value === null) return "준비중";
+  return `${value.toLocaleString("ko-KR")}건`;
+}
+
 export default async function HomePage() {
-  const [counts, restaurants] = await Promise.all([
+  const [counts, restaurants, animalNoticeCounts] = await Promise.all([
     getCategoryCountsSnapshot(),
     getRestaurantsLightSnapshot(),
+    getAnimalNoticeCountsSnapshot(),
   ]);
+  const placeTotalCount = counts.restaurantCount + counts.placeCount;
+  const shelterNoticeCount = animalNoticeCounts.total || counts.lostPetCount;
+  const homeSignals = [
+    { label: "찾을 수 있는 곳", value: formatCompactCount(placeTotalCount), href: "/categories" },
+    { label: "보호 중", value: formatCompactCount(shelterNoticeCount), href: "/lost-pets?tab=shelter" },
+    { label: "가기 전", value: "체크리스트", href: "/guide/travel" },
+  ];
 
   return (
     <PublicPageShell
@@ -45,13 +58,13 @@ export default async function HomePage() {
             lineHeight: 1.3,
           }}
         >
-          우리 동네 반려생활, 바로 찾기
+          오늘 갈 곳, 동네에서 바로 찾기
         </h1>
         <p style={{ fontSize: "12px", color: "var(--muted)", margin: "0 0 10px" }}>
-          식당·병원·약국부터 보호동물 공고와 여행 가이드까지 연결합니다.
+          식당, 병원, 약국, 보호동물 공고까지 필요한 것부터 살펴보세요.
         </p>
 
-        <InstantSearchBox placeholder="지역, 업종, 업체명 검색" />
+        <InstantSearchBox placeholder="동네, 업종, 업체명 검색" />
 
         <div
           style={{
@@ -136,6 +149,38 @@ export default async function HomePage() {
             </SmartLink>
           ))}
         </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+            gap: "6px",
+            marginTop: "8px",
+          }}
+        >
+          {homeSignals.map((item) => (
+            <SmartLink
+              key={item.href}
+              href={item.href}
+              pendingLabel="이동 중..."
+              style={{
+                minWidth: 0,
+                border: "1px solid var(--line)",
+                borderRadius: "8px",
+                background: "#fbfcfb",
+                padding: "7px 8px",
+                textDecoration: "none",
+              }}
+            >
+              <div style={{ fontSize: "10px", fontWeight: 800, color: "var(--muted)", lineHeight: 1.15, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {item.label}
+              </div>
+              <div style={{ marginTop: "2px", fontSize: "12px", fontWeight: 900, color: "var(--brand)", lineHeight: 1.2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                {item.value}
+              </div>
+            </SmartLink>
+          ))}
+        </div>
       </div>
 
       {/* CategoryCards */}
@@ -162,13 +207,13 @@ export default async function HomePage() {
           lineHeight: 1.6,
         }}
       >
-        <div style={{ fontWeight: 700, color: "#666", marginBottom: "4px" }}>데이터 안내</div>
-        식당 정보는 식품안전나라 공공데이터를 기반으로 합니다.
+        <div style={{ fontWeight: 700, color: "#666", marginBottom: "4px" }}>정보 안내</div>
+        식당 정보는 식품안전나라 공개자료를 보기 쉽게 정리한 내용입니다.
         누락·오류 정보는{" "}
         <SmartLink href="/business" style={{ color: "var(--brand)", fontWeight: 700, textDecoration: "none" }}>
-          업체등록
+          업체 등록
         </SmartLink>
-        으로 제보해주세요.
+        으로 알려주세요.
       </div>
 
       {/* 하단 여백 */}

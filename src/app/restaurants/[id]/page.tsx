@@ -61,7 +61,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       <section className="section-shell p-6 sm:p-8">
         <div className="relative z-10">
           <div className="mb-4 flex flex-wrap gap-2">
-            <span className="badge"><ShieldCheck size={14} /> 공식 등록 데이터</span>
+            <span className="badge"><ShieldCheck size={14} /> 공식 등록 정보</span>
             <span className="badge">{restaurant.businessType}</span>
             <span className="badge">{regionLabel}</span>
           </div>
@@ -70,10 +70,10 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
           <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
             <Info label="업종" value={restaurant.businessType} />
             <Info label="지역" value={regionLabel} />
-            <Info label="전화번호" value={bestPhone ?? "전화번호 정보 없음"} />
-            <Info label="기준일" value={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")} />
-            {reliableEnrichment?.externalCategory ? <Info label="외부 분류" value={reliableEnrichment.externalCategory} /> : null}
-            <Info label="출처" value="식품안전나라 공개 정보" />
+            <Info label="전화번호" value={bestPhone ?? "전화번호는 아직 없어요"} />
+            <Info label="업데이트" value={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")} />
+            {reliableEnrichment?.externalCategory ? <Info label="지도 분류" value={reliableEnrichment.externalCategory} /> : null}
+            <Info label="정보 기준" value="식품안전나라 공개자료" />
           </div>
           <DetailActionBar
             name={restaurant.name}
@@ -94,9 +94,9 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
         addressLabel={restaurant.address}
         phone={bestPhone}
         hasCoordinates={restaurant.lat !== null && restaurant.lng !== null}
-        businessStatus="공공데이터 등록"
+        businessStatus="공식 등록 정보"
         dataUpdatedLabel={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")}
-        sourceLabel="식품안전나라"
+        sourceLabel="식품안전나라 공개자료"
         reviewCount={reviewSummary.count}
         questions={decisionQuestions}
         reportHref={reportHref}
@@ -113,16 +113,16 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
-        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보가 다르거나 반려동물 동반 조건을 알고 계신가요?</h2>
+        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">다녀온 정보가 조금 다르다면 알려주세요</h2>
         <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-          영업 여부, 좌석 운영, 대형견 가능 여부, 케이지 조건처럼 방문자가 알아야 할 내용을 제보해 주시면 내부 확인 후 반영합니다.
+          영업 여부, 좌석 운영, 대형견 가능 여부, 이동장 조건처럼 다음 보호자가 꼭 알면 좋은 내용을 확인한 뒤 반영합니다.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <SmartLink href={reportHref} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">
-            정보 수정 제보
+            정보 수정 요청
           </SmartLink>
           <SmartLink href={`${reportHref}&topic=pet-policy`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] bg-white px-5 py-2.5 text-sm font-black text-[var(--brand)]">
-            동반 조건 제보
+            동반 조건 알려주기
           </SmartLink>
         </div>
       </section>
@@ -160,14 +160,14 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
                 </SmartLink>
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
                   <SmartLink href={`/restaurants/${item.id}`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-black text-white">
-                    상세보기
+                    자세히 보기
                   </SmartLink>
                   <SmartLink
                     href={item.lat !== null && item.lng !== null ? `/map?category=restaurants&lat=${item.lat.toFixed(6)}&lng=${item.lng.toFixed(6)}` : `/map?category=restaurants&q=${encodeURIComponent(item.name)}`}
                     pendingLabel="지도 여는 중..."
                     className="inline-flex min-h-9 items-center rounded-full border border-[var(--brand)] px-3 py-1.5 text-xs font-black text-[var(--brand)]"
                   >
-                    지도보기
+                    지도에서 보기
                   </SmartLink>
                 </div>
               </article>
@@ -194,14 +194,14 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
                 </SmartLink>
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-[var(--line)] pt-3">
                   <SmartLink href={`/places/${item.id}`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--ink)] px-3 py-1.5 text-xs font-black text-white">
-                    상세보기
+                    자세히 보기
                   </SmartLink>
                   <SmartLink
                     href={item.lat !== null && item.lng !== null ? `/map?category=${item.category === "PHARMACY" ? "pharmacy" : "hospitals"}&lat=${item.lat.toFixed(6)}&lng=${item.lng.toFixed(6)}` : `/map?category=${item.category === "PHARMACY" ? "pharmacy" : "hospitals"}&q=${encodeURIComponent(item.name)}`}
                     pendingLabel="지도 여는 중..."
                     className="inline-flex min-h-9 items-center rounded-full border border-[var(--brand)] px-3 py-1.5 text-xs font-black text-[var(--brand)]"
                   >
-                    지도보기
+                    지도에서 보기
                   </SmartLink>
                 </div>
               </article>
@@ -211,7 +211,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       ) : null}
 
       <section className="mt-8 rounded-[1rem] border border-[var(--line)] bg-[#fafdf9] p-5 text-sm leading-7 text-[var(--muted)]">
-        이 정보는 공공데이터를 보기 쉽게 정리한 안내입니다. 실제 영업 여부, 반려동물 동반 조건, 좌석 운영 방식은 업체 사정에 따라 달라질 수 있으므로 방문 전 직접 확인해 주세요.
+        이 정보는 공개자료를 보기 쉽게 정리한 안내입니다. 실제 영업 여부, 반려동물 동반 조건, 좌석 운영 방식은 업체 사정에 따라 달라질 수 있으니 방문 전 직접 물어보는 것이 좋습니다.
       </section>
     </main>
   );

@@ -54,34 +54,34 @@ export function DetailDecisionPanel({
   reviewHref,
 }: DetailDecisionPanelProps) {
   const facts = [
-    { label: "전화 문의", value: phone ? "전화 가능" : "번호 제보 필요", tone: phone ? "good" : "warn" },
-    { label: "위치 확인", value: hasCoordinates ? "지도 좌표 있음" : "주소 기반 확인", tone: hasCoordinates ? "good" : "warn" },
-    { label: "운영 상태", value: businessStatus ?? "방문 전 확인", tone: getStatusTone(businessStatus) },
-    { label: "방문 리뷰", value: reviewCount > 0 ? `${reviewCount.toLocaleString("ko-KR")}건` : "첫 리뷰 대기", tone: reviewCount > 0 ? "good" : "muted" },
-    { label: "데이터 기준", value: dataUpdatedLabel, tone: "muted" },
-    { label: "출처", value: sourceLabel, tone: "muted" },
+    { label: "전화", value: phone ? "전화로 확인 가능" : "전화번호 제보 필요", tone: phone ? "good" : "warn" },
+    { label: "위치", value: hasCoordinates ? "지도에서 바로 보기" : "주소로 찾아보기", tone: hasCoordinates ? "good" : "warn" },
+    { label: "운영", value: businessStatus ?? "업체마다 달라요", tone: getStatusTone(businessStatus) },
+    { label: "후기", value: reviewCount > 0 ? `${reviewCount.toLocaleString("ko-KR")}건` : "아직 후기가 없어요", tone: reviewCount > 0 ? "good" : "muted" },
+    { label: "업데이트", value: dataUpdatedLabel, tone: "muted" },
+    { label: "정보", value: sourceLabel, tone: "muted" },
   ] satisfies Array<{ label: string; value: string; tone: FactTone }>;
 
   return (
     <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
-          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">방문 판단 요약</p>
-          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">전화·위치·상태를 먼저 확인하세요</h2>
+          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">가기 전에 볼 것</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">오늘 바로 갈 수 있는지 먼저 살펴보세요</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-            {regionLabel} {categoryLabel} 정보입니다. 주소는 {addressLabel} 기준으로 표시하며, 확정되지 않은 조건은 방문 전 업체 확인이 필요합니다.
+            {regionLabel} {categoryLabel} 정보입니다. 주소는 {addressLabel} 기준으로 보여드려요. 운영 방식이나 세부 조건은 업체마다 다를 수 있습니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {reviewHref ? (
             <SmartLink href={reviewHref} className="inline-flex min-h-10 items-center gap-2 rounded-full bg-[var(--brand)] px-4 text-xs font-black text-white">
               <MessageSquarePlus size={14} />
-              리뷰 남기기
+              후기 남기기
             </SmartLink>
           ) : null}
           <SmartLink href={reportHref} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
             <ClipboardList size={14} />
-            정보 제보
+            정보 알려주기
           </SmartLink>
         </div>
       </div>
@@ -92,11 +92,11 @@ export function DetailDecisionPanel({
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.75fr_1fr]">
         <div className="rounded-lg bg-[#f8faf9] p-4 text-sm leading-7 text-[var(--muted)]">
-          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 표시 기준</p>
-          <p className="mt-2">공공데이터, 직접 제보, 신뢰 기준을 통과한 외부 장소 정보만 함께 보여줍니다.</p>
+          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 정보 기준</p>
+          <p className="mt-2">정부 공개자료, 직접 제보, 지도 정보와 잘 맞는 내용만 골라 보여드립니다.</p>
         </div>
         <div className="rounded-lg bg-[#fcfbf8] p-4">
-          <p className="flex items-center gap-2 text-sm font-black text-[var(--ink)]"><Phone size={16} /> 방문 전 물어볼 질문</p>
+          <p className="flex items-center gap-2 text-sm font-black text-[var(--ink)]"><Phone size={16} /> 전화할 때 물어볼 것</p>
           <ul className="mt-3 grid gap-2 text-sm leading-6 text-[var(--muted)] sm:grid-cols-2">
             {questions.map((question) => (
               <li key={question} className="flex gap-2">
@@ -111,7 +111,7 @@ export function DetailDecisionPanel({
       {!hasCoordinates ? (
         <p className="mt-4 flex items-center gap-2 rounded-lg bg-[#fff7ed] px-3 py-2 text-xs font-bold leading-5 text-[#9a3412]">
           <MapPinned size={14} />
-          지도 좌표가 없는 항목은 외부 지도 검색 결과와 실제 주소가 다를 수 있습니다.
+          지도 핀이 없는 항목은 주소 검색 결과가 실제 위치와 다를 수 있어요.
         </p>
       ) : null}
     </section>

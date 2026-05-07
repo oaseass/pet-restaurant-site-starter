@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getPlaceDetailById } from "@/lib/place-detail";
 
 export const metadata: Metadata = {
-  title: "리뷰 남기기 | 댕냥지도",
+  title: "후기 남기기 | 댕냥지도",
   robots: { index: false, follow: false },
 };
 
@@ -35,7 +35,7 @@ const PET_SIZE_OPTIONS = [
 ] as const;
 
 const ANSWER_OPTIONS = [
-  { value: "UNKNOWN", label: "확인 필요" },
+  { value: "UNKNOWN", label: "아직 몰라요" },
   { value: "YES", label: "예" },
   { value: "NO", label: "아니오" },
 ] as const;
@@ -76,13 +76,13 @@ export default async function ReviewNewPage({ searchParams }: { searchParams: Pr
   return (
     <main className="mx-auto max-w-4xl px-5 py-8 sm:py-10">
       <section className="section-shell p-6 sm:p-8">
-        <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">댕냥지도 리뷰</p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight text-[var(--ink)]">반려동물 동반 경험 리뷰 남기기</h1>
+        <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">댕냥지도 후기</p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight text-[var(--ink)]">반려동물과 다녀온 후기 남기기</h1>
         <p className="mt-3 text-sm leading-7 text-[var(--muted)]">
-          {target.label} <span className="font-black text-[var(--ink)]">{target.name}</span>에 반려동물과 함께 방문한 경험을 남겨 주세요.
+          {target.label} <span className="font-black text-[var(--ink)]">{target.name}</span>에 반려동물과 함께 다녀온 경험을 남겨 주세요.
         </p>
         <p className="mt-1 text-xs font-bold text-[var(--muted)]">{target.meta}</p>
-        {params.submitted ? <p className="mt-4 rounded-lg bg-[var(--brand-soft)] px-4 py-3 text-sm font-black text-[var(--brand)]">리뷰가 접수되었습니다. 운영자 검수 후 상세 페이지에 반영됩니다.</p> : null}
+        {params.submitted ? <p className="mt-4 rounded-lg bg-[var(--brand-soft)] px-4 py-3 text-sm font-black text-[var(--brand)]">후기가 접수되었습니다. 확인 후 상세 페이지에 반영됩니다.</p> : null}
         {params.error ? <p className="mt-4 rounded-lg bg-[#fff1e8] px-4 py-3 text-sm font-black text-[#b45309]">{params.error}</p> : null}
       </section>
 

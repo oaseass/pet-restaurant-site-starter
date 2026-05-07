@@ -45,7 +45,7 @@ export function RightRail({ restaurantCount, lastUpdatedAt }: RightRailProps) {
           <div style={{ fontSize: "14px", fontWeight: 800, color: "white" }}>지도에서 검색</div>
           {restaurantCount !== undefined && (
             <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.8)", marginTop: "3px" }}>
-              식당 {restaurantCount.toLocaleString("ko-KR")}건 등록
+              식당 {restaurantCount.toLocaleString("ko-KR")}곳
             </div>
           )}
         </div>
@@ -73,16 +73,16 @@ export function RightRail({ restaurantCount, lastUpdatedAt }: RightRailProps) {
         </div>
       </div>
 
-      {/* 데이터 기준 */}
+          {/* 정보 기준 */}
       {(restaurantCount !== undefined || updatedDateStr) && (
         <div style={{ border: "1px solid var(--line)", borderRadius: "10px", background: "var(--surface)", overflow: "hidden" }}>
           <div style={{ padding: "8px 12px 6px", fontSize: "11px", fontWeight: 800, color: "#666", borderBottom: "1px solid var(--line)" }}>
-            데이터 기준
+            정보 기준
           </div>
           <div style={{ padding: "8px 12px", display: "flex", flexDirection: "column", gap: "4px" }}>
             {restaurantCount !== undefined && (
               <div style={{ fontSize: "12px", color: "#555" }}>
-                등록 식당 <strong style={{ color: "#222" }}>{restaurantCount.toLocaleString("ko-KR")}건</strong>
+                식당 <strong style={{ color: "#222" }}>{restaurantCount.toLocaleString("ko-KR")}곳</strong>
               </div>
             )}
             {updatedDateStr && (
@@ -90,7 +90,7 @@ export function RightRail({ restaurantCount, lastUpdatedAt }: RightRailProps) {
                 업데이트 <strong style={{ color: "#222" }}>{updatedDateStr}</strong>
               </div>
             )}
-            <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>식품안전나라 공공데이터 기반</div>
+            <div style={{ fontSize: "11px", color: "#999", marginTop: "2px" }}>식품안전나라 공개자료 기준</div>
           </div>
         </div>
       )}

@@ -1,5 +1,45 @@
 # Codex Report
 
+## AI 느낌 제거 및 공개 화면 톤 정리 진행 결과
+
+1. AI 느낌이 강했던 문구/화면
+- 홈, 검색, 목록, 지도, 상세, 보호동물, 가이드 전반에 `공공 데이터`, `첫 리뷰 대기`, `확인 필요`, `전화 제보`, `상세보기`, `데이터 기준`, `외부 장소 정보`, `관리자 검수형 가이드`, `내부 DB`처럼 서비스 내부 상태나 행정 데이터 화면처럼 보이는 표현이 반복되었습니다.
+- 식당, 병원, 약국, 미용, 유치원·호텔, 장례가 서로 다른 방문 맥락을 갖는데도 카드와 상세 패널에서 같은 fallback 문구가 반복되어 사람이 직접 만든 생활 서비스 느낌이 약했습니다.
+
+2. 실제로 바꾼 문구 방향
+- 공개 화면의 기본 톤을 `데이터를 보여줍니다`에서 `가기 전에 무엇을 물어볼지 알려주는 서비스`로 바꿨습니다.
+- 예: `첫 리뷰 대기`는 `아직 후기가 없어요`, `공공 데이터`는 `정부 공개자료를 정리했어요`, `외부 장소 정보`는 `지도 정보와 비교해봤어요`, `상세보기`는 `자세히 보기`, `정보 수정 제보`는 `정보 수정 요청`으로 바꿨습니다.
+- 식당은 좌석·실내/야외·피크타임, 병원은 오늘 진료·야간/응급·예약, 약국은 원하는 약 재고·처방전, 미용은 견종/크기/피부 상태, 유치원·호텔은 입소 기준·예방접종, 장례는 화장·봉안·픽업·비용처럼 카테고리별로 실제 질문이 달라지게 정리했습니다.
+- `내부 DB`, `관리자 검수형` 같은 내부 용어는 공개 화면에서 제거하고 `직접 정리한 가이드`, `공개자료를 바탕으로 찾기 쉽게 정리`처럼 사용자에게 보이는 표현으로 바꿨습니다.
+
+3. 수정 파일
+- 홈/검색/지도/목록: `src/app/page.tsx`, `src/app/search/page.tsx`, `src/app/map/page.tsx`, `src/app/restaurants/page.tsx`, `src/components/search/SearchResultsList.tsx`, `src/components/PlaceDirectoryPage.tsx`, `src/components/PlaceListSection.tsx`, `src/components/RestaurantCard.tsx`, `src/components/PlaceCard.tsx`, `src/components/map/MapListPanel.tsx`, `src/components/map/MapBottomSheet.tsx`, `src/components/map/MapShell.tsx`
+- 상세/후기/가이드/보호동물: `src/app/restaurants/[id]/page.tsx`, `src/app/places/[slug]/page.tsx`, `src/app/reviews/new/page.tsx`, `src/app/lost-pets/page.tsx`, `src/app/lost-pets/notices/[desertionNo]/page.tsx`, `src/components/detail/*`, `src/components/reviews/ReviewSection.tsx`, `src/components/guide/GuideArticle.tsx`
+- 공통 콘텐츠/라벨: `src/lib/discovery-cards.ts`, `src/lib/discovery-cards.test.ts`, `src/lib/platform-content.ts`, `src/lib/category-info-content.ts`, `src/lib/sources/travel/airline-rules.ts`, `src/lib/sources/travel/ship-rules.ts`, `src/components/SourceNotice.tsx`, `src/components/BoardList.tsx`, `src/components/RightRail.tsx`, `src/app/offline/page.tsx`, `src/app/policies/[slug]/page.tsx`
+
+4. npm test 결과
+- `npm test`: 통과
+- 결과: 25개 테스트 통과, 실패 0개
+
+5. npm run build 결과
+- `npm run build`: 최종 통과
+- 참고: 중간에 로컬 `next start`가 Prisma DLL을 잡고 있어 Windows `EPERM rename`이 한 번 발생했습니다. 로컬 서버를 종료한 뒤 재실행해 정상 통과했습니다.
+- build/export 후 생성된 `public/data/**` 변경은 커밋 대상에서 제외했습니다.
+
+6. production 확인 결과
+- 최종 배포: `https://pet-restaurant-site-starter-pekmah9yj-larchides-projects.vercel.app`, alias `https://pet-restaurant-site-starter.vercel.app` 연결 확인.
+- 390px 모바일 폭으로 `/`, `/search?q=동물병원`, `/restaurants`, `/hospitals`, `/pharmacy`, `/grooming`, `/daycare`, `/funeral`, `/map?lat=35.190605&lng=126.815636&category=all`, `/restaurants/9bbc43ee-d9c5-4fac-a593-116d3cced8d6`, `/places/33e00bc4-44eb-4e88-a866-e1a3a868832b`, `/places/bd5eeb9b-cfb6-4bcb-a9fe-38f9a7556b31`, `/lost-pets`, `/guide/travel` 확인 완료.
+- 확인 경로 모두 200 응답, 가로 overflow 없음, 개발자용 enum 노출 없음, `내부 DB`, `관리자 검수형`, `첫 리뷰 대기`, `공공 데이터`, `확인 필요`, `전화 제보`, `상세보기`, `리뷰 남기기`, `정보 수정 제보` 노출 없음.
+
+7. 아직 남은 AI스러운 부분
+- 카테고리 목록의 지역별 수치 배지와 보호동물 공고 숫자는 여전히 행정 데이터 느낌이 조금 남아 있습니다. 다만 실제 탐색에 필요한 신호라 삭제하지 않고 문장 톤만 낮췄습니다.
+- 법률/의료/항공·선박 가이드 일부는 규정성 정보라 문장이 보수적입니다. 검증되지 않은 사실을 만들지 않기 위해 실무적인 확인 문장 중심으로 유지했습니다.
+
+8. 다음 개선 제안
+- 실제 사용자 후기와 제보가 쌓이면 카드에 `다녀온 사람이 남긴 조건`을 1줄 요약으로 붙여 공공자료 의존감을 더 줄일 수 있습니다.
+- 병원·약국·미용·유치원·장례 목록은 지역별 수치 배지보다 `지금 전화해볼 곳`, `지도에서 바로 볼 곳`, `후기가 있는 곳` 같은 생활형 필터로 바꾸면 더 한국형 서비스처럼 보일 수 있습니다.
+- 보호동물 화면은 지역/보호소 필터와 공고 상태 필터를 더 직관적으로 정리하면 행정 공고 목록 느낌을 줄일 수 있습니다.
+
 ## 가이드 상세 장소 연결 및 수익화 라운드 진행 결과
 
 - 이번에 실제로 좋아진 화면: `/guide/travel`을 포함한 가이드 상세가 글만 읽고 끝나는 구조에서 벗어나, 본문 초반에 `같이 확인할 장소` 카드로 바로 이어지도록 개선했습니다. 여행 가이드는 동반 식당과 여행지 주변 병원을 함께 보여주고, 예방접종/수술/등록/장례 등 다른 가이드는 상황에 맞는 병원, 약국, 장례 시설을 공개 스냅샷에서 추천합니다.

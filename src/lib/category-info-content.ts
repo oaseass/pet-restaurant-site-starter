@@ -28,9 +28,9 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
     title: "동물병원 찾기",
     subtitle: "동물병원",
     description:
-      "가까운 동물병원과 24시 응급병원 정보를 지도에서 빠르게 확인할 수 있도록 데이터를 정리하고 있습니다. 병원 방문 전에는 진료 가능 시간, 응급 진료 여부, 예방접종 가능 항목, 진료비 게시 여부를 꼭 확인하세요.",
-    ctaPrimary: { label: "지도에서 확인하기", href: "/map" },
-    ctaSecondary: { label: "병원 정보 제보하기", href: "/guide" },
+      "가까운 동물병원과 응급 진료가 가능한 곳을 지도에서 살펴볼 수 있게 정리했습니다. 병원 방문 전에는 오늘 진료 가능 시간, 응급 진료 여부, 예방접종 가능 항목, 진료비 게시 여부를 꼭 물어보세요.",
+    ctaPrimary: { label: "지도에서 보기", href: "/map" },
+    ctaSecondary: { label: "병원 정보 알려주기", href: "/guide" },
     cards: [
       {
         icon: "🏥",
@@ -64,7 +64,7 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
     faq: [
       {
         q: "동물병원 진료비는 정해진 기준이 있나요?",
-        a: "법정 진료비 기준은 없습니다. 병원마다 자율 책정합니다. 진찰료·입원비 등 주요 항목은 원내 게시 의무가 있으나 실제 청구액은 진료 전 확인이 필요합니다.",
+        a: "법정 진료비 기준은 없습니다. 병원마다 자율 책정합니다. 진찰료·입원비 등 주요 항목은 원내 게시 의무가 있으나 실제 청구액은 진료 전에 물어보는 편이 좋습니다.",
       },
       {
         q: "야간에 반려동물이 아프면 어디로 가야 하나요?",
@@ -88,9 +88,9 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
     title: "반려동물 미용",
     subtitle: "반려동물 미용",
     description:
-      "위생미용, 전체미용, 스파 등 미용 종류와 가격 기준을 정리하고 있습니다. 미용샵 방문 전 가격표 게시 여부, CCTV 확인 가능 여부, 소독·위생 관리 방식을 확인하세요.",
-    ctaPrimary: { label: "지도에서 확인하기", href: "/map" },
-    ctaSecondary: { label: "미용샵 정보 제보하기", href: "/guide" },
+      "위생미용, 전체미용, 스파처럼 미용 방식이 샵마다 다릅니다. 예약 전 가격표, CCTV 또는 보호자 대기 가능 여부, 소독·위생 관리 방식을 물어보세요.",
+    ctaPrimary: { label: "지도에서 보기", href: "/map" },
+    ctaSecondary: { label: "미용샵 정보 알려주기", href: "/guide" },
     cards: [
       {
         icon: "✂️",
@@ -99,7 +99,7 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       },
       {
         icon: "📏",
-        title: "가격이 달라지는 기준",
+        title: "가격이 달라지는 이유",
         body: "견종·체중·털 길이와 엉킴 정도, 귀 청소·발톱 커팅 포함 여부에 따라 가격이 달라집니다. 예약 시 기준 가격과 추가 비용 발생 조건을 미리 확인하세요.",
       },
       {
@@ -148,9 +148,9 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
     title: "유치원·호텔·위탁관리",
     subtitle: "유치원·호텔·위탁관리",
     description:
-      "반려동물 유치원, 호텔, 위탁관리 서비스는 운영 방식과 비용이 다양합니다. 맡기기 전 예방접종 확인 여부, CCTV 제공 여부, 식사 기준, 야간 관리 방식을 꼭 확인하세요.",
-    ctaPrimary: { label: "지도에서 확인하기", href: "/map" },
-    ctaSecondary: { label: "업체 정보 제보하기", href: "/guide" },
+      "유치원, 호텔, 위탁관리 서비스는 운영 방식과 비용이 다양합니다. 맡기기 전 예방접종 증명, CCTV 제공, 식사 방식, 야간 관리 방식을 꼭 물어보세요.",
+    ctaPrimary: { label: "지도에서 보기", href: "/map" },
+    ctaSecondary: { label: "업체 정보 알려주기", href: "/guide" },
     cards: [
       {
         icon: "🏫",
@@ -178,7 +178,7 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       "소형견/대형견 분리 여부",
       "CCTV 제공 여부",
       "픽업 가능 여부",
-      "식사/간식 제공 기준",
+      "식사·간식 제공 방식",
       "1박 이용 시 야간 관리 여부",
     ],
     faq: [
@@ -196,7 +196,7 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       },
       {
         q: "위탁관리 개인과 시설형은 어떻게 다른가요?",
-        a: "개인 위탁(펫시터·가정집 위탁)은 소규모로 개별 돌봄이 가능하지만 규제가 덜한 편입니다. 시설형은 규모가 크고 인허가를 받은 경우가 많습니다. 보험 가입 여부와 사고 처리 기준을 확인하세요.",
+        a: "개인 위탁(펫시터·가정집 위탁)은 소규모로 개별 돌봄이 가능하지만 규제가 덜한 편입니다. 시설형은 규모가 크고 인허가를 받은 경우가 많습니다. 보험 가입 여부와 사고 처리 방식을 물어보세요.",
       },
     ],
     sourceNote:
@@ -210,7 +210,7 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
     description:
       "반려동물이 세상을 떠났을 때 합법적인 장묘 절차와 믿을 수 있는 업체를 찾는 데 도움이 되는 정보를 정리했습니다. 차분히 확인하시고, 필요한 절차를 하나씩 진행하세요.",
     ctaPrimary: { label: "장례업체 지도에서 보기", href: "/map" },
-    ctaSecondary: { label: "업체 정보 제보하기", href: "/guide" },
+    ctaSecondary: { label: "업체 정보 알려주기", href: "/guide" },
     cards: [
       {
         icon: "📌",
@@ -229,7 +229,7 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
       },
       {
         icon: "🚗",
-        title: "이동 서비스·비용 기준",
+        title: "픽업·비용 물어볼 점",
         body: "이동 서비스 제공 여부, 픽업 가능 지역, 개별 화장과 합동 화장의 가격 차이, 봉안 기간과 비용을 사전에 확인하세요. 체중·크기에 따라 비용이 달라지는 경우가 많습니다.",
       },
     ],
@@ -268,9 +268,9 @@ export const CATEGORY_CONTENT: Record<string, CategoryContent> = {
     title: "동물약국 찾기",
     subtitle: "동물약국",
     description:
-      "처방전 없이 구입 가능한 동물용 의약품부터 수의사 처방이 필요한 약까지, 가까운 동물약국 정보를 정리하고 있습니다. 약 구입 전 처방전 필요 여부와 복용 방법을 반드시 확인하세요.",
-    ctaPrimary: { label: "지도에서 확인하기", href: "/map" },
-    ctaSecondary: { label: "약국 정보 제보하기", href: "/guide" },
+      "동물용 의약품을 취급하는 가까운 약국을 찾아볼 수 있습니다. 약을 사러 가기 전 처방전 필요 여부와 복용 방법을 반드시 약국에 물어보세요.",
+    ctaPrimary: { label: "지도에서 보기", href: "/map" },
+    ctaSecondary: { label: "약국 정보 알려주기", href: "/guide" },
     cards: [
       {
         icon: "💊",

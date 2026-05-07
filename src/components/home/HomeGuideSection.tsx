@@ -2,23 +2,23 @@ import Link from "next/link";
 
 const GUIDE_CARDS = [
   {
-    title: "동반 식당 방문 전 확인할 것",
-    desc: "입장 조건, 케이지 규정, 매너 에티켓 정리",
+    title: "식당 가기 전",
+    desc: "좌석·동반 조건",
     href: "/guide/travel",
   },
   {
-    title: "강아지 비행기 타는 법",
-    desc: "국내선·국제선 기내 반입 및 위탁 절차",
+    title: "비행기 준비",
+    desc: "기내·위탁 체크",
     href: "/guide/flight",
   },
   {
-    title: "예방접종 전 확인할 것",
-    desc: "강아지·고양이 접종 일정과 주의사항",
+    title: "예방접종",
+    desc: "일정·주의할 점",
     href: "/guide/vaccination",
   },
   {
-    title: "실종 시 바로 해야 할 일",
-    desc: "동물등록·제보 등록·SNS 확산 체크리스트",
+    title: "실종 대응",
+    desc: "제보·공고 확인",
     href: "/lost-pets",
   },
 ] as const;
@@ -35,7 +35,7 @@ export function HomeGuideSection() {
         }}
       >
         <div style={{ fontSize: "11px", fontWeight: 800, color: "#999", letterSpacing: "0.05em" }}>
-          가이드
+          가기 전에 챙길 것
         </div>
         <Link
           href="/guide"
@@ -44,28 +44,30 @@ export function HomeGuideSection() {
           전체 보기 →
         </Link>
       </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "6px" }}>
         {GUIDE_CARDS.map((g) => (
           <Link
             key={g.href}
             href={g.href}
             style={{
               display: "flex",
-              alignItems: "center",
+              minHeight: "76px",
+              flexDirection: "column",
+              alignItems: "flex-start",
               justifyContent: "space-between",
-              gap: "8px",
-              padding: "10px 12px",
+              gap: "7px",
+              padding: "10px",
               background: "#fff",
               border: "1px solid var(--line)",
-              borderRadius: "10px",
+              borderRadius: "8px",
               textDecoration: "none",
             }}
           >
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)" }}>
                 {g.title}
               </div>
-              <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>
+              <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px", lineHeight: 1.35 }}>
                 {g.desc}
               </div>
             </div>
@@ -74,10 +76,9 @@ export function HomeGuideSection() {
                 fontSize: "11px",
                 fontWeight: 700,
                 color: "var(--brand)",
-                flexShrink: 0,
               }}
             >
-              보기 →
+              읽기 →
             </span>
           </Link>
         ))}

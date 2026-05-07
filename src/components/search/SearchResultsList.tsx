@@ -6,7 +6,7 @@ import { PLACE_CATEGORY_LABELS as GUIDE_CATEGORY_LABELS, type GuideDoc } from "@
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
 import { getReviewSummariesSnapshot } from "@/lib/public-data";
-import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceMapCategoryKey, getPublicReviewSummary, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { buildDiscoveryMapHref, buildReviewHref, formatDiscoveryDate, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceMapCategoryKey, getPlaceVisitHint, getPublicReviewSummary, getRestaurantVisitHint, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
@@ -52,7 +52,7 @@ function placeMapHref(place: SearchPlaceResult) {
 }
 
 function regionLabel(item: { sido?: string | null; sigungu?: string | null }) {
-  return [item.sido, item.sigungu].filter(Boolean).join(" ") || "지역 미상";
+  return [item.sido, item.sigungu].filter(Boolean).join(" ") || "지역 정보를 정리 중이에요";
 }
 
 function SectionHeader({ title, count, description }: { title: string; count: number; description: string }) {
@@ -122,9 +122,9 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
       <section className="border-b border-[var(--line)] bg-[#fafdf9] px-4 py-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">검색 결과</p>
+            <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">찾은 결과</p>
             <p className="mt-1 text-sm font-black text-[var(--ink)]">
-              {total === 0 ? "결과 없음" : `${total.toLocaleString("ko-KR")}개 결과`}
+              {total === 0 ? "아직 맞는 결과를 못 찾았어요" : `${total.toLocaleString("ko-KR")}곳을 찾았어요`}
             </p>
           </div>
           {keyword ? (
@@ -148,8 +148,8 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
       {total === 0 && keyword ? (
         <section className="px-4 py-10 text-center">
           <Search className="mx-auto text-[var(--muted)]" size={24} />
-          <p className="mt-3 text-sm font-black text-[var(--ink)]">검색 결과가 없습니다.</p>
-          <p className="mt-2 text-xs leading-6 text-[var(--muted)]">지역명, 업종명, 장소명을 조금 다르게 입력해 보세요.</p>
+          <p className="mt-3 text-sm font-black text-[var(--ink)]">검색어와 딱 맞는 곳을 못 찾았어요.</p>
+          <p className="mt-2 text-xs leading-6 text-[var(--muted)]">동네 이름이나 업종을 조금 짧게 넣어보세요.</p>
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {["서울 동물병원", "동물약국", "미용", "유치원"].map((sample) => (
               <SmartLink key={sample} href={`/search?q=${encodeURIComponent(sample)}`} className="rounded-full bg-[var(--brand-soft)] px-3 py-1.5 text-xs font-black text-[var(--brand)] no-underline">
@@ -162,7 +162,7 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
 
       {restaurants.length > 0 ? (
         <section>
-          <SectionHeader title="식당" count={restaurants.length} description="반려동물 동반 식당은 방문 전 좌석, 대형견, 피크타임 조건을 확인하세요." />
+          <SectionHeader title="식당" count={restaurants.length} description="강아지랑 같이 앉을 수 있는 좌석은 매장마다 달라요. 피크타임 전에는 전화가 가장 빠릅니다." />
           <div className="grid gap-2 p-3 sm:grid-cols-2">
             {sortedRestaurants.map((restaurant) => {
               const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
@@ -176,16 +176,17 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
                     <div className="flex flex-wrap gap-1.5">
                       <span className="rounded bg-[var(--brand-soft)] px-2 py-0.5 text-[10px] font-black text-[var(--brand)]">식당</span>
                       <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.businessType}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.lat !== null ? "지도 가능" : "주소 검색"}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화 가능" : "전화 제보"}</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{restaurant.lat !== null ? "지도에서 보기" : "주소로 찾기"}</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호 제보"}</span>
                     </div>
                     <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{restaurant.name}</h3>
                     <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(restaurant)}</p>
                     <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{restaurant.address}</p>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{getRestaurantVisitHint()}</p>
                     <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                       <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
                       <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
-                      <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(restaurant.updatedAt)}</span>
+                      <span className="flex items-center gap-1"><CalendarDays size={12} />업데이트 {formatDiscoveryDate(restaurant.updatedAt)}</span>
                     </div>
                   </SmartLink>
                   <DiscoveryCardActions
@@ -205,7 +206,7 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
 
       {places.length > 0 ? (
         <section>
-          <SectionHeader title="시설" count={places.length} description="병원, 약국, 미용, 유치원, 장례 시설은 전화·운영 상태·서비스 조건을 먼저 확인하세요." />
+          <SectionHeader title="시설" count={places.length} description="병원, 약국, 미용, 유치원, 장례는 운영 방식이 달라요. 필요한 조건을 전화로 먼저 물어보세요." />
           <div className="grid gap-2 p-3 sm:grid-cols-2">
             {sortedPlaces.map((place) => {
               const displayName = getDisplayPlaceName(place);
@@ -220,17 +221,18 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
                   <SmartLink href={`/places/${place.id}`} className="block text-[var(--ink)] no-underline">
                     <div className="flex flex-wrap gap-1.5">
                       <span className="rounded bg-[#e0f2fe] px-2 py-0.5 text-[10px] font-black text-[#0369a1]">{categoryLabel}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.lat !== null ? "지도 가능" : "주소 검색"}</span>
-                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화 가능" : "전화 제보"}</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.lat !== null ? "지도에서 보기" : "주소로 찾기"}</span>
+                      <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호 제보"}</span>
                       {place.businessStatus ? <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.businessStatus}</span> : null}
                     </div>
                     <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{displayName}</h3>
                     <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(place)}</p>
-                    <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소 확인 필요"}</p>
+                    <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소는 정리 중이에요"}</p>
+                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{getPlaceVisitHint(place.category)}</p>
                     <div className="mt-2 grid gap-1.5 text-[11px] font-bold text-[#7b746d]">
                       <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
                       <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span>
-                      <span className="flex items-center gap-1"><CalendarDays size={12} />기준 {formatDiscoveryDate(place.updatedAt)}</span>
+                      <span className="flex items-center gap-1"><CalendarDays size={12} />업데이트 {formatDiscoveryDate(place.updatedAt)}</span>
                     </div>
                   </SmartLink>
                   <DiscoveryCardActions
@@ -250,7 +252,7 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
 
       {guides.length > 0 ? (
         <section>
-          <SectionHeader title="가이드" count={guides.length} description="방문 전 확인할 질문과 체크리스트를 먼저 볼 수 있습니다." />
+          <SectionHeader title="가이드" count={guides.length} description="가기 전에 물어볼 질문과 챙길 것만 빠르게 볼 수 있어요." />
           <div className="grid gap-2 p-3 sm:grid-cols-2">
             {guides.map((guide) => (
               <SmartLink key={guide.slug} href={`/guide/${guide.slug}`} className="rounded-lg border border-[var(--line)] bg-white p-4 text-[var(--ink)] no-underline transition hover:bg-[#fcfbf9]">

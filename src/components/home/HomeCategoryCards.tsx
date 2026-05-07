@@ -12,51 +12,51 @@ interface CategoryCardItem {
 const CATEGORIES: CategoryCardItem[] = [
   {
     label: "식당",
-    desc: "반려동물 동반 가능 식당 검색",
+    desc: "강아지랑 갈 곳",
     href: "/restaurants",
-    cta: "식당 찾기",
+    cta: "찾기",
   },
   {
     label: "병원",
-    desc: "동물병원 정보 안내",
+    desc: "진료 가능한 곳",
     href: "/hospitals",
-    cta: "정보 보기",
+    cta: "찾기",
   },
   {
     label: "미용",
-    desc: "반려동물 미용 안내",
+    desc: "예약할 곳",
     href: "/grooming",
-    cta: "정보 보기",
+    cta: "찾기",
   },
   {
     label: "유치원·호텔",
-    desc: "위탁관리 및 유치원 안내",
+    desc: "맡길 곳",
     href: "/daycare",
-    cta: "정보 보기",
+    cta: "찾기",
   },
   {
     label: "장례",
-    desc: "반려동물 장례 안내",
+    desc: "상담할 곳",
     href: "/funeral",
-    cta: "정보 보기",
+    cta: "찾기",
   },
   {
     label: "약국",
-    desc: "동물약국 정보 안내",
+    desc: "약 물어볼 곳",
     href: "/pharmacy",
-    cta: "정보 보기",
+    cta: "찾기",
   },
   {
     label: "찾아요",
-    desc: "실종 제보 등록 및 확인",
+    desc: "보호·실종 공고",
     href: "/lost-pets",
-    cta: "제보 보기",
+    cta: "확인",
   },
   {
     label: "가이드",
-    desc: "반려동물 여행·생활 가이드",
+    desc: "가기 전 체크",
     href: "/guide",
-    cta: "가이드 보기",
+    cta: "읽기",
   },
 ];
 
@@ -74,6 +74,7 @@ const CATEGORY_COUNT_KEYS: Record<string, keyof NonNullable<PublicCategoryCounts
 
 function getCategoryCount(category: CategoryCardItem, counts: PublicCategoryCounts) {
   if (category.label === "식당") return counts.restaurantCount;
+  if (category.label === "찾아요") return counts.lostPetCount;
   const key = CATEGORY_COUNT_KEYS[category.label];
   return key ? counts.placeCategoryCounts?.[key] : undefined;
 }
@@ -82,17 +83,29 @@ export function HomeCategoryCards({ counts }: HomeCategoryCardsProps) {
   const categories = CATEGORIES.map((category) => ({ ...category, count: getCategoryCount(category, counts) }));
 
   return (
-    <section style={{ padding: "16px 14px 0" }}>
+    <section style={{ padding: "12px 14px 0" }}>
       <div
         style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: "8px",
+          marginBottom: "7px",
+        }}
+      >
+        <div
+          style={{
           fontSize: "11px",
           fontWeight: 800,
           color: "#999",
           letterSpacing: "0.05em",
-          marginBottom: "8px",
-        }}
-      >
-        카테고리
+          }}
+        >
+          무엇을 찾으세요?
+        </div>
+        <SmartLink href="/categories" style={{ fontSize: "11px", fontWeight: 800, color: "var(--brand)", textDecoration: "none" }}>
+          모두 보기 →
+        </SmartLink>
       </div>
       <div
         style={{
@@ -109,14 +122,15 @@ export function HomeCategoryCards({ counts }: HomeCategoryCardsProps) {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              padding: "10px 12px",
+              minHeight: "58px",
+              padding: "8px 10px",
               background: "#fff",
               border: "1px solid var(--line)",
-              borderRadius: "10px",
+              borderRadius: "8px",
               textDecoration: "none",
             }}
           >
-            <div>
+            <div style={{ minWidth: 0 }}>
               <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--ink)" }}>
                 {c.label}
               </div>
@@ -126,16 +140,16 @@ export function HomeCategoryCards({ counts }: HomeCategoryCardsProps) {
                   : c.desc}
               </div>
               {c.count !== undefined ? (
-                <div style={{ fontSize: "10px", color: "#999", marginTop: "2px" }}>{c.desc}</div>
+                <div style={{ fontSize: "10px", color: "#999", marginTop: "1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.desc}</div>
               ) : null}
             </div>
             <span
               style={{
-                fontSize: "11px",
+                fontSize: "10.5px",
                 fontWeight: 700,
                 color: "var(--brand)",
                 flexShrink: 0,
-                marginLeft: "8px",
+                marginLeft: "6px",
               }}
             >
               {c.cta} →

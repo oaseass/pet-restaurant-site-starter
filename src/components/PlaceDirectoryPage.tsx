@@ -38,14 +38,14 @@ function getCategoryReadinessCopy(category: PlaceCategory, count: number) {
   const label = PLACE_CATEGORY_LABELS[category];
   if (count === 0) {
     return {
-      title: `${label} 공개 데이터가 아직 없습니다.`,
-      description: `${label} 정보가 추가되면 지역별 목록과 상세 페이지에서 바로 확인할 수 있습니다.`,
+      title: `${label} 정보는 아직 준비 중이에요.`,
+      description: `${label} 정보가 들어오면 동네별 목록과 상세 화면에서 바로 볼 수 있습니다.`,
     };
   }
 
   return {
-    title: `${label} 이용 안내`,
-    description: `${label} 목록은 계속 보강하고 있습니다. 방문 전 최신 운영 여부와 이용 조건을 다시 확인해 주세요.`,
+    title: `${label} 가기 전 참고할 점`,
+    description: `${label} 목록은 계속 보강하고 있어요. 방문 전 오늘 운영 여부와 이용 조건을 한 번 더 물어보세요.`,
   };
 }
 
@@ -66,7 +66,7 @@ export async function PlaceDirectoryPage({
   const pageDescription =
     description ??
     categoryInfo?.description ??
-    `${PLACE_CATEGORY_LABELS[category]} 정보를 지도와 목록으로 보기 쉽게 정리했습니다.`;
+    `${PLACE_CATEGORY_LABELS[category]}를 지도와 목록에서 함께 찾아보세요.`;
 
   const isRestaurant = category === "PET_RESTAURANT";
 
@@ -158,8 +158,8 @@ export async function PlaceDirectoryPage({
         <div className="relative z-10 max-w-3xl">
           <p className="eyebrow">카테고리</p>
           <div className="mt-4 flex flex-wrap gap-2">
-            <span className="badge">등록 {count.toLocaleString("ko-KR")}건</span>
-            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{isRestaurant ? "지도 탐색 가능" : "지역별 목록 제공"}</span>
+            <span className="badge">{count.toLocaleString("ko-KR")}곳</span>
+            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{isRestaurant ? "지도에서 같이 보기" : "지역별로 찾기"}</span>
           </div>
           <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">{pageTitle}</h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">{pageDescription}</p>
@@ -169,7 +169,7 @@ export async function PlaceDirectoryPage({
           {isRestaurant && regions && regions.bySido.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">
               {regions.bySido.slice(0, 8).map((region) => (
-                <span key={region.sido} className="badge bg-[rgba(31,74,64,0.08)] text-[#1a463f]">{region.sido} {region.count.toLocaleString("ko-KR")}건</span>
+                <span key={region.sido} className="badge bg-[rgba(31,74,64,0.08)] text-[#1a463f]">{region.sido} {region.count.toLocaleString("ko-KR")}곳</span>
               ))}
             </div>
           ) : null}
@@ -180,7 +180,7 @@ export async function PlaceDirectoryPage({
         <div className="flex flex-wrap gap-2">
           {isRestaurant && regions
             ? regions.bySido.slice(0, 12).map((region) => (
-                <span key={region.sido} className="badge">{region.sido} {region.count.toLocaleString("ko-KR")}건</span>
+                <span key={region.sido} className="badge">{region.sido} {region.count.toLocaleString("ko-KR")}곳</span>
               ))
             : REGION_OPTIONS.map((region) => (
                 <span key={region} className="badge">{region}</span>
@@ -191,7 +191,7 @@ export async function PlaceDirectoryPage({
       <div className="mt-6">
         <ResponsiveMapLayout
           title={`${pageTitle} 지도`}
-          description="지도와 목록을 함께 보며 위치를 비교할 수 있습니다. 모바일에서는 목록과 지도를 번갈아 확인할 수 있습니다."
+          description="지도와 목록을 함께 보며 가까운 곳을 비교해보세요. 모바일에서는 목록과 지도를 번갈아 볼 수 있습니다."
           items={mapItems}
           sidebar={
             <>
@@ -215,7 +215,7 @@ export async function PlaceDirectoryPage({
                     );
                   })
                 ) : (
-                  <EmptyState title="아직 식당 데이터가 비어 있습니다." description="다음 배치 동기화 이후 다시 확인해 주세요." character="dog-hoodie" />
+                  <EmptyState title="아직 보여드릴 식당이 없어요." description="새 정보가 반영되면 이 화면에서 바로 볼 수 있습니다." character="dog-hoodie" />
                 )
               ) : displayPlaces.length > 0 ? (
                 displayPlaces.map((place) => {
@@ -269,8 +269,8 @@ export async function PlaceDirectoryPage({
             <p className="eyebrow">이용 안내</p>
             <h2 className="mt-4 text-xl font-black tracking-tight">{getCategoryReadinessCopy(category, count).title}</h2>
             <div className="mt-5 flex flex-wrap gap-2">
-              <span className="badge">등록 {count.toLocaleString("ko-KR")}건</span>
-              <span className="badge">지역별 정보 정리 중</span>
+              <span className="badge">{count.toLocaleString("ko-KR")}곳</span>
+              <span className="badge">지역별로 정리 중</span>
             </div>
             <p className="mt-4 text-sm leading-7 text-[var(--muted)] sm:text-[15px]">
               {getCategoryReadinessCopy(category, count).description}
