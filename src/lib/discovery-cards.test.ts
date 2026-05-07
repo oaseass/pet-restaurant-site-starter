@@ -41,8 +41,8 @@ test("getRestaurantIdentity prioritizes external place category over generic bus
   const identity = getRestaurantIdentity({ businessType: "일반음식점", externalCategory: "음식점 > 한식" });
 
   assert.equal(identity.identityLabel, "한식");
-  assert.match(identity.description, /대표 메뉴와 동반 좌석/);
-  assert.equal(identity.missingInfoLabel, "대표 메뉴 제보하기");
+  assert.match(identity.description, /한식 성격의 음식점/);
+  assert.equal(identity.infoCtaLabel, "메뉴·동반 정보 알려주기");
 });
 
 test("getPlaceIdentity derives category-specific service gaps", () => {
@@ -51,6 +51,6 @@ test("getPlaceIdentity derives category-specific service gaps", () => {
   const daycare = getPlaceIdentity({ category: "DAYCARE", name: "멍멍 호텔" });
 
   assert.equal(hospital.identityLabel, "24시 후보 병원");
-  assert.equal(pharmacy.serviceLabel, "취급 약품은 업체 확인이 필요해요");
+  assert.equal(pharmacy.infoCtaLabel, "약품 정보 알려주기");
   assert.equal(daycare.identityLabel, "호텔·위탁");
 });

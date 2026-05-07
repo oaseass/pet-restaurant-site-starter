@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { AlertCircle, MapPin, ShieldCheck } from "lucide-react";
 import type { Metadata } from "next";
 import { AdSlot } from "@/components/AdSlot";
-import { CategoryVisualBlock } from "@/components/discovery/CategoryVisualBlock";
 import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
@@ -14,7 +13,7 @@ import { SmartLink } from "@/components/SmartLink";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { absoluteUrl } from "@/lib/brand";
 import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
-import { getBusinessExternalCategory, getBusinessExternalHref, getPlaceIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
+import { getBusinessExternalCategory, getPlaceIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
 import { getApprovedReviewSummary } from "@/lib/reviews";
 import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
 
@@ -150,7 +149,6 @@ export default async function PlaceSlugPage({
   ]);
   const reliableEnrichment = (type === "GROOMING" || type === "DAYCARE") ? null : enrichment && enrichment.matchScore >= 0.85 ? enrichment : null;
   const externalCategory = getBusinessExternalCategory(reliableEnrichment);
-  const externalHref = getBusinessExternalHref(reliableEnrichment);
   const identity = getPlaceIdentity({ category: type, name: displayName, externalCategory });
   const bestPhone = place.phone ?? reliableEnrichment?.phone ?? null;
   const reviewLabel = getReviewSummaryLabel(reviewSummary.count, reviewSummary.averageOverall);
@@ -181,41 +179,40 @@ export default async function PlaceSlugPage({
       </nav>
 
       <section className="section-shell overflow-hidden p-0">
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="relative z-10 p-6 sm:p-8">
-            <p className="eyebrow">장소 소개</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="badge"><ShieldCheck size={14} /> 공식 등록 정보</span>
-              <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{identity.identityLabel}</span>
-              {place.businessStatus && (
-                <span
-                  className={`badge ${
-                    place.businessStatus === "영업" || place.businessStatus === "정상"
-                      ? "bg-green-100 text-green-700 border-green-200"
-                      : "bg-[#fef3e8] text-[#b45309] border-[#fed7aa]"
-                  }`}
-                >
-                  {place.businessStatus}
-                </span>
-              )}
-              {place.sido && (
-                <span className="badge">{[place.sido, place.sigungu].filter(Boolean).join(" · ")}</span>
-              )}
-              <span className="badge">{reviewLabel}</span>
-            </div>
-
-            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{displayName}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-[#4f4741]">{identity.description}</p>
-
-            <p className="mt-4 flex items-start gap-2 text-[#5f5550]">
-              <MapPin className="mt-1 shrink-0" size={18} />
-              <span>
-                {displayAddress}
-                {place.addressMasked && (
-                  <span className="ml-2 text-xs text-[var(--muted)]">(주소 일부 비공개)</span>
-                )}
+        <div className="relative z-10 p-6 sm:p-8">
+          <p className="eyebrow">장소 소개</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="badge"><ShieldCheck size={14} /> 공식 등록 정보</span>
+            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{identity.identityLabel}</span>
+            {place.businessStatus && (
+              <span
+                className={`badge ${
+                  place.businessStatus === "영업" || place.businessStatus === "정상"
+                    ? "bg-green-100 text-green-700 border-green-200"
+                    : "bg-[#fef3e8] text-[#b45309] border-[#fed7aa]"
+                }`}
+              >
+                {place.businessStatus}
               </span>
-            </p>
+            )}
+            {place.sido && (
+              <span className="badge">{[place.sido, place.sigungu].filter(Boolean).join(" · ")}</span>
+            )}
+            <span className="badge">{reviewLabel}</span>
+          </div>
+
+          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{displayName}</h1>
+          <p className="mt-4 max-w-2xl text-base leading-8 text-[#4f4741]">{identity.description}</p>
+
+          <p className="mt-4 flex items-start gap-2 text-[#5f5550]">
+            <MapPin className="mt-1 shrink-0" size={18} />
+            <span>
+              {displayAddress}
+              {place.addressMasked && (
+                <span className="ml-2 text-xs text-[var(--muted)]">(주소 일부 비공개)</span>
+              )}
+            </span>
+          </p>
 
           {/* 도로명 주소가 있고 마스킹 아닐 때 추가 표시 */}
           {!place.addressMasked && place.roadAddress && place.address && place.roadAddress !== place.address && (
@@ -232,20 +229,10 @@ export default async function PlaceSlugPage({
 
             <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
               <InfoRow label="장소 성격" value={identity.identityLabel} />
-              <InfoRow label="전화" value={bestPhone ?? "전화번호는 제보를 기다려요"} />
-              <InfoRow label={type === "PHARMACY" ? "취급 약품" : type === "ANIMAL_HOSPITAL" ? "진료 항목" : "서비스"} value={identity.serviceLabel} />
+              <InfoRow label="전화" value={bestPhone ?? "전화번호 미등록"} />
               <InfoRow label="후기" value={reviewLabel} />
               {place.eupmyeondong && <InfoRow label="읍면동" value={place.eupmyeondong} />}
               {externalCategory ? <InfoRow label="지도 분류" value={externalCategory} /> : null}
-            </div>
-
-            <div className="mt-5 rounded-xl border border-[var(--line)] bg-white/82 p-4">
-              <p className="text-sm font-black text-[var(--ink)]">{identity.serviceLabel}</p>
-              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">확인되지 않은 서비스, 비용, 운영 방식을 단정하지 않고 전화 확인과 제보로 보강합니다.</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <SmartLink href={`${reportHref}&topic=service`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--brand)] px-3 py-1.5 text-xs font-black text-white">{identity.missingInfoLabel}</SmartLink>
-                {externalHref ? <a href={externalHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-black text-[var(--ink)]">외부 지도에서 확인</a> : null}
-              </div>
             </div>
 
             <DetailActionBar
@@ -259,10 +246,6 @@ export default async function PlaceSlugPage({
               mapHref={mapHref}
             />
           </div>
-          <div className="p-5 sm:p-6 lg:pl-0">
-            <CategoryVisualBlock kind={identity.visualKind} title={identity.identityLabel} description="실제 업체 사진이 아니라 카테고리를 구분하기 위한 안내 블록입니다." photoHref={`${reportHref}&topic=photo`} />
-          </div>
-        </div>
       </section>
 
       <DetailDecisionPanel
@@ -289,6 +272,24 @@ export default async function PlaceSlugPage({
       <div className="mt-6">
         <VisitInfoPanel category={type} />
       </div>
+
+      <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
+        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보를 더 정확하게 만들기</h2>
+        <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
+          운영시간, 서비스, 비용, 사진처럼 실제 방문에 도움이 되는 내용을 확인한 뒤 반영합니다.
+        </p>
+        <div className="mt-4 flex flex-wrap gap-2">
+          <SmartLink href={reportHref} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">
+            정보 수정 요청
+          </SmartLink>
+          <SmartLink href={`${reportHref}&topic=service`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] bg-white px-5 py-2.5 text-sm font-black text-[var(--brand)]">
+            {identity.infoCtaLabel}
+          </SmartLink>
+          <SmartLink href={`${reportHref}&topic=photo`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--ink)]">
+            사진 올리기
+          </SmartLink>
+        </div>
+      </section>
 
       <ReviewSection
         targetType="PLACE"

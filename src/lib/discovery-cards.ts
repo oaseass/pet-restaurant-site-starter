@@ -3,15 +3,11 @@ import type { PublicReviewSummarySnapshot } from "@/lib/public-data";
 
 export type DiscoveryPlaceCategory = "RESTAURANT" | "ANIMAL_HOSPITAL" | "PHARMACY" | "GROOMING" | "DAYCARE" | "FUNERAL";
 
-export type DiscoveryVisualKind = "restaurant" | "hospital" | "pharmacy" | "grooming" | "daycare" | "funeral";
-
 export type DiscoveryIdentity = {
-  visualKind: DiscoveryVisualKind;
   eyebrow: string;
   identityLabel: string;
   description: string;
-  serviceLabel: string;
-  missingInfoLabel: string;
+  infoCtaLabel: string;
   visitHint: string;
 };
 
@@ -155,14 +151,12 @@ export function getRestaurantIdentity({
   const identityLabel = getRestaurantKindLabel(businessType, externalCategory);
   const hasExternalCategory = Boolean(simplifyExternalCategory(externalCategory));
   return {
-    visualKind: "restaurant",
     eyebrow: "식당",
     identityLabel,
     description: hasExternalCategory
-      ? `카카오 장소정보에서는 ${identityLabel} 성격의 음식점으로 확인된 곳입니다. 대표 메뉴와 동반 좌석 정보는 아직 제보가 필요합니다.`
-      : "반려동물 동반 식당으로 등록된 곳입니다. 대표 메뉴와 동반 좌석 정보는 아직 제보가 필요합니다.",
-    serviceLabel: "대표 메뉴는 아직 등록되지 않았어요",
-    missingInfoLabel: "대표 메뉴 제보하기",
+      ? `카카오 장소정보에서는 ${identityLabel} 성격의 음식점으로 확인된 곳입니다.`
+      : "반려동물 동반 식당으로 등록된 곳입니다.",
+    infoCtaLabel: "메뉴·동반 정보 알려주기",
     visitHint: getRestaurantVisitHint(),
   };
 }
@@ -204,68 +198,56 @@ export function getPlaceIdentity({
   if (category === "ANIMAL_HOSPITAL") {
     const identityLabel = getHospitalKindLabel(text, externalCategory);
     return {
-      visualKind: "hospital",
       eyebrow: "병원",
       identityLabel,
       description: "동물병원 등록 정보가 있는 곳입니다. 진료시간과 응급 진료 여부는 전화로 확인해보세요.",
-      serviceLabel: "진료 항목은 업체 확인이 필요해요",
-      missingInfoLabel: "진료 정보 제보하기",
+      infoCtaLabel: "진료 정보 알려주기",
       visitHint: getPlaceVisitHint(category),
     };
   }
   if (category === "PHARMACY") {
     return {
-      visualKind: "pharmacy",
       eyebrow: "약국",
       identityLabel: simplifyExternalCategory(externalCategory) ?? "동물약국",
       description: "동물약국 등록 정보가 있는 곳입니다. 찾는 약품 재고는 방문 전 전화 확인이 좋습니다.",
-      serviceLabel: "취급 약품은 업체 확인이 필요해요",
-      missingInfoLabel: "약품 정보 제보하기",
+      infoCtaLabel: "약품 정보 알려주기",
       visitHint: getPlaceVisitHint(category),
     };
   }
   if (category === "GROOMING") {
     return {
-      visualKind: "grooming",
       eyebrow: "미용",
       identityLabel: "미용 예약",
       description: "반려동물 미용 관련 업체입니다. 견종·크기·피부 상태에 따라 예약 가능 여부가 달라질 수 있습니다.",
-      serviceLabel: "미용 서비스는 업체마다 달라요",
-      missingInfoLabel: "서비스 정보 제보하기",
+      infoCtaLabel: "서비스 정보 알려주기",
       visitHint: getPlaceVisitHint(category),
     };
   }
   if (category === "DAYCARE") {
     const identityLabel = getDaycareKindLabel(text, externalCategory);
     return {
-      visualKind: "daycare",
       eyebrow: "유치원·호텔",
       identityLabel,
       description: "위탁·호텔·훈련 서비스는 업체마다 운영 방식이 달라 방문 전 상담이 필요합니다.",
-      serviceLabel: "운영 서비스는 업체 확인이 필요해요",
-      missingInfoLabel: "운영 서비스 제보하기",
+      infoCtaLabel: "운영 서비스 알려주기",
       visitHint: getPlaceVisitHint(category),
     };
   }
   if (category === "FUNERAL") {
     const identityLabel = getFuneralKindLabel(text, externalCategory);
     return {
-      visualKind: "funeral",
       eyebrow: "장례",
       identityLabel,
       description: "반려동물 장례 관련 업체입니다. 화장·봉안·픽업 가능 여부와 비용은 상담 전 확인하세요.",
-      serviceLabel: "비용과 절차는 업체 상담이 필요해요",
-      missingInfoLabel: "장례 서비스 제보하기",
+      infoCtaLabel: "장례 정보 알려주기",
       visitHint: getPlaceVisitHint(category),
     };
   }
   return {
-    visualKind: "hospital",
     eyebrow: "장소",
     identityLabel: simplifyExternalCategory(externalCategory) ?? "반려생활 장소",
     description: "반려생활 관련 장소입니다. 운영 방식과 이용 조건은 방문 전 업체에 확인해 주세요.",
-    serviceLabel: "서비스 정보는 업체 확인이 필요해요",
-    missingInfoLabel: "서비스 정보 제보하기",
+    infoCtaLabel: "서비스 정보 알려주기",
     visitHint: getPlaceVisitHint(category),
   };
 }

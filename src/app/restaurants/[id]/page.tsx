@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { AdSlot } from "@/components/AdSlot";
-import { CategoryVisualBlock } from "@/components/discovery/CategoryVisualBlock";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
 import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
@@ -10,7 +9,7 @@ import { VisitInfoPanel } from "@/components/detail/VisitInfoPanel";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
-import { getBusinessExternalCategory, getBusinessExternalHref, getRestaurantIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
+import { getBusinessExternalCategory, getRestaurantIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
 import { getApprovedReviewSummary } from "@/lib/reviews";
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -44,7 +43,6 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
   ]);
   const reliableEnrichment = enrichment && enrichment.matchScore >= 0.85 ? enrichment : null;
   const externalCategory = getBusinessExternalCategory(reliableEnrichment);
-  const externalHref = getBusinessExternalHref(reliableEnrichment);
   const identity = getRestaurantIdentity({ businessType: restaurant.businessType, externalCategory });
   const bestPhone = reliableEnrichment?.phone ?? null;
   const regionLabel = `${restaurant.sido}${restaurant.sigungu ? ` ${restaurant.sigungu}` : ""}`;
@@ -64,48 +62,33 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
       <section className="section-shell overflow-hidden p-0">
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_300px]">
-          <div className="relative z-10 p-6 sm:p-8">
-            <p className="eyebrow">장소 소개</p>
-            <div className="mt-4 flex flex-wrap gap-2">
-              <span className="badge"><ShieldCheck size={14} /> 공식 등록 정보</span>
-              <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{identity.identityLabel}</span>
-              <span className="badge">{regionLabel}</span>
-              <span className="badge">{reviewLabel}</span>
-            </div>
-            <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-[2.4rem]">{restaurant.name}</h1>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-[#4f4741]">{identity.description}</p>
-            <p className="mt-4 flex gap-2 text-sm leading-7 text-[#5f5550] sm:text-base"><MapPin className="mt-1 shrink-0" size={18} /> {restaurant.address}</p>
-            <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
-              <Info label="장소 성격" value={identity.identityLabel} />
-              <Info label="전화" value={bestPhone ?? "전화번호는 제보를 기다려요"} />
-              <Info label="대표 메뉴" value={identity.serviceLabel} />
-              <Info label="동반 좌석" value="실내·야외 조건은 방문 전 확인" />
-              {externalCategory ? <Info label="지도 분류" value={externalCategory} /> : null}
-              <Info label="후기" value={reviewLabel} />
-            </div>
-            <div className="mt-5 rounded-xl border border-[var(--line)] bg-white/82 p-4">
-              <p className="text-sm font-black text-[var(--ink)]">메뉴와 좌석 정보는 아직 비어 있어요</p>
-              <p className="mt-2 text-sm leading-7 text-[var(--muted)]">확인되지 않은 대표 메뉴나 좌석 조건을 단정하지 않고, 방문한 사람이 알려준 정보만 반영합니다.</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <SmartLink href={`${reportHref}&topic=service`} className="inline-flex min-h-9 items-center rounded-full bg-[var(--brand)] px-3 py-1.5 text-xs font-black text-white">{identity.missingInfoLabel}</SmartLink>
-                {externalHref ? <a href={externalHref} target="_blank" rel="noopener noreferrer" className="inline-flex min-h-9 items-center rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-black text-[var(--ink)]">외부 지도에서 확인</a> : null}
-              </div>
-            </div>
-            <DetailActionBar
-              name={restaurant.name}
-              address={restaurant.address}
-              lat={restaurant.lat}
-              lng={restaurant.lng}
-              phone={bestPhone}
-              reportHref={reportHref}
-              reviewHref={reviewHref}
-              mapHref={mapHref}
-            />
+        <div className="relative z-10 p-6 sm:p-8">
+          <p className="eyebrow">장소 소개</p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="badge"><ShieldCheck size={14} /> 공식 등록 정보</span>
+            <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{identity.identityLabel}</span>
+            <span className="badge">{regionLabel}</span>
+            <span className="badge">{reviewLabel}</span>
           </div>
-          <div className="p-5 sm:p-6 lg:pl-0">
-            <CategoryVisualBlock kind={identity.visualKind} title={identity.identityLabel} description="실제 업체 사진이 아니라 카테고리를 구분하기 위한 안내 블록입니다." photoHref={`${reportHref}&topic=photo`} />
+          <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-[2.4rem]">{restaurant.name}</h1>
+          <p className="mt-4 max-w-2xl text-base leading-8 text-[#4f4741]">{identity.description}</p>
+          <p className="mt-4 flex gap-2 text-sm leading-7 text-[#5f5550] sm:text-base"><MapPin className="mt-1 shrink-0" size={18} /> {restaurant.address}</p>
+          <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
+            <Info label="장소 성격" value={identity.identityLabel} />
+            <Info label="전화" value={bestPhone ?? "전화번호 미등록"} />
+            {externalCategory ? <Info label="지도 분류" value={externalCategory} /> : null}
+            <Info label="후기" value={reviewLabel} />
           </div>
+          <DetailActionBar
+            name={restaurant.name}
+            address={restaurant.address}
+            lat={restaurant.lat}
+            lng={restaurant.lng}
+            phone={bestPhone}
+            reportHref={reportHref}
+            reviewHref={reviewHref}
+            mapHref={mapHref}
+          />
         </div>
       </section>
 
@@ -133,16 +116,22 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
-        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">다녀온 정보가 조금 다르다면 알려주세요</h2>
+        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보를 더 정확하게 만들기</h2>
         <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-          영업 여부, 좌석 운영, 대형견 가능 여부, 이동장 조건처럼 다음 보호자가 꼭 알면 좋은 내용을 확인한 뒤 반영합니다.
+          메뉴, 좌석 운영, 대형견 가능 여부, 이동장 조건처럼 다음 보호자가 꼭 알면 좋은 내용만 확인한 뒤 반영합니다.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <SmartLink href={reportHref} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">
             정보 수정 요청
           </SmartLink>
+          <SmartLink href={`${reportHref}&topic=service`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] bg-white px-5 py-2.5 text-sm font-black text-[var(--brand)]">
+            {identity.infoCtaLabel}
+          </SmartLink>
           <SmartLink href={`${reportHref}&topic=pet-policy`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--brand)] bg-white px-5 py-2.5 text-sm font-black text-[var(--brand)]">
             동반 조건 알려주기
+          </SmartLink>
+          <SmartLink href={`${reportHref}&topic=photo`} className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--line)] bg-white px-5 py-2.5 text-sm font-black text-[var(--ink)]">
+            사진 올리기
           </SmartLink>
         </div>
       </section>

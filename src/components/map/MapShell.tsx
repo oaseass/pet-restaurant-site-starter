@@ -425,8 +425,7 @@ export function MapShell({
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
                 <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
                   <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
-                  <span>{selectedItem.reviewLabel ?? "아직 후기가 없어요"}</span>
-                  {selectedItem.serviceLabel ? <span>{selectedItem.serviceLabel}</span> : null}
+                  {selectedItem.reviewLabel ? <span>{selectedItem.reviewLabel}</span> : null}
                 </div>
                 <DiscoveryCardActions
                   className="mt-3 border-t border-[var(--line)] pt-3"
@@ -503,8 +502,7 @@ export function MapShell({
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{selectedItem.address}</p>
                 <div className="mt-2 grid gap-1.5 text-xs font-bold text-[#7b746d]">
                   <span>{selectedItem.externalCategory ?? selectedItem.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
-                  <span>{selectedItem.reviewLabel ?? "아직 후기가 없어요"}</span>
-                  {selectedItem.serviceLabel ? <span>{selectedItem.serviceLabel}</span> : null}
+                  {selectedItem.reviewLabel ? <span>{selectedItem.reviewLabel}</span> : null}
                 </div>
                 <DiscoveryCardActions
                   className="mt-3 border-t border-[var(--line)] pt-3"

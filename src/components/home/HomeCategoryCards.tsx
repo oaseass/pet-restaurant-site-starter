@@ -6,6 +6,7 @@ interface CategoryCardItem {
   desc: string;
   href: string;
   cta: string;
+  helper: string;
   count?: number;
 }
 
@@ -15,48 +16,56 @@ const CATEGORIES: CategoryCardItem[] = [
     desc: "강아지랑 갈 곳",
     href: "/restaurants",
     cta: "찾기",
+    helper: "좌석은 가기 전 확인",
   },
   {
     label: "병원",
     desc: "진료 가능한 곳",
     href: "/hospitals",
     cta: "찾기",
+    helper: "오늘 진료는 전화로",
   },
   {
     label: "미용",
     desc: "예약할 곳",
     href: "/grooming",
     cta: "찾기",
+    helper: "견종·크기 먼저 확인",
   },
   {
     label: "유치원·호텔",
     desc: "맡길 곳",
     href: "/daycare",
     cta: "찾기",
+    helper: "입소 조건 상담",
   },
   {
     label: "장례",
     desc: "상담할 곳",
     href: "/funeral",
     cta: "찾기",
+    helper: "절차·비용 물어보기",
   },
   {
     label: "약국",
     desc: "약 물어볼 곳",
     href: "/pharmacy",
     cta: "찾기",
+    helper: "재고는 전화 확인",
   },
   {
     label: "찾아요",
     desc: "보호·실종 공고",
     href: "/lost-pets",
     cta: "확인",
+    helper: "지역별 공고 보기",
   },
   {
     label: "가이드",
     desc: "가기 전 체크",
     href: "/guide",
     cta: "읽기",
+    helper: "준비물과 질문 정리",
   },
 ];
 
@@ -137,9 +146,7 @@ export function HomeCategoryCards({ counts }: HomeCategoryCardsProps) {
               <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "2px" }}>
                 {c.desc}
               </div>
-              {c.count !== undefined ? (
-                <div style={{ fontSize: "10px", color: "#999", marginTop: "1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.count.toLocaleString("ko-KR")}곳 정리 중</div>
-              ) : null}
+              <div style={{ fontSize: "10px", color: "#999", marginTop: "1px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.helper}</div>
             </div>
             <span
               style={{

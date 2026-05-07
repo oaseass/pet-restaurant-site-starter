@@ -54,10 +54,10 @@ export function DetailDecisionPanel({
   reviewHref,
 }: DetailDecisionPanelProps) {
   const facts = [
-    { label: "전화", value: phone ? "전화로 확인 가능" : "전화번호를 기다려요", tone: phone ? "good" : "warn" },
+    { label: "전화", value: phone ? "전화로 확인 가능" : "전화번호 미등록", tone: phone ? "good" : "warn" },
     { label: "위치", value: hasCoordinates ? "지도에서 바로 보기" : "주소로 찾아보기", tone: hasCoordinates ? "good" : "warn" },
     { label: "운영", value: businessStatus ?? "업체마다 달라요", tone: getStatusTone(businessStatus) },
-    { label: "후기", value: reviewCount > 0 ? `${reviewCount.toLocaleString("ko-KR")}건` : "아직 후기가 없어요", tone: reviewCount > 0 ? "good" : "muted" },
+    { label: "후기", value: reviewCount > 0 ? `${reviewCount.toLocaleString("ko-KR")}건` : "후기 없음", tone: reviewCount > 0 ? "good" : "muted" },
   ] satisfies Array<{ label: string; value: string; tone: FactTone }>;
 
   return (
@@ -90,8 +90,8 @@ export function DetailDecisionPanel({
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.75fr_1fr]">
         <div className="rounded-lg bg-[#f8faf9] p-4 text-sm leading-7 text-[var(--muted)]">
-          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 확인된 것과 비어 있는 것</p>
-          <p className="mt-2">{sourceLabel}를 바탕으로 정리했고, 마지막 반영일은 {dataUpdatedLabel}입니다. 메뉴·서비스·사진처럼 직접 확인이 필요한 정보는 제보가 들어온 뒤 보여드립니다.</p>
+          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 공개자료와 보완할 정보</p>
+          <p className="mt-2">{sourceLabel}를 바탕으로 정리했고, 마지막 반영일은 {dataUpdatedLabel}입니다. 메뉴·서비스·사진처럼 방문자가 알려준 정보는 확인 후 반영합니다.</p>
         </div>
         <div className="rounded-lg bg-[#fcfbf8] p-4">
           <p className="flex items-center gap-2 text-sm font-black text-[var(--ink)]"><Phone size={16} /> 전화할 때 물어볼 것</p>

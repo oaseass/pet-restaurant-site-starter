@@ -1,6 +1,5 @@
 import { MapPin, ShieldCheck } from "lucide-react";
 import { clsx } from "clsx";
-import { CategoryVisualBlock } from "@/components/discovery/CategoryVisualBlock";
 import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
 import type { MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { SmartLink } from "@/components/SmartLink";
@@ -91,31 +90,26 @@ export function MapListPanel({
                     )}
                   >
                     <SmartLink href={item.href} className="block w-full rounded-lg text-left focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
-                      <div className="grid gap-3 sm:grid-cols-[104px_minmax(0,1fr)]">
-                        <CategoryVisualBlock kind={item.visualKind ?? "restaurant"} title={item.identityLabel ?? item.businessType ?? item.categoryLabel ?? "장소"} description={item.serviceLabel ?? "방문 전 업체에 확인해 주세요"} compact />
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap gap-2">
-                            {item.categoryLabel && (
-                              <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-black text-[#2563eb]">{item.categoryLabel}</span>
-                            )}
-                            {item.officialRegistered ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-[#ecf8f3] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
-                                <ShieldCheck size={13} />
-                                공식 등록 정보
-                              </span>
-                            ) : null}
-                            {item.identityLabel ? <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.identityLabel}</span> : null}
-                            {item.coordinateStatus === "ready" && (
-                              <span className="rounded-full bg-[#dff3ec] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
-                                지도 핀 있음
-                              </span>
-                            )}
-                            <span className="rounded-full bg-[#f3f4f6] px-2.5 py-1 text-[11px] font-black text-[var(--muted)]">{item.phone ? "전화로 확인" : "전화번호를 기다려요"}</span>
-                          </div>
-                          <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
-                          {item.identityDescription ? <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#5f5550]">{item.identityDescription}</p> : null}
-                        </div>
+                      <div className="flex flex-wrap gap-2">
+                        {item.categoryLabel && (
+                          <span className="rounded-full bg-[#eff6ff] px-2.5 py-1 text-[11px] font-black text-[#2563eb]">{item.categoryLabel}</span>
+                        )}
+                        {item.officialRegistered ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#ecf8f3] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
+                            <ShieldCheck size={13} />
+                            공식 등록 정보
+                          </span>
+                        ) : null}
+                        {item.identityLabel ? <span className="rounded-full bg-[#f5f1eb] px-2.5 py-1 text-[11px] font-black text-[#63574d]">{item.identityLabel}</span> : null}
+                        {item.coordinateStatus === "ready" && (
+                          <span className="rounded-full bg-[#dff3ec] px-2.5 py-1 text-[11px] font-black text-[#1a463f]">
+                            지도 핀 있음
+                          </span>
+                        )}
+                        <span className="rounded-full bg-[#f3f4f6] px-2.5 py-1 text-[11px] font-black text-[var(--muted)]">{item.phone ? "전화로 확인" : "전화번호 알려주기"}</span>
                       </div>
+                      <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
+                      {item.identityDescription ? <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#5f5550]">{item.identityDescription}</p> : null}
                       <p className="mt-2 text-sm font-bold text-[var(--muted)]">
                         {item.regionLabel}
                         {item.distanceKm !== undefined && (
@@ -130,8 +124,7 @@ export function MapListPanel({
                       </p>
                       <div className="mt-3 grid gap-1.5 text-xs font-bold text-[#7b746d]">
                         <span>{item.externalCategory ?? item.sourceLabel ?? "정부 공개자료를 정리했어요"}</span>
-                        <span>{item.reviewLabel ?? "아직 후기가 없어요"}</span>
-                        {item.serviceLabel ? <span>{item.serviceLabel}</span> : null}
+                        {item.reviewLabel ? <span>{item.reviewLabel}</span> : null}
                       </div>
                     </SmartLink>
                     <div className="mt-4 border-t border-[var(--line)] pt-3">

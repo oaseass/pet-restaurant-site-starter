@@ -7,7 +7,7 @@ import { AdSlot } from "@/components/AdSlot";
 import { HomeCategoryCards } from "@/components/home/HomeCategoryCards";
 import { HomeRestaurantHighlights } from "@/components/home/HomeRestaurantHighlights";
 import { HomeGuideSection } from "@/components/home/HomeGuideSection";
-import { getAnimalNoticeCountsSnapshot, getCategoryCountsSnapshot, getRestaurantsLightSnapshot } from "@/lib/public-data";
+import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot } from "@/lib/public-data";
 
 const HOME_ENTRY_LINKS = [
   { label: "병원", href: "/hospitals", icon: HeartPulse },
@@ -17,23 +17,15 @@ const HOME_ENTRY_LINKS = [
   { label: "챙길 것", href: "/guide/travel", icon: BookOpen },
 ] as const;
 
-function formatCompactCount(value?: number | null) {
-  if (value === undefined || value === null) return "준비중";
-  return `${value.toLocaleString("ko-KR")}건`;
-}
-
 export default async function HomePage() {
-  const [counts, restaurants, animalNoticeCounts] = await Promise.all([
+  const [counts, restaurants] = await Promise.all([
     getCategoryCountsSnapshot(),
     getRestaurantsLightSnapshot(),
-    getAnimalNoticeCountsSnapshot(),
   ]);
-  const placeTotalCount = counts.restaurantCount + counts.placeCount;
-  const shelterNoticeCount = animalNoticeCounts.total || counts.lostPetCount;
   const homeSignals = [
-    { label: "찾을 수 있는 곳", value: formatCompactCount(placeTotalCount), href: "/categories" },
-    { label: "보호 중", value: formatCompactCount(shelterNoticeCount), href: "/lost-pets?tab=shelter" },
-    { label: "가기 전", value: "체크리스트", href: "/guide/travel" },
+    { label: "내 주변", value: "지도 열기", href: "/map" },
+    { label: "보호동물", value: "공고 보기", href: "/lost-pets?tab=shelter" },
+    { label: "가기 전", value: "질문 보기", href: "/guide/travel" },
   ];
 
   return (
