@@ -26,8 +26,17 @@ export type BusinessEnrichmentEntry = {
   naverTitle?: string | null;
   naverCategory?: string | null;
   naverLink?: string | null;
+  googlePlaceResourceName?: string | null;
   googlePlaceName?: string | null;
   googlePrimaryType?: string | null;
+  googleRating?: number | null;
+  googleUserRatingCount?: number | null;
+  googlePhotoName?: string | null;
+  googlePhotoAuthorName?: string | null;
+  googlePhotoAuthorUri?: string | null;
+  googleOpeningHours?: string[] | null;
+  googleEditorialSummary?: string | null;
+  googleWebsiteUri?: string | null;
   enrichedAt?: string | null;
   checkedAt: string;
 };

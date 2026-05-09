@@ -45,6 +45,15 @@ type ExternalCandidate = {
   url?: string | null;
   lat?: number | null;
   lng?: number | null;
+  googlePlaceResourceName?: string | null;
+  googleRating?: number | null;
+  googleUserRatingCount?: number | null;
+  googlePhotoName?: string | null;
+  googlePhotoAuthorName?: string | null;
+  googlePhotoAuthorUri?: string | null;
+  googleOpeningHours?: string[] | null;
+  googleEditorialSummary?: string | null;
+  googleWebsiteUri?: string | null;
   score: number;
   assessment: BusinessMatchScoreDetails;
 };
@@ -118,6 +127,11 @@ function buildQuery(target: BusinessTarget) {
 function parseFiniteNumber(value: unknown) {
   const numberValue = Number(value);
   return Number.isFinite(numberValue) ? numberValue : null;
+}
+
+function parseInteger(value: unknown) {
+  const numberValue = Number(value);
+  return Number.isInteger(numberValue) ? numberValue : null;
 }
 
 function assessCandidate(target: BusinessTarget, candidate: ExternalCandidateDraft): ExternalCandidate {
@@ -216,7 +230,7 @@ async function fetchGoogleCandidates(target: BusinessTarget, apiKey: string | un
     headers: {
       "Content-Type": "application/json",
       "X-Goog-Api-Key": apiKey,
-      "X-Goog-FieldMask": "places.displayName,places.formattedAddress,places.googleMapsUri,places.primaryType,places.primaryTypeDisplayName,places.nationalPhoneNumber,places.location",
+      "X-Goog-FieldMask": "places.name,places.displayName,places.formattedAddress,places.googleMapsUri,places.primaryType,places.primaryTypeDisplayName,places.nationalPhoneNumber,places.location,places.rating,places.userRatingCount,places.photos,places.regularOpeningHours.weekdayDescriptions,places.editorialSummary,places.websiteUri",
     },
     body: JSON.stringify(body),
     signal: AbortSignal.timeout(8000),
@@ -224,6 +238,7 @@ async function fetchGoogleCandidates(target: BusinessTarget, apiKey: string | un
   if (!response.ok) throw new Error(`[enrich-businesses] Google Places API 오류: ${response.status} ${response.statusText}`);
   const json = await response.json() as {
     places?: Array<{
+      name?: string;
       displayName?: { text?: string };
       formattedAddress?: string;
       googleMapsUri?: string;
@@ -231,10 +246,21 @@ async function fetchGoogleCandidates(target: BusinessTarget, apiKey: string | un
       primaryTypeDisplayName?: { text?: string };
       nationalPhoneNumber?: string;
       location?: { latitude?: number; longitude?: number };
+      rating?: number;
+      userRatingCount?: number;
+      photos?: Array<{
+        name?: string;
+        authorAttributions?: Array<{ displayName?: string; uri?: string }>;
+      }>;
+      regularOpeningHours?: { weekdayDescriptions?: string[] };
+      editorialSummary?: { text?: string };
+      websiteUri?: string;
     }>;
   };
 
   return (json.places ?? []).map((item) => {
+    const primaryPhoto = item.photos?.find((photo) => Boolean(photo.name));
+    const primaryPhotoAuthor = primaryPhoto?.authorAttributions?.[0];
     const candidate = {
       source: "GOOGLE" as const,
       name: item.displayName?.text ?? "",
@@ -245,6 +271,15 @@ async function fetchGoogleCandidates(target: BusinessTarget, apiKey: string | un
       url: item.googleMapsUri ?? null,
       lat: parseFiniteNumber(item.location?.latitude),
       lng: parseFiniteNumber(item.location?.longitude),
+      googlePlaceResourceName: item.name ?? null,
+      googleRating: parseFiniteNumber(item.rating),
+      googleUserRatingCount: parseInteger(item.userRatingCount),
+      googlePhotoName: primaryPhoto?.name ?? null,
+      googlePhotoAuthorName: primaryPhotoAuthor?.displayName ?? null,
+      googlePhotoAuthorUri: primaryPhotoAuthor?.uri ?? null,
+      googleOpeningHours: item.regularOpeningHours?.weekdayDescriptions ?? null,
+      googleEditorialSummary: item.editorialSummary?.text ?? null,
+      googleWebsiteUri: item.websiteUri ?? null,
     };
     return assessCandidate(target, candidate);
   });
@@ -301,6 +336,9 @@ function toCandidateReport(candidate: ExternalCandidate) {
     candidateUrl: candidate.url ?? null,
     candidateLat: candidate.lat ?? null,
     candidateLng: candidate.lng ?? null,
+    googleRating: candidate.googleRating ?? null,
+    googleUserRatingCount: candidate.googleUserRatingCount ?? null,
+    hasGooglePhoto: Boolean(candidate.googlePhotoName),
     matchScore: candidate.score,
     nameScore: candidate.assessment.nameScore,
     addressScore: candidate.assessment.addressScore,
@@ -367,11 +405,12 @@ async function processTarget(
     ...(await fetchGoogleCandidates(target, keys.googlePlacesKey)),
   ].sort(sortCandidates);
   const best = candidates.find((candidate) => candidate.assessment.autoApplicable);
+  const googleVisualCandidate = candidates.find((candidate) => candidate.source === "GOOGLE" && candidate.assessment.autoApplicable);
   return {
     target,
     candidates,
     best,
-    entry: best ? toEntry(target, best) : undefined,
+    entry: best ? toEntry(target, best, googleVisualCandidate) : undefined,
     report: toTargetReport(target, candidates, best),
   };
 }
@@ -433,8 +472,9 @@ async function readSnapshot(): Promise<BusinessEnrichmentSnapshot> {
   }
 }
 
-function toEntry(target: BusinessTarget, candidate: ExternalCandidate): BusinessEnrichmentEntry {
+function toEntry(target: BusinessTarget, candidate: ExternalCandidate, googleVisualCandidate?: ExternalCandidate): BusinessEnrichmentEntry {
   const checkedAt = new Date().toISOString();
+  const googleCandidate = candidate.source === "GOOGLE" ? candidate : googleVisualCandidate;
   return {
     targetType: target.targetType,
     targetId: target.targetId,
@@ -448,7 +488,7 @@ function toEntry(target: BusinessTarget, candidate: ExternalCandidate): Business
     externalPlaceUrl: candidate.url || null,
     kakaoPlaceUrl: candidate.source === "KAKAO" ? candidate.url || null : null,
     naverPlaceUrl: candidate.source === "NAVER" ? candidate.url || null : null,
-    googleMapsUri: candidate.source === "GOOGLE" ? candidate.url || null : null,
+    googleMapsUri: googleCandidate?.url || null,
     kakaoPlaceName: candidate.source === "KAKAO" ? candidate.name || null : null,
     kakaoCategoryName: candidate.source === "KAKAO" ? candidate.category || null : null,
     kakaoPhone: candidate.source === "KAKAO" ? candidate.phone || null : null,
@@ -456,8 +496,17 @@ function toEntry(target: BusinessTarget, candidate: ExternalCandidate): Business
     naverTitle: candidate.source === "NAVER" ? candidate.name || null : null,
     naverCategory: candidate.source === "NAVER" ? candidate.category || null : null,
     naverLink: candidate.source === "NAVER" ? candidate.url || null : null,
-    googlePlaceName: candidate.source === "GOOGLE" ? candidate.name || null : null,
-    googlePrimaryType: candidate.source === "GOOGLE" ? candidate.category || null : null,
+    googlePlaceResourceName: googleCandidate?.googlePlaceResourceName || null,
+    googlePlaceName: googleCandidate?.name || null,
+    googlePrimaryType: googleCandidate?.category || null,
+    googleRating: googleCandidate?.googleRating ?? null,
+    googleUserRatingCount: googleCandidate?.googleUserRatingCount ?? null,
+    googlePhotoName: googleCandidate?.googlePhotoName || null,
+    googlePhotoAuthorName: googleCandidate?.googlePhotoAuthorName || null,
+    googlePhotoAuthorUri: googleCandidate?.googlePhotoAuthorUri || null,
+    googleOpeningHours: googleCandidate?.googleOpeningHours ?? null,
+    googleEditorialSummary: googleCandidate?.googleEditorialSummary || null,
+    googleWebsiteUri: googleCandidate?.googleWebsiteUri || null,
     enrichedAt: checkedAt,
     checkedAt,
   };

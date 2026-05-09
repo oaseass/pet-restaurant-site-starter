@@ -42,7 +42,7 @@ export function MapLocationButton({ category }: { category?: string }) {
           ? "위치 재시도"
           : status === "unsupported"
             ? "현재 위치 미지원"
-            : "현재 위치로 찾기";
+            : "내 위치 반영";
 
   return (
     <button

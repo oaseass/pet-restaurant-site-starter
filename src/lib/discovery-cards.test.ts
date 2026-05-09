@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getDiscoveryQualityScore, getPlaceIdentity, getPublicReviewSummary, getRestaurantIdentity, getReviewSummaryLabel } from "./discovery-cards";
+import { getDiscoveryQualityScore, getInformationCompletenessRank, getInformationCompletenessSummary, getPlaceIdentity, getPublicReviewSummary, getRestaurantIdentity, getReviewSummaryLabel } from "./discovery-cards";
 
 test("getReviewSummaryLabel includes count and average when reviews exist", () => {
   assert.equal(getReviewSummaryLabel(3, 4.666), "리뷰 3건 · 평점 4.7");
@@ -35,6 +35,44 @@ test("getDiscoveryQualityScore favors review, phone, external info, and coordina
 
   assert.equal(emptyScore, 0);
   assert.ok(richScore > emptyScore);
+});
+
+test("getInformationCompletenessRank maps score ratios to user-facing grades", () => {
+  assert.equal(getInformationCompletenessRank(8, 8).grade, "S");
+  assert.equal(getInformationCompletenessRank(6, 8).grade, "A");
+  assert.equal(getInformationCompletenessRank(4, 8).grade, "B");
+  assert.equal(getInformationCompletenessRank(1, 8).grade, "C");
+  assert.equal(getInformationCompletenessRank(0, 8).grade, "NEEDS_CHECK");
+});
+
+test("getInformationCompletenessSummary counts practical visit signals", () => {
+  const summary = getInformationCompletenessSummary({
+    hasSource: true,
+    phone: "02-000-0000",
+    externalCategory: "음식점 > 한식",
+    reviewCount: 1,
+    hasCoordinates: true,
+    hasPhoto: true,
+    hasBusinessCheck: true,
+    hasUpdatedAt: true,
+  });
+
+  assert.equal(summary.score, 8);
+  assert.equal(summary.total, 8);
+  assert.equal(summary.badgeLabel, "정보 완성도 S");
+});
+
+test("getInformationCompletenessSummary returns missing information labels", () => {
+  const summary = getInformationCompletenessSummary({
+    hasSource: true,
+    phone: "02-000-0000",
+    externalCategory: "동물병원",
+    hasCoordinates: true,
+    hasUpdatedAt: true,
+  });
+
+  assert.deepEqual(summary.missingLabels, ["사진", "후기", "최근 확인"]);
+  assert.equal(summary.gapLabel, "더 채울 정보: 사진, 후기, 최근 확인");
 });
 
 test("getRestaurantIdentity prioritizes external place category over generic business type", () => {

@@ -109,7 +109,7 @@ export function MapListPanel({
                         <span className="rounded-full bg-[#f3f4f6] px-2.5 py-1 text-[11px] font-black text-[var(--muted)]">{item.phone ? "전화로 확인" : "전화번호 알려주기"}</span>
                       </div>
                       <h3 className="mt-3 text-lg font-black tracking-tight text-[#1f1915]">{item.name}</h3>
-                      {item.identityDescription ? <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#5f5550]">{item.identityDescription}</p> : null}
+                      {item.identityDescription ? <p className="mt-2 line-clamp-1 text-sm leading-6 text-[#5f5550]">{item.identityDescription}</p> : null}
                       <p className="mt-2 text-sm font-bold text-[var(--muted)]">
                         {item.regionLabel}
                         {item.distanceKm !== undefined && (
@@ -127,16 +127,13 @@ export function MapListPanel({
                         {item.reviewLabel ? <span>{item.reviewLabel}</span> : null}
                       </div>
                     </SmartLink>
-                    <div className="mt-4 border-t border-[var(--line)] pt-3">
-                      <p className="text-xs font-bold text-[var(--muted)]">업데이트 {item.dataUpdatedLabel}</p>
+                    <div className="mt-3 border-t border-[var(--line)] pt-3">
                       <DiscoveryCardActions
-                        className="mt-3"
                         detailHref={item.href}
                         onMapSelect={() => onSelect(item.id)}
                         mapLabel={item.coordinateStatus === "ready" ? "지도에서 보기" : "주소로 찾기"}
                         phone={item.phone}
                         externalHref={item.externalHref}
-                        reviewHref={item.reviewHref}
                         detailLabel="자세히 보기"
                       />
                     </div>

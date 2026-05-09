@@ -7,6 +7,7 @@ export type NavigationLinkInput = {
 
 export type NavigationLinks = {
   kakaoMapUrl: string | null;
+  googleMapsUrl: string | null;
   naverMapUrl: string | null;
   tmapUrl: string | null;
   webFallbackUrl: string | null;
@@ -39,6 +40,7 @@ export function buildNavigationLinks({ name, lat, lng, address }: NavigationLink
   if (!canNavigate) {
     return {
       kakaoMapUrl: null,
+      googleMapsUrl: null,
       naverMapUrl: null,
       tmapUrl: null,
       webFallbackUrl: null,
@@ -57,6 +59,11 @@ export function buildNavigationLinks({ name, lat, lng, address }: NavigationLink
     kakaoMapUrl: hasCoordinates
       ? `kakaomap://route?ep=${latValue},${lngValue}&by=CAR`
       : `kakaomap://search?q=${encodedQuery}`,
+    googleMapsUrl: hasAddress
+      ? `https://www.google.com/maps/dir/?api=1&destination=${encodedQuery}&travelmode=driving`
+      : hasCoordinates
+        ? `https://www.google.com/maps/dir/?api=1&destination=${latValue},${lngValue}&travelmode=driving`
+        : `https://www.google.com/maps/search/?api=1&query=${encodedQuery}`,
     naverMapUrl: hasCoordinates
       ? `nmap://route/car?dlat=${latValue}&dlng=${lngValue}&dname=${encodedName}&appname=pet-restaurant-site-starter`
       : `nmap://search?query=${encodedQuery}&appname=pet-restaurant-site-starter`,

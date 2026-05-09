@@ -39,6 +39,16 @@ function Fact({ label, value, tone }: { label: string; value: string; tone: Fact
   );
 }
 
+function getPriorityCopy(categoryLabel: string) {
+  if (categoryLabel.includes("식당")) return "동반 가능 등록만으로는 좌석 조건이 확정되지 않아요. 실내·야외·대형견 조건을 먼저 확인하세요.";
+  if (categoryLabel.includes("병원")) return "가장 중요한 건 오늘 진료 가능한 증상과 예약 여부입니다. 야간·응급은 전화 확인이 우선이에요.";
+  if (categoryLabel.includes("약국")) return "찾는 약품 재고와 처방전 필요 여부가 핵심입니다. 이동 전에 전화하면 헛걸음을 줄일 수 있어요.";
+  if (categoryLabel.includes("미용")) return "예약 가능한 시간, 견종·체중 제한, 노령견·피부 상태 대응 여부를 먼저 물어보세요.";
+  if (categoryLabel.includes("유치원") || categoryLabel.includes("호텔")) return "입소 기준, 예방접종 증명, 사회성 테스트 여부가 실제 이용 가능성을 가릅니다.";
+  if (categoryLabel.includes("장례")) return "급할수록 상담 가능 시간, 운구 가능 지역, 총 비용 포함 항목을 먼저 확인하세요.";
+  return "방문 전 오늘 운영 여부와 예약·비용·준비물을 먼저 확인하세요.";
+}
+
 export function DetailDecisionPanel({
   categoryLabel,
   regionLabel,
@@ -86,6 +96,11 @@ export function DetailDecisionPanel({
 
       <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {facts.map((fact) => <Fact key={fact.label} {...fact} />)}
+      </div>
+
+      <div className="mt-4 rounded-lg border border-[rgba(31,107,91,0.18)] bg-[#f8faf9] px-4 py-3 text-sm leading-7 text-[var(--muted)]">
+        <span className="font-black text-[var(--ink)]">우선 확인: </span>
+        {getPriorityCopy(categoryLabel)}
       </div>
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.75fr_1fr]">

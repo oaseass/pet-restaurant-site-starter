@@ -5,15 +5,23 @@ import { AdSlot } from "@/components/AdSlot";
 import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
+import { BusinessCheckPanel } from "@/components/detail/BusinessCheckPanel";
+import { BusinessStoryPanel } from "@/components/detail/BusinessStoryPanel";
 import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
+import { DetailMapCard } from "@/components/detail/DetailMapCard";
+import { DetailOverviewPanel } from "@/components/detail/DetailOverviewPanel";
 import { VisitInfoPanel } from "@/components/detail/VisitInfoPanel";
 import { PlaceDirectoryPage } from "@/components/PlaceDirectoryPage";
 import { SmartLink } from "@/components/SmartLink";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { absoluteUrl } from "@/lib/brand";
 import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
+import { getApprovedBusinessCheckSummary } from "@/lib/business-checks";
 import { getBusinessExternalCategory, getPlaceIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
+import { getGooglePlaceVisualEnrichment, mergeGoogleVisualEnrichment } from "@/lib/google-place-visual";
+import type { ListPageSearchParams } from "@/lib/list-location-filters";
+import { getPublicPlaceProfile } from "@/lib/place-profiles";
 import { getApprovedReviewSummary } from "@/lib/reviews";
 import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
 
@@ -108,14 +116,17 @@ export async function generateMetadata({
 
 export default async function PlaceSlugPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<ListPageSearchParams>;
 }) {
   const { slug } = await params;
 
   // 카테고리 슬러그 → 목록 페이지
   if (!UUID_RE.test(slug)) {
-    return <PlaceDirectoryPage categorySlug={slug} />;
+    const resolvedSearchParams = await searchParams;
+    return <PlaceDirectoryPage categorySlug={slug} baseHref={`/places/${slug}`} searchParams={resolvedSearchParams} />;
   }
 
   // UUID → 상세 페이지
@@ -141,17 +152,30 @@ export default async function PlaceSlugPage({
   // 같은 지역 · 카테고리 추천 (상위 5개)
   const type = place.category as "ANIMAL_HOSPITAL" | "PHARMACY" | "GROOMING" | "DAYCARE" | "FUNERAL";
   const supportCategoryTypes: Array<"ANIMAL_HOSPITAL" | "PHARMACY"> = type === "ANIMAL_HOSPITAL" ? ["PHARMACY"] : type === "PHARMACY" ? ["ANIMAL_HOSPITAL"] : ["ANIMAL_HOSPITAL", "PHARMACY"];
-  const [allSameCategory, supportCategoryGroups, reviewSummary, enrichment] = await Promise.all([
+  const [allSameCategory, supportCategoryGroups, reviewSummary, checkSummary, profile, enrichment] = await Promise.all([
     getPlacesByCategorySnapshot(type),
     Promise.all(supportCategoryTypes.map((category) => getPlacesByCategorySnapshot(category))),
     getApprovedReviewSummary("PLACE", place.id),
+    getApprovedBusinessCheckSummary("PLACE", place.id),
+    getPublicPlaceProfile(place.id),
     getBusinessEnrichmentForTarget("PLACE", place.id),
   ]);
-  const reliableEnrichment = (type === "GROOMING" || type === "DAYCARE") ? null : enrichment && enrichment.matchScore >= 0.85 ? enrichment : null;
+  const googleVisualEnrichment = enrichment?.googlePhotoName || type === "GROOMING" || type === "DAYCARE" ? null : await getGooglePlaceVisualEnrichment({
+    targetType: "PLACE",
+    targetId: place.id,
+    category: type,
+    name: displayName,
+    address: navigationAddress,
+    lat: place.lat,
+    lng: place.lng,
+  });
+  const displayEnrichment = mergeGoogleVisualEnrichment(enrichment, googleVisualEnrichment);
+  const reliableEnrichment = (type === "GROOMING" || type === "DAYCARE") ? null : displayEnrichment && displayEnrichment.matchScore >= 0.85 ? displayEnrichment : null;
   const externalCategory = getBusinessExternalCategory(reliableEnrichment);
   const identity = getPlaceIdentity({ category: type, name: displayName, externalCategory });
   const bestPhone = place.phone ?? reliableEnrichment?.phone ?? null;
   const reviewLabel = getReviewSummaryLabel(reviewSummary.count, reviewSummary.averageOverall);
+  const hasReview = reviewSummary.count > 0;
   const decisionQuestions = DECISION_QUESTIONS[type] ?? ["오늘 운영 여부를 확인할 수 있나요?", "예약이나 방문 제한이 있나요?", "비용과 준비물이 어떻게 되나요?", "주차나 대기 방식이 어떻게 되나요?"];
   const nearby = allSameCategory
     .filter((p) => p.id !== place.id && p.sido === place.sido && p.sigungu === place.sigungu)
@@ -198,7 +222,7 @@ export default async function PlaceSlugPage({
             {place.sido && (
               <span className="badge">{[place.sido, place.sigungu].filter(Boolean).join(" · ")}</span>
             )}
-            <span className="badge">{reviewLabel}</span>
+            {hasReview ? <span className="badge">{reviewLabel}</span> : null}
           </div>
 
           <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-4xl">{displayName}</h1>
@@ -230,7 +254,7 @@ export default async function PlaceSlugPage({
             <div className="mt-6 grid gap-3 text-sm sm:grid-cols-2">
               <InfoRow label="장소 성격" value={identity.identityLabel} />
               <InfoRow label="전화" value={bestPhone ?? "전화번호 미등록"} />
-              <InfoRow label="후기" value={reviewLabel} />
+              {hasReview ? <InfoRow label="후기" value={reviewLabel} /> : null}
               {place.eupmyeondong && <InfoRow label="읍면동" value={place.eupmyeondong} />}
               {externalCategory ? <InfoRow label="지도 분류" value={externalCategory} /> : null}
             </div>
@@ -244,9 +268,50 @@ export default async function PlaceSlugPage({
               reportHref={reportHref}
               reviewHref={reviewHref}
               mapHref={mapHref}
+              targetType="PLACE"
+              targetId={place.id}
             />
           </div>
       </section>
+
+      <DetailMapCard
+        name={displayName}
+        address={navigationAddress}
+        lat={place.lat}
+        lng={place.lng}
+        mapHref={mapHref}
+      />
+
+      <BusinessStoryPanel
+        name={displayName}
+        category={type}
+        categoryLabel={categoryLabel}
+        identityLabel={identity.identityLabel}
+        regionLabel={[place.sido, place.sigungu].filter(Boolean).join(" ") || "지역 정보를 정리 중이에요"}
+        profile={profile}
+        enrichment={reliableEnrichment}
+        checkSummary={checkSummary}
+        reportHref={reportHref}
+        reviewHref={reviewHref}
+      />
+
+      <DetailOverviewPanel
+        name={displayName}
+        category={type}
+        categoryLabel={categoryLabel}
+        identityLabel={identity.identityLabel}
+        regionLabel={[place.sido, place.sigungu].filter(Boolean).join(" ") || "지역 정보를 정리 중이에요"}
+        addressLabel={displayAddress}
+        phone={bestPhone}
+        hasCoordinates={place.lat !== null && place.lng !== null}
+        sourceLabel={sourceLabel}
+        businessStatus={place.businessStatus ?? null}
+        dataUpdatedLabel={new Date(place.updatedAt).toLocaleDateString("ko-KR")}
+        reviewCount={reviewSummary.count}
+        reviewAverage={reviewSummary.averageOverall}
+        checkSummary={checkSummary}
+        enrichment={reliableEnrichment}
+      />
 
       <DetailDecisionPanel
         categoryLabel={categoryLabel}
@@ -263,9 +328,16 @@ export default async function PlaceSlugPage({
         reviewHref={reviewHref}
       />
 
+      <BusinessCheckPanel
+        targetType="PLACE"
+        targetId={place.id}
+        categoryLabel={categoryLabel}
+        summary={checkSummary}
+      />
+
       {reliableEnrichment ? (
         <div className="mt-8">
-          <BusinessEnrichmentPanel enrichment={reliableEnrichment} category={type} reportHref={reportHref} reviewHref={reviewHref} />
+          <BusinessEnrichmentPanel enrichment={reliableEnrichment} category={type} reportHref={reportHref} reviewHref={reviewHref} showPhoto={false} />
         </div>
       ) : null}
 

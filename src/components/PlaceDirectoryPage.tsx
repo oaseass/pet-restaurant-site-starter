@@ -4,16 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { SearchBox } from "@/components/SearchBox";
 import { EmptyState } from "@/components/EmptyState";
 import { FilterBottomSheet } from "@/components/FilterBottomSheet";
+import { LocationApplyButton } from "@/components/LocationApplyButton";
 import { OfficialDataNotice } from "@/components/OfficialDataNotice";
 import { PlaceCard } from "@/components/PlaceCard";
 import { PriceNote } from "@/components/PriceNote";
 import { ResponsiveMapLayout } from "@/components/ResponsiveMapLayout";
 import { RestaurantCard } from "@/components/RestaurantCard";
+import { SmartLink } from "@/components/SmartLink";
 import { MedicalDisclaimer } from "@/components/MedicalDisclaimer";
 import { LegalDisclaimer } from "@/components/LegalDisclaimer";
 import { AdSlot } from "@/components/AdSlot";
+import { getApprovedBusinessCheckSummaries, getRecentApprovedBusinessCheckTargetIds } from "@/lib/business-checks";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
-import { getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getPublicReviewSummary, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getInformationCompletenessSummary, getPublicReviewSummary, getTrustedBusinessEnrichment, hasUsableCoordinates, needsInformationCompletenessWork } from "@/lib/discovery-cards";
+import { buildListFilterHref, compareByDistance, filterByListLocation, hasActiveListFilter, parseListSearchParams, type ListPageSearchParams } from "@/lib/list-location-filters";
 import { getCategoryCountsSnapshot, getRegionsSnapshot, getRestaurantsLightSnapshot, getReviewSummariesSnapshot, sortRestaurantsLight, toRestaurantCardItem } from "@/lib/public-data";
 import {
   PLACE_CATEGORY_LABELS,
@@ -49,17 +53,43 @@ function getCategoryReadinessCopy(category: PlaceCategory, count: number) {
   };
 }
 
+function filterByRecentCheck<T extends { id: string }>(items: T[], recentCheckedIds: Set<string>, checked: "" | "recent") {
+  return checked === "recent" ? items.filter((item) => recentCheckedIds.has(item.id)) : items;
+}
+
+function compareByRecentCheck<T extends { id: string }>(left: T, right: T, recentCheckedIds: Set<string>) {
+  return Number(recentCheckedIds.has(right.id)) - Number(recentCheckedIds.has(left.id));
+}
+
+function filterByInformationNeeds<T>(items: T[], info: "" | "needs", getSummary: (item: T) => ReturnType<typeof getInformationCompletenessSummary>) {
+  return info === "needs" ? items.filter((item) => needsInformationCompletenessWork(getSummary(item))) : items;
+}
+
+function compareByInformationNeeds<T>(left: T, right: T, info: "" | "needs", getSummary: (item: T) => ReturnType<typeof getInformationCompletenessSummary>) {
+  if (info !== "needs") return 0;
+  const leftSummary = getSummary(left);
+  const rightSummary = getSummary(right);
+  return leftSummary.score - rightSummary.score || rightSummary.missingLabels.length - leftSummary.missingLabels.length;
+}
+
 export async function PlaceDirectoryPage({
   categorySlug,
   title,
   description,
+  baseHref,
+  searchParams,
 }: {
   categorySlug: string;
   title?: string;
   description?: string;
+  baseHref?: string;
+  searchParams?: ListPageSearchParams;
 }) {
   const category = getPlaceCategoryBySlug(categorySlug);
   if (!category) notFound();
+
+  const filterState = parseListSearchParams(searchParams);
+  const hasFilter = hasActiveListFilter(filterState);
 
   const categoryInfo = QUICK_CATEGORIES.find((item) => item.category === category);
   const pageTitle = title ?? PLACE_CATEGORY_LABELS[category];
@@ -69,6 +99,7 @@ export async function PlaceDirectoryPage({
     `${PLACE_CATEGORY_LABELS[category]}를 지도와 목록에서 함께 찾아보세요.`;
 
   const isRestaurant = category === "PET_RESTAURANT";
+  const directoryHref = baseHref ?? (isRestaurant ? "/restaurants" : `/places/${categorySlug}`);
 
   const [categoryCounts, restaurantsLight, regions, placeCount, places, enrichmentSnapshot, reviewSnapshot] = await Promise.all([
     getCategoryCountsSnapshot(),
@@ -80,13 +111,39 @@ export async function PlaceDirectoryPage({
       : prisma.place.findMany({
           where: { category, isActive: true },
           orderBy: [{ ownerVerified: "desc" }, { updatedAt: "desc" }],
-          take: 36,
+          take: hasFilter ? 500 : 36,
         }),
     getBusinessEnrichmentSnapshot(),
     getReviewSummariesSnapshot(),
   ]);
 
-  const restaurants = isRestaurant ? sortRestaurantsLight(restaurantsLight).map(toRestaurantCardItem).sort((a, b) => {
+  const recentCheckedIds = await getRecentApprovedBusinessCheckTargetIds(isRestaurant ? "RESTAURANT" : "PLACE");
+  const restaurantLocationCandidates = isRestaurant ? filterByListLocation(restaurantsLight, filterState) : [];
+  const restaurantCandidates = filterByRecentCheck(restaurantLocationCandidates, recentCheckedIds, filterState.checked);
+  const restaurantCardCandidates = isRestaurant ? sortRestaurantsLight(restaurantCandidates).map(toRestaurantCardItem) : [];
+  const getRestaurantCompleteness = (restaurant: (typeof restaurantCardCandidates)[number]) => {
+    const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", restaurant.id);
+    const review = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", restaurant.id);
+    return getInformationCompletenessSummary({
+      hasSource: restaurant.officialRegistered,
+      phone: getBusinessPhone(null, enrichment),
+      externalHref: getBusinessExternalHref(enrichment),
+      externalCategory: getBusinessExternalCategory(enrichment),
+      reviewCount: review?.count,
+      hasCoordinates: hasUsableCoordinates(restaurant.lat, restaurant.lng),
+      hasPhoto: Boolean(enrichment?.googlePhotoName),
+      hasBusinessCheck: recentCheckedIds.has(restaurant.id),
+      hasUpdatedAt: Boolean(restaurant.dataUpdatedAt),
+    });
+  };
+  const informationFilteredRestaurantCandidates = filterByInformationNeeds(restaurantCardCandidates, filterState.info, getRestaurantCompleteness);
+  const restaurants = isRestaurant ? informationFilteredRestaurantCandidates.sort((a, b) => {
+    const distanceCompare = compareByDistance(a, b, filterState);
+    if (distanceCompare !== 0) return distanceCompare;
+    const recentCompare = compareByRecentCheck(a, b, recentCheckedIds);
+    if (recentCompare !== 0) return recentCompare;
+    const informationCompare = compareByInformationNeeds(a, b, filterState.info, getRestaurantCompleteness);
+    if (informationCompare !== 0) return informationCompare;
     const aEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", a.id);
     const bEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "RESTAURANT", b.id);
     const aReview = getPublicReviewSummary(reviewSnapshot, "RESTAURANT", a.id);
@@ -108,7 +165,31 @@ export async function PlaceDirectoryPage({
     if (aScore !== bScore) return bScore - aScore;
     return b.dataUpdatedAt.getTime() - a.dataUpdatedAt.getTime();
   }).slice(0, 18) : [];
-  const displayPlaces = isRestaurant ? [] : [...places].sort((a, b) => {
+  const placeLocationCandidates = isRestaurant ? [] : filterByListLocation(places, filterState);
+  const placeCandidates = filterByRecentCheck(placeLocationCandidates, recentCheckedIds, filterState.checked);
+  const getPlaceCompleteness = (place: (typeof placeCandidates)[number]) => {
+    const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
+    const review = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
+    return getInformationCompletenessSummary({
+      hasSource: Boolean(place.sourceName),
+      phone: getBusinessPhone(place.phone, enrichment),
+      externalHref: getBusinessExternalHref(enrichment),
+      externalCategory: getBusinessExternalCategory(enrichment),
+      reviewCount: review?.count,
+      hasCoordinates: hasUsableCoordinates(place.lat, place.lng),
+      hasPhoto: Boolean(enrichment?.googlePhotoName),
+      hasBusinessCheck: recentCheckedIds.has(place.id),
+      hasUpdatedAt: Boolean(place.updatedAt),
+    });
+  };
+  const informationFilteredPlaceCandidates = isRestaurant ? [] : filterByInformationNeeds(placeCandidates, filterState.info, getPlaceCompleteness);
+  const displayPlaces = isRestaurant ? [] : [...informationFilteredPlaceCandidates].sort((a, b) => {
+    const distanceCompare = compareByDistance(a, b, filterState);
+    if (distanceCompare !== 0) return distanceCompare;
+    const recentCompare = compareByRecentCheck(a, b, recentCheckedIds);
+    if (recentCompare !== 0) return recentCompare;
+    const informationCompare = compareByInformationNeeds(a, b, filterState.info, getPlaceCompleteness);
+    if (informationCompare !== 0) return informationCompare;
     const aEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", a.id, a.category);
     const bEnrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", b.id, b.category);
     const aReview = getPublicReviewSummary(reviewSnapshot, "PLACE", a.id);
@@ -130,7 +211,14 @@ export async function PlaceDirectoryPage({
     if (aScore !== bScore) return bScore - aScore;
     return Number(b.ownerVerified) - Number(a.ownerVerified) || b.updatedAt.getTime() - a.updatedAt.getTime();
   }).slice(0, 18);
-  const count = isRestaurant ? categoryCounts.restaurantCount : placeCount;
+  const totalCount = isRestaurant ? categoryCounts.restaurantCount : placeCount;
+  const visibleCount = isRestaurant ? informationFilteredRestaurantCandidates.length : informationFilteredPlaceCandidates.length;
+  const count = hasFilter ? visibleCount : totalCount;
+  const readinessCopy = getCategoryReadinessCopy(category, totalCount);
+  const [restaurantCheckSummaries, placeCheckSummaries] = await Promise.all([
+    isRestaurant ? getApprovedBusinessCheckSummaries("RESTAURANT", restaurants.map((restaurant) => restaurant.id)) : Promise.resolve(new Map()),
+    isRestaurant ? Promise.resolve(new Map()) : getApprovedBusinessCheckSummaries("PLACE", displayPlaces.map((place) => place.id)),
+  ]);
 
   const mapItems = isRestaurant
     ? restaurants.map((restaurant) => ({
@@ -160,16 +248,55 @@ export async function PlaceDirectoryPage({
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="badge">{count.toLocaleString("ko-KR")}곳</span>
             <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{isRestaurant ? "지도에서 같이 보기" : "지역별로 찾기"}</span>
+            {filterState.userLocation ? <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">내 위치 {filterState.userLocation.radiusKm}km</span> : null}
+            {filterState.checked === "recent" ? <span className="badge bg-[#ecfdf5] text-[#047857]">최근 확인 {count.toLocaleString("ko-KR")}곳</span> : null}
+            {filterState.info === "needs" ? <span className="badge bg-[#fff7ed] text-[#c2410c]">보강 필요 {count.toLocaleString("ko-KR")}곳</span> : null}
           </div>
           <h1 className="mt-5 text-3xl font-black tracking-tight sm:text-4xl">{pageTitle}</h1>
           <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--muted)] sm:text-base">{pageDescription}</p>
           <div className="mt-6 max-w-3xl">
             <SearchBox />
           </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <LocationApplyButton baseHref={buildListFilterHref(directoryHref, { sido: filterState.sido || null, checked: filterState.checked || null, info: filterState.info || null })} radiusKm={20} pendingLabel="목록 바꾸는 중..." />
+            <SmartLink
+              href={buildListFilterHref(directoryHref, {
+                sido: filterState.sido || null,
+                location: filterState.userLocation,
+                checked: filterState.checked === "recent" ? null : "recent",
+                info: filterState.info || null,
+              })}
+              className={`btn-secondary text-sm ${filterState.checked === "recent" ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : ""}`.trim()}
+            >
+              최근 확인된 곳
+            </SmartLink>
+            <SmartLink
+              href={buildListFilterHref(directoryHref, {
+                sido: filterState.sido || null,
+                location: filterState.userLocation,
+                checked: filterState.checked || null,
+                info: filterState.info === "needs" ? null : "needs",
+              })}
+              className={`btn-secondary text-sm ${filterState.info === "needs" ? "border-[#fed7aa] bg-[#fff7ed] text-[#c2410c]" : ""}`.trim()}
+            >
+              보강 필요한 곳
+            </SmartLink>
+          </div>
           {isRestaurant && regions && regions.bySido.length > 0 ? (
             <div className="mt-5 flex flex-wrap gap-2">
+              {hasFilter ? (
+                <SmartLink href={directoryHref} className="badge bg-white text-[#5f5550] hover:border-[var(--brand)] hover:text-[var(--brand)]">
+                  전체 보기
+                </SmartLink>
+              ) : null}
               {regions.bySido.slice(0, 8).map((region) => (
-                <span key={region.sido} className="badge bg-[rgba(31,74,64,0.08)] text-[#1a463f]">{region.sido} {region.count.toLocaleString("ko-KR")}곳</span>
+                <SmartLink
+                  key={region.sido}
+                  href={buildListFilterHref(directoryHref, { sido: region.sido, checked: filterState.checked || null, info: filterState.info || null })}
+                  className={`badge bg-[rgba(31,74,64,0.08)] text-[#1a463f] hover:border-[var(--brand)] hover:text-[var(--brand)] ${filterState.sido === region.sido ? "border-[var(--brand)] bg-[var(--brand-soft)] text-[var(--brand)]" : ""}`.trim()}
+                >
+                  {region.sido} {region.count.toLocaleString("ko-KR")}곳
+                </SmartLink>
               ))}
             </div>
           ) : null}
@@ -178,12 +305,43 @@ export async function PlaceDirectoryPage({
 
       <FilterBottomSheet title="모바일 필터 열기">
         <div className="flex flex-wrap gap-2">
+          {hasFilter ? (
+            <SmartLink href={directoryHref} className="badge bg-white text-[#5f5550]">
+              전체 보기
+            </SmartLink>
+          ) : null}
+          <SmartLink
+            href={buildListFilterHref(directoryHref, {
+              sido: filterState.sido || null,
+              location: filterState.userLocation,
+              checked: filterState.checked === "recent" ? null : "recent",
+              info: filterState.info || null,
+            })}
+            className={`badge ${filterState.checked === "recent" ? "bg-[var(--brand-soft)] text-[var(--brand)]" : ""}`.trim()}
+          >
+            최근 확인된 곳
+          </SmartLink>
+          <SmartLink
+            href={buildListFilterHref(directoryHref, {
+              sido: filterState.sido || null,
+              location: filterState.userLocation,
+              checked: filterState.checked || null,
+              info: filterState.info === "needs" ? null : "needs",
+            })}
+            className={`badge ${filterState.info === "needs" ? "bg-[#fff7ed] text-[#c2410c]" : ""}`.trim()}
+          >
+            보강 필요한 곳
+          </SmartLink>
           {isRestaurant && regions
             ? regions.bySido.slice(0, 12).map((region) => (
-                <span key={region.sido} className="badge">{region.sido} {region.count.toLocaleString("ko-KR")}곳</span>
+                <SmartLink key={region.sido} href={buildListFilterHref(directoryHref, { sido: region.sido, checked: filterState.checked || null, info: filterState.info || null })} className={`badge ${filterState.sido === region.sido ? "bg-[var(--brand-soft)] text-[var(--brand)]" : ""}`.trim()}>
+                  {region.sido} {region.count.toLocaleString("ko-KR")}곳
+                </SmartLink>
               ))
             : REGION_OPTIONS.map((region) => (
-                <span key={region} className="badge">{region}</span>
+                <SmartLink key={region} href={buildListFilterHref(directoryHref, { sido: region, checked: filterState.checked || null, info: filterState.info || null })} className={`badge ${filterState.sido === region ? "bg-[var(--brand-soft)] text-[var(--brand)]" : ""}`.trim()}>
+                  {region}
+                </SmartLink>
               ))}
         </div>
       </FilterBottomSheet>
@@ -208,14 +366,16 @@ export async function PlaceDirectoryPage({
                           phone: getBusinessPhone(null, enrichment),
                           externalCategory: getBusinessExternalCategory(enrichment),
                           externalHref: getBusinessExternalHref(enrichment),
+                          hasPhoto: Boolean(enrichment?.googlePhotoName),
                           reviewCount: reviewSummary?.count,
                           reviewAverage: reviewSummary?.averageOverall,
+                          checkSummary: restaurantCheckSummaries.get(restaurant.id) ?? null,
                         }}
                       />
                     );
                   })
                 ) : (
-                  <EmptyState title="아직 보여드릴 식당이 없어요." description="새 정보가 반영되면 이 화면에서 바로 볼 수 있습니다." character="dog-hoodie" />
+                  <EmptyState title={filterState.checked === "recent" ? "최근 확인된 식당이 아직 없어요." : hasFilter ? "조건에 맞는 식당이 없어요." : "아직 보여드릴 식당이 없어요."} description={filterState.checked === "recent" ? "확인 제보가 승인되면 이 목록에 먼저 올라옵니다." : hasFilter ? "전체 보기로 돌아가거나 다른 지역을 골라보세요." : "새 정보가 반영되면 이 화면에서 바로 볼 수 있습니다."} character="dog-hoodie" />
                 )
               ) : displayPlaces.length > 0 ? (
                 displayPlaces.map((place) => {
@@ -238,8 +398,10 @@ export async function PlaceDirectoryPage({
                         businessStatus: place.businessStatus,
                         externalCategory: getBusinessExternalCategory(enrichment),
                         externalHref: getBusinessExternalHref(enrichment),
+                        hasPhoto: Boolean(enrichment?.googlePhotoName),
                         reviewCount: reviewSummary?.count,
                         reviewAverage: reviewSummary?.averageOverall,
+                        checkSummary: placeCheckSummaries.get(place.id) ?? null,
                         dataUpdatedAt: place.updatedAt,
                         categoryLabel: PLACE_CATEGORY_LABELS[place.category],
                         href: `/places/${place.id}`,
@@ -249,8 +411,8 @@ export async function PlaceDirectoryPage({
                 })
               ) : (
                 <EmptyState
-                  title={getCategoryReadinessCopy(category, count).title}
-                  description={getCategoryReadinessCopy(category, count).description}
+                  title={filterState.checked === "recent" ? `최근 확인된 ${PLACE_CATEGORY_LABELS[category]} 정보가 아직 없어요.` : hasFilter ? `조건에 맞는 ${PLACE_CATEGORY_LABELS[category]} 정보가 없어요.` : readinessCopy.title}
+                  description={filterState.checked === "recent" ? "전화·방문 확인 제보가 승인되면 이 목록에 먼저 올라옵니다." : hasFilter ? "전체 보기로 돌아가거나 다른 지역을 골라보세요." : readinessCopy.description}
                   character={categoryInfo?.character ?? "puppy-front-white"}
                 />
               )}
@@ -267,13 +429,13 @@ export async function PlaceDirectoryPage({
         ) : (
           <section className="card rounded-[1rem] p-5 sm:p-6">
             <p className="eyebrow">이용 안내</p>
-            <h2 className="mt-4 text-xl font-black tracking-tight">{getCategoryReadinessCopy(category, count).title}</h2>
+            <h2 className="mt-4 text-xl font-black tracking-tight">{readinessCopy.title}</h2>
             <div className="mt-5 flex flex-wrap gap-2">
               <span className="badge">{count.toLocaleString("ko-KR")}곳</span>
               <span className="badge">지역별로 정리 중</span>
             </div>
             <p className="mt-4 text-sm leading-7 text-[var(--muted)] sm:text-[15px]">
-              {getCategoryReadinessCopy(category, count).description}
+              {readinessCopy.description}
             </p>
           </section>
         )}

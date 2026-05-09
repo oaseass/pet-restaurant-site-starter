@@ -94,6 +94,145 @@ export function getDiscoveryQualityScore({
   );
 }
 
+export type InformationCompletenessGrade = "S" | "A" | "B" | "C" | "NEEDS_CHECK";
+
+export type InformationCompletenessSummary = {
+  grade: InformationCompletenessGrade;
+  badgeLabel: string;
+  levelLabel: string;
+  description: string;
+  score: number;
+  total: number;
+  missingLabels: string[];
+  gapLabel: string | null;
+};
+
+function createInformationCompletenessSummary({
+  grade,
+  badgeLabel,
+  levelLabel,
+  description,
+  score,
+  total,
+  missingLabels = [],
+}: Omit<InformationCompletenessSummary, "gapLabel"> & { missingLabels?: string[] }): InformationCompletenessSummary {
+  const visibleMissingLabels = missingLabels.slice(0, 3);
+  const gapPrefix = grade === "S" || grade === "A" ? "더 채울 정보" : "보강 필요";
+  return {
+    grade,
+    badgeLabel,
+    levelLabel,
+    description,
+    score,
+    total,
+    missingLabels,
+    gapLabel: visibleMissingLabels.length > 0 ? `${gapPrefix}: ${visibleMissingLabels.join(", ")}` : null,
+  };
+}
+
+export function getInformationCompletenessRank(score: number, total: number, missingLabels: string[] = []): InformationCompletenessSummary {
+  const safeTotal = Math.max(1, total);
+  const safeScore = Math.max(0, Math.min(score, safeTotal));
+  const ratio = safeScore / safeTotal;
+
+  if (ratio >= 0.85) {
+    return createInformationCompletenessSummary({
+      grade: "S",
+      badgeLabel: "정보 완성도 S",
+      levelLabel: "매우 충분",
+      description: "사진, 지도, 연락, 후기나 확인 정보까지 두루 갖춘 곳입니다.",
+      score: safeScore,
+      total: safeTotal,
+      missingLabels,
+    });
+  }
+  if (ratio >= 0.62) {
+    return createInformationCompletenessSummary({
+      grade: "A",
+      badgeLabel: "정보 완성도 A",
+      levelLabel: "방문 판단 가능",
+      description: "기본 정보와 지도 비교가 충분해 방문 전 판단하기 좋습니다.",
+      score: safeScore,
+      total: safeTotal,
+      missingLabels,
+    });
+  }
+  if (ratio >= 0.4) {
+    return createInformationCompletenessSummary({
+      grade: "B",
+      badgeLabel: "정보 완성도 B",
+      levelLabel: "기본 확인 가능",
+      description: "주소와 전화 등 기본 정보는 있으나 세부 조건 확인이 필요합니다.",
+      score: safeScore,
+      total: safeTotal,
+      missingLabels,
+    });
+  }
+  if (ratio > 0) {
+    return createInformationCompletenessSummary({
+      grade: "C",
+      badgeLabel: "정보 완성도 C",
+      levelLabel: "정보 보강 필요",
+      description: "공개자료 중심이라 사진, 후기, 운영 조건 보강이 필요합니다.",
+      score: safeScore,
+      total: safeTotal,
+      missingLabels,
+    });
+  }
+
+  return createInformationCompletenessSummary({
+    grade: "NEEDS_CHECK",
+    badgeLabel: "정보 확인 필요",
+    levelLabel: "확인 필요",
+    description: "방문 판단에 필요한 핵심 정보가 아직 부족합니다.",
+    score: safeScore,
+    total: safeTotal,
+    missingLabels,
+  });
+}
+
+export function getInformationCompletenessSummary({
+  hasSource,
+  phone,
+  externalHref,
+  externalCategory,
+  reviewCount,
+  hasCoordinates,
+  hasPhoto,
+  hasBusinessCheck,
+  hasUpdatedAt,
+}: {
+  hasSource?: boolean;
+  phone?: string | null;
+  externalHref?: string | null;
+  externalCategory?: string | null;
+  reviewCount?: number | null;
+  hasCoordinates?: boolean;
+  hasPhoto?: boolean;
+  hasBusinessCheck?: boolean;
+  hasUpdatedAt?: boolean;
+}) {
+  const signals = [
+    { label: "공개 출처", active: hasSource },
+    { label: "지도 좌표", active: hasCoordinates },
+    { label: "전화번호", active: Boolean(phone) },
+    { label: "지도 비교", active: Boolean(externalHref || externalCategory) },
+    { label: "사진", active: hasPhoto },
+    { label: "후기", active: Boolean(reviewCount && reviewCount > 0) },
+    { label: "최근 확인", active: hasBusinessCheck },
+    { label: "업데이트일", active: hasUpdatedAt },
+  ];
+  return getInformationCompletenessRank(
+    signals.filter((signal) => signal.active).length,
+    signals.length,
+    signals.filter((signal) => !signal.active).map((signal) => signal.label),
+  );
+}
+
+export function needsInformationCompletenessWork(summary: InformationCompletenessSummary) {
+  return summary.grade === "B" || summary.grade === "C" || summary.grade === "NEEDS_CHECK";
+}
+
 export function getTrustedBusinessEnrichment(
   snapshot: BusinessEnrichmentSnapshot,
   targetType: BusinessEnrichmentTargetType,

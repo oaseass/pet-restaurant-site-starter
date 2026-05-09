@@ -6,7 +6,7 @@ import { PLACE_CATEGORY_LABELS as GUIDE_CATEGORY_LABELS, type GuideDoc } from "@
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
 import { getReviewSummariesSnapshot } from "@/lib/public-data";
-import { buildDiscoveryMapHref, buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceIdentity, getPlaceMapCategoryKey, getPublicReviewSummary, getRestaurantIdentity, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { buildDiscoveryMapHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceIdentity, getPlaceMapCategoryKey, getPublicReviewSummary, getRestaurantIdentity, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 
 const PLACE_CATEGORY_LABELS: Record<string, string> = {
   ANIMAL_HOSPITAL: "동물병원",
@@ -190,12 +190,11 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
                     </div>
                   </SmartLink>
                   <DiscoveryCardActions
-                    className="mt-3 border-t border-[var(--line)] pt-3"
+                    className="mt-2 border-t border-[var(--line)] pt-2"
                     detailHref={`/restaurants/${restaurant.id}`}
                     mapHref={restaurantMapHref(restaurant)}
                     phone={phone}
                     externalHref={externalHref}
-                    reviewHref={buildReviewHref("RESTAURANT", restaurant.id)}
                   />
                 </article>
               );
@@ -229,7 +228,7 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
                       {place.businessStatus ? <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.businessStatus}</span> : null}
                     </div>
                     <h3 className="mt-2 line-clamp-2 text-[15px] font-black leading-snug">{displayName}</h3>
-                    <p className="mt-2 line-clamp-2 text-xs leading-5 text-[#5f5550]">{identity.description}</p>
+                    <p className="mt-2 line-clamp-1 text-xs leading-5 text-[#5f5550]">{identity.description}</p>
                     <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{regionLabel(place)}</p>
                     <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소는 정리 중이에요"}</p>
                     <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-bold text-[#7b746d]">
@@ -238,12 +237,11 @@ export async function SearchResultsList({ restaurants, places = [], guides, keyw
                     </div>
                   </SmartLink>
                   <DiscoveryCardActions
-                    className="mt-3 border-t border-[var(--line)] pt-3"
+                    className="mt-2 border-t border-[var(--line)] pt-2"
                     detailHref={`/places/${place.id}`}
                     mapHref={placeMapHref(place)}
                     phone={phone}
                     externalHref={externalHref}
-                    reviewHref={buildReviewHref("PLACE", place.id)}
                   />
                 </article>
               );

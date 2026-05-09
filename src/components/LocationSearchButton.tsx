@@ -67,7 +67,7 @@ export function LocationSearchButton() {
           ? "지도 여는 중..."
           : status === "error"
             ? "위치 권한 없음 - 지도 열기"
-            : "현재 위치로 찾기"}
+            : "내 위치 반영"}
     </button>
   );
 }

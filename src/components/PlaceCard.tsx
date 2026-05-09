@@ -1,7 +1,9 @@
 import { MapPin, Phone } from "lucide-react";
 import { DiscoveryCardActions } from "@/components/discovery/DiscoveryCardActions";
+import { InformationCompletenessBadge } from "@/components/InformationCompletenessBadge";
 import { SmartLink } from "@/components/SmartLink";
-import { buildDiscoveryMapHref, buildReviewHref, getExternalInfoLabel, getPlaceIdentity, getPlaceMapCategoryKey, getReviewSummaryLabel, hasUsableCoordinates } from "@/lib/discovery-cards";
+import { getBusinessCheckBadgeLabel, type BusinessCheckSummary } from "@/lib/business-checks-shared";
+import { buildDiscoveryMapHref, getExternalInfoLabel, getInformationCompletenessSummary, getPlaceIdentity, getPlaceMapCategoryKey, getReviewSummaryLabel, hasUsableCoordinates } from "@/lib/discovery-cards";
 import type { PlaceCategory, SourceType } from "@prisma/client";
 
 const LOW_CONFIDENCE_NAME_PATTERNS = [/^#?grooming$/i, /^#?daycare$/i, /^#?funeral$/i, /^#?pharmacy$/i, /^#?hospital$/i, /^#?animal[-_\s]?hospital$/i];
@@ -38,8 +40,10 @@ export function PlaceCard({
     sourceName?: string | null;
     externalCategory?: string | null;
     externalHref?: string | null;
+    hasPhoto?: boolean;
     reviewCount?: number | null;
     reviewAverage?: number | null;
+    checkSummary?: BusinessCheckSummary | null;
     dataUpdatedAt?: string | Date | null;
   };
 }) {
@@ -49,21 +53,34 @@ export function PlaceCard({
   const mapHref = buildDiscoveryMapHref({ categoryKey: mapCategoryKey, name: displayName, lat: item.lat, lng: item.lng });
   const reviewLabel = getReviewSummaryLabel(item.reviewCount, item.reviewAverage);
   const hasReview = Boolean(item.reviewCount && item.reviewCount > 0);
+  const checkBadgeLabel = getBusinessCheckBadgeLabel(item.checkSummary);
   const externalLabel = item.externalCategory ?? (item.externalHref ? "지도 정보와 비교했어요" : getExternalInfoLabel(null));
-  const reviewHref = item.href ? buildReviewHref("PLACE", item.id) : undefined;
   const identity = getPlaceIdentity({ category: item.category, name: displayName, externalCategory: item.externalCategory });
+  const completeness = getInformationCompletenessSummary({
+    hasSource: Boolean(item.sourceName || item.sourceType),
+    phone: item.phone,
+    externalHref: item.externalHref,
+    externalCategory: item.externalCategory,
+    reviewCount: item.reviewCount,
+    hasCoordinates,
+    hasPhoto: item.hasPhoto,
+    hasBusinessCheck: Boolean(item.checkSummary?.count),
+    hasUpdatedAt: Boolean(item.dataUpdatedAt),
+  });
   const body = (
     <>
       <div className="flex flex-wrap gap-2">
         <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{identity.eyebrow}</span>
         <span className="badge">{identity.identityLabel}</span>
         <span className="badge">{hasCoordinates ? "지도에서 보기" : "주소로 찾기"}</span>
+        <InformationCompletenessBadge summary={completeness} className="rounded-full px-3 py-1 text-xs" />
         <span className="badge">{item.phone ? "전화 가능" : "전화번호 알려주기"}</span>
         {item.businessStatus ? <span className="badge">{item.businessStatus}</span> : null}
         {item.ownerVerified ? <span className="badge bg-[#ecf8f3] text-[#1a463f]">업체 인증</span> : null}
+        {checkBadgeLabel ? <span className="badge bg-[#ecfdf5] text-[#047857]">{checkBadgeLabel}</span> : null}
       </div>
       <h3 className="mt-3 text-xl font-black tracking-tight">{displayName}</h3>
-      <p className="mt-2 line-clamp-2 text-sm leading-7 text-[#5f5550]">{identity.description}</p>
+      <p className="mt-2 line-clamp-1 text-sm leading-6 text-[#5f5550]">{identity.description}</p>
       {item.address ? (
         <p className="mt-3 flex gap-2 text-sm leading-7 text-[var(--muted)]">
           <MapPin className="mt-1 shrink-0" size={16} />
@@ -76,8 +93,10 @@ export function PlaceCard({
           <span>{item.phone}</span>
         </p>
       ) : null}
+      {completeness.gapLabel ? <p className="mt-2 line-clamp-1 text-xs font-bold text-[#8a6a3f]">{completeness.gapLabel}</p> : null}
       <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-bold text-[#7b746d]">
         <span>{externalLabel}</span>
+        {item.checkSummary?.latestCheckedAt ? <span>{new Date(item.checkSummary.latestCheckedAt).toLocaleDateString("ko-KR")} 확인</span> : null}
         {hasReview ? <span>{reviewLabel}</span> : null}
       </div>
     </>
@@ -96,7 +115,6 @@ export function PlaceCard({
         mapHref={mapHref}
         phone={item.phone}
         externalHref={item.externalHref}
-        reviewHref={reviewHref}
       />
     </article>
   );

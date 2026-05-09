@@ -114,6 +114,18 @@ enum ReviewStatus {
   REJECTED
 }
 
+enum BusinessCheckType {
+  PHONE_CALL
+  VISIT
+}
+
+enum BusinessCheckResult {
+  CONFIRMED_OPEN
+  NO_ANSWER
+  NEEDS_UPDATE
+  CLOSED_OR_UNAVAILABLE
+}
+
 model Restaurant {
   id                 String           @id @default(cuid())
   sourceKey          String           @unique
@@ -327,6 +339,22 @@ model Review {
   updatedAt         DateTime           @updatedAt
 
   @@index([targetType, targetId, status, createdAt])
+  @@index([status, createdAt])
+}
+
+model BusinessCheck {
+  id        String              @id @default(cuid())
+  targetType ReviewTargetType
+  targetId   String
+  checkType  BusinessCheckType
+  result     BusinessCheckResult
+  checkedAt  DateTime
+  note       String?
+  status     ReportStatus       @default(PENDING)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@index([targetType, targetId, status, checkedAt])
   @@index([status, createdAt])
 }
 

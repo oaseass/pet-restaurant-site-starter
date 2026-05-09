@@ -1,6 +1,7 @@
-import { Camera, ExternalLink, Info, MessageSquarePlus, MessageSquareWarning, PawPrint, Utensils } from "lucide-react";
+import { Camera, ExternalLink, Info, MessageSquarePlus, MessageSquareWarning, PawPrint, Star, Utensils } from "lucide-react";
 import { SmartLink } from "@/components/SmartLink";
 import type { BusinessEnrichmentEntry } from "@/lib/business-enrichment";
+import { GooglePlacePhoto } from "./GooglePlacePhoto";
 
 type BusinessCategory = "RESTAURANT" | "ANIMAL_HOSPITAL" | "PHARMACY" | "GROOMING" | "DAYCARE" | "FUNERAL";
 
@@ -9,6 +10,7 @@ type BusinessEnrichmentPanelProps = {
   category: BusinessCategory;
   reportHref: string;
   reviewHref: string;
+  showPhoto?: boolean;
 };
 
 const CATEGORY_SUMMARIES: Record<BusinessCategory, string> = {
@@ -46,6 +48,19 @@ function getExternalAddress(enrichment: BusinessEnrichmentEntry) {
   return enrichment.roadAddress ?? enrichment.jibunAddress ?? "지도에서 주소를 다시 확인해보세요";
 }
 
+function formatGoogleRating(enrichment: BusinessEnrichmentEntry) {
+  if (typeof enrichment.googleRating !== "number") return null;
+  const reviewLabel = typeof enrichment.googleUserRatingCount === "number" && enrichment.googleUserRatingCount > 0
+    ? ` · 리뷰 ${enrichment.googleUserRatingCount.toLocaleString("ko-KR")}개`
+    : "";
+  return `${enrichment.googleRating.toFixed(1)}${reviewLabel}`;
+}
+
+function getOpeningPreview(enrichment: BusinessEnrichmentEntry) {
+  const firstLine = enrichment.googleOpeningHours?.find((line) => line.trim().length > 0);
+  return firstLine ?? null;
+}
+
 function DetailItem({ label, value, wide = false }: { label: string; value: string; wide?: boolean }) {
   return (
     <div className={wide ? "sm:col-span-2" : undefined}>
@@ -55,16 +70,19 @@ function DetailItem({ label, value, wide = false }: { label: string; value: stri
   );
 }
 
-export function BusinessEnrichmentPanel({ enrichment, category, reportHref, reviewHref }: BusinessEnrichmentPanelProps) {
+export function BusinessEnrichmentPanel({ enrichment, category, reportHref, reviewHref, showPhoto = true }: BusinessEnrichmentPanelProps) {
   const canDisplay = enrichment && enrichment.matchScore >= 0.85;
   const isCandidate = enrichment && enrichment.matchScore >= 0.65 && enrichment.matchScore < 0.85;
   const visibleEnrichment = canDisplay ? enrichment : null;
   const checkedAtLabel = formatCheckedAt(visibleEnrichment?.enrichedAt ?? visibleEnrichment?.checkedAt);
+  const googleRatingLabel = visibleEnrichment ? formatGoogleRating(visibleEnrichment) : null;
+  const openingPreview = visibleEnrichment ? getOpeningPreview(visibleEnrichment) : null;
   const sourceLinks = visibleEnrichment
     ? [
         { href: visibleEnrichment.kakaoPlaceUrl, label: "카카오맵에서 리뷰 확인" },
         { href: visibleEnrichment.naverPlaceUrl, label: "네이버지도에서 리뷰 확인" },
-        { href: visibleEnrichment.googleMapsUri, label: "구글지도에서 리뷰 확인" },
+        { href: visibleEnrichment.googleMapsUri, label: "구글지도에서 사진·리뷰 확인" },
+        { href: visibleEnrichment.googleWebsiteUri, label: "공식 사이트 보기" },
         visibleEnrichment.externalPlaceUrl && !visibleEnrichment.kakaoPlaceUrl && !visibleEnrichment.naverPlaceUrl && !visibleEnrichment.googleMapsUri
           ? { href: visibleEnrichment.externalPlaceUrl, label: "외부 지도에서 리뷰 확인" }
           : null,
@@ -87,10 +105,30 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
 
       {visibleEnrichment ? (
         <div className="mt-5 rounded-xl border border-[var(--line)] bg-white p-4">
+          {showPhoto && visibleEnrichment.googlePhotoName ? (
+            <div className="mb-4">
+              <GooglePlacePhoto
+                photoName={visibleEnrichment.googlePhotoName}
+                alt={`${getExternalName(visibleEnrichment)} 장소 사진`}
+                authorName={visibleEnrichment.googlePhotoAuthorName}
+                authorUri={visibleEnrichment.googlePhotoAuthorUri}
+                rating={visibleEnrichment.googleRating}
+                userRatingCount={visibleEnrichment.googleUserRatingCount}
+              />
+            </div>
+          ) : null}
+
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full bg-[var(--brand-soft)] px-3 py-1 text-xs font-black text-[var(--brand)]">{getSourceLabel(visibleEnrichment.source)}</span>
             <span className="rounded-full bg-[#f3f4f6] px-3 py-1 text-xs font-black text-[var(--muted)]">이름·주소가 잘 맞아요</span>
             <span className="rounded-full bg-[#ecfdf5] px-3 py-1 text-xs font-black text-[#047857]">지도 링크 제공</span>
+            {visibleEnrichment.googlePhotoName ? <span className="rounded-full bg-[#eff6ff] px-3 py-1 text-xs font-black text-[#1d4ed8]">Google 사진 연결</span> : null}
+            {googleRatingLabel ? (
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#fff7ed] px-3 py-1 text-xs font-black text-[#c2410c]">
+                <Star size={13} fill="currentColor" />
+                {googleRatingLabel}
+              </span>
+            ) : null}
           </div>
 
           <dl className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -99,8 +137,9 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
             <DetailItem label="지도 전화번호" value={visibleEnrichment.phone ?? "전화번호는 아직 없어요"} />
             <DetailItem label="지도 주소" value={getExternalAddress(visibleEnrichment)} wide />
             <DetailItem label="어떤 업체인지" value={CATEGORY_SUMMARIES[category]} wide />
-            <DetailItem label="영업정보" value="오늘 운영은 업체에 물어보세요" />
+            <DetailItem label="영업정보" value={openingPreview ?? "오늘 운영은 업체에 물어보세요"} />
             <DetailItem label="메뉴·서비스" value="아직 제보가 더 필요해요" />
+            {visibleEnrichment.googleEditorialSummary ? <DetailItem label="Google 요약" value={visibleEnrichment.googleEditorialSummary} wide /> : null}
             {checkedAtLabel ? <DetailItem label="비교한 날짜" value={checkedAtLabel} /> : null}
           </dl>
 

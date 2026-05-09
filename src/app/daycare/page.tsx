@@ -2,6 +2,7 @@ import { CategoryInfoPage } from "@/components/CategoryInfoPage";
 import { PlaceListSection } from "@/components/PlaceListSection";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { CATEGORY_CONTENT } from "@/lib/category-info-content";
+import type { ListPageSearchParams } from "@/lib/list-location-filters";
 import { getCategoryCountsSnapshot, getPlacesByCategorySnapshot } from "@/lib/public-data";
 
 export const metadata = {
@@ -9,12 +10,17 @@ export const metadata = {
   description: "반려동물 유치원, 호텔, 위탁관리 서비스 안내. 맡기기 전 체크리스트와 주의사항을 확인하세요.",
 };
 
-export default async function DaycarePage() {
+export default async function DaycarePage({
+  searchParams,
+}: {
+  searchParams: Promise<ListPageSearchParams>;
+}) {
+  const resolvedSearchParams = await searchParams;
   const [counts, places] = await Promise.all([getCategoryCountsSnapshot(), getPlacesByCategorySnapshot("DAYCARE")]);
   return (
     <PublicPageShell restaurantCount={counts.restaurantCount} lastUpdatedAt={counts.lastUpdatedAt}>
       {places.length > 0 && (
-        <PlaceListSection places={places} categoryLabel="유치원·호텔" mapHref="/map?category=daycare" />
+        <PlaceListSection places={places} categoryLabel="유치원·호텔" mapHref="/map?category=daycare" listHref="/daycare" searchParams={resolvedSearchParams} />
       )}
       <CategoryInfoPage data={CATEGORY_CONTENT.daycare} />
     </PublicPageShell>

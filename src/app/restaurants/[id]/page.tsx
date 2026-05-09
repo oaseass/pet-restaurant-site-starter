@@ -3,13 +3,19 @@ import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { AdSlot } from "@/components/AdSlot";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
+import { BusinessCheckPanel } from "@/components/detail/BusinessCheckPanel";
+import { BusinessStoryPanel } from "@/components/detail/BusinessStoryPanel";
 import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
+import { DetailMapCard } from "@/components/detail/DetailMapCard";
+import { DetailOverviewPanel } from "@/components/detail/DetailOverviewPanel";
 import { VisitInfoPanel } from "@/components/detail/VisitInfoPanel";
 import { ReviewSection } from "@/components/reviews/ReviewSection";
 import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
+import { getApprovedBusinessCheckSummary } from "@/lib/business-checks";
 import { getBusinessExternalCategory, getRestaurantIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
+import { getGooglePlaceVisualEnrichment, mergeGoogleVisualEnrichment } from "@/lib/google-place-visual";
 import { getApprovedReviewSummary } from "@/lib/reviews";
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -17,7 +23,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
   const restaurant = await prisma.restaurant.findUnique({ where: { id } });
   if (!restaurant || restaurant.status !== "ACTIVE") notFound();
 
-  const [nearby, relatedCarePlaces, reviewSummary, enrichment] = await Promise.all([
+  const [nearby, relatedCarePlaces, reviewSummary, checkSummary, enrichment] = await Promise.all([
     prisma.restaurant.findMany({
       where: {
         status: "ACTIVE",
@@ -39,9 +45,20 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       take: 6,
     }),
     getApprovedReviewSummary("RESTAURANT", restaurant.id),
+    getApprovedBusinessCheckSummary("RESTAURANT", restaurant.id),
     getBusinessEnrichmentForTarget("RESTAURANT", restaurant.id),
   ]);
-  const reliableEnrichment = enrichment && enrichment.matchScore >= 0.85 ? enrichment : null;
+  const googleVisualEnrichment = enrichment?.googlePhotoName ? null : await getGooglePlaceVisualEnrichment({
+    targetType: "RESTAURANT",
+    targetId: restaurant.id,
+    category: "RESTAURANT",
+    name: restaurant.name,
+    address: restaurant.address,
+    lat: restaurant.lat,
+    lng: restaurant.lng,
+  });
+  const displayEnrichment = mergeGoogleVisualEnrichment(enrichment, googleVisualEnrichment);
+  const reliableEnrichment = displayEnrichment && displayEnrichment.matchScore >= 0.85 ? displayEnrichment : null;
   const externalCategory = getBusinessExternalCategory(reliableEnrichment);
   const identity = getRestaurantIdentity({ businessType: restaurant.businessType, externalCategory });
   const bestPhone = reliableEnrichment?.phone ?? null;
@@ -49,6 +66,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
   const reportHref = `/report?type=restaurant&id=${restaurant.id}&name=${encodeURIComponent(restaurant.name)}`;
   const reviewHref = `/reviews/new?targetType=RESTAURANT&targetId=${restaurant.id}`;
   const reviewLabel = getReviewSummaryLabel(reviewSummary.count, reviewSummary.averageOverall);
+  const hasReview = reviewSummary.count > 0;
   const mapHref = restaurant.lat !== null && restaurant.lng !== null
     ? `/map?category=restaurants&lat=${restaurant.lat.toFixed(6)}&lng=${restaurant.lng.toFixed(6)}`
     : `/map?category=restaurants&q=${encodeURIComponent(restaurant.name)}`;
@@ -68,7 +86,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
             <span className="badge"><ShieldCheck size={14} /> 공식 등록 정보</span>
             <span className="badge bg-[var(--brand-soft)] text-[var(--brand)]">{identity.identityLabel}</span>
             <span className="badge">{regionLabel}</span>
-            <span className="badge">{reviewLabel}</span>
+            {hasReview ? <span className="badge">{reviewLabel}</span> : null}
           </div>
           <h1 className="mt-4 text-3xl font-black tracking-tight sm:text-[2.4rem]">{restaurant.name}</h1>
           <p className="mt-4 max-w-2xl text-base leading-8 text-[#4f4741]">{identity.description}</p>
@@ -77,7 +95,7 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
             <Info label="장소 성격" value={identity.identityLabel} />
             <Info label="전화" value={bestPhone ?? "전화번호 미등록"} />
             {externalCategory ? <Info label="지도 분류" value={externalCategory} /> : null}
-            <Info label="후기" value={reviewLabel} />
+            {hasReview ? <Info label="후기" value={reviewLabel} /> : null}
           </div>
           <DetailActionBar
             name={restaurant.name}
@@ -88,9 +106,49 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
             reportHref={reportHref}
             reviewHref={reviewHref}
             mapHref={mapHref}
+            targetType="RESTAURANT"
+            targetId={restaurant.id}
           />
         </div>
       </section>
+
+      <DetailMapCard
+        name={restaurant.name}
+        address={restaurant.address}
+        lat={restaurant.lat}
+        lng={restaurant.lng}
+        mapHref={mapHref}
+      />
+
+      <BusinessStoryPanel
+        name={restaurant.name}
+        category="RESTAURANT"
+        categoryLabel="반려동물 동반 식당"
+        identityLabel={identity.identityLabel}
+        regionLabel={regionLabel}
+        enrichment={reliableEnrichment}
+        checkSummary={checkSummary}
+        reportHref={reportHref}
+        reviewHref={reviewHref}
+      />
+
+      <DetailOverviewPanel
+        name={restaurant.name}
+        category="RESTAURANT"
+        categoryLabel="반려동물 동반 식당"
+        identityLabel={identity.identityLabel}
+        regionLabel={regionLabel}
+        addressLabel={restaurant.address}
+        phone={bestPhone}
+        hasCoordinates={restaurant.lat !== null && restaurant.lng !== null}
+        sourceLabel="식품안전나라 공개자료"
+        businessStatus="공식 등록 정보"
+        dataUpdatedLabel={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")}
+        reviewCount={reviewSummary.count}
+        reviewAverage={reviewSummary.averageOverall}
+        checkSummary={checkSummary}
+        enrichment={reliableEnrichment}
+      />
 
       <DetailDecisionPanel
         categoryLabel="반려동물 동반 식당"
@@ -107,8 +165,15 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
         reviewHref={reviewHref}
       />
 
+      <BusinessCheckPanel
+        targetType="RESTAURANT"
+        targetId={restaurant.id}
+        categoryLabel="반려동물 동반 식당"
+        summary={checkSummary}
+      />
+
       <div className="mt-8">
-        <BusinessEnrichmentPanel enrichment={enrichment} category="RESTAURANT" reportHref={reportHref} reviewHref={reviewHref} />
+        <BusinessEnrichmentPanel enrichment={displayEnrichment} category="RESTAURANT" reportHref={reportHref} reviewHref={reviewHref} showPhoto={false} />
       </div>
 
       <div className="mt-6">

@@ -318,12 +318,12 @@ export function MapShell({
     : locationStatus === "opening"
       ? "지도 여는 중"
     : locationStatus === "ready"
-      ? "현재 위치 적용됨"
+      ? "내 위치 반영됨"
       : locationStatus === "unsupported"
         ? "현재 위치 미지원"
         : locationStatus === "error"
           ? "위치 재시도"
-          : "현재 위치로 찾기";
+          : "내 위치 반영";
 
   const requestUserLocation = () => {
     if (!navigator.geolocation) {
