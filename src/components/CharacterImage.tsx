@@ -12,6 +12,15 @@ const CHARACTER_ASSET_PATHS: Record<CharacterAsset, string> = {
   "dog-brown": "/images/characters/dog-brown.png",
   "cat-waving": "/images/characters/cat-waving.png",
   "cat-peeking": "/images/characters/cat-peeking.png",
+  "theme-hospital": "/images/characters/theme-hospital.png",
+  "theme-restaurant": "/images/characters/theme-restaurant.png",
+  "theme-grooming": "/images/characters/theme-grooming.png",
+  "theme-hotel": "/images/characters/theme-hotel.png",
+  "theme-pharmacy": "/images/characters/theme-pharmacy.png",
+  "theme-memorial": "/images/characters/theme-memorial.png",
+  "gen-shiba": "/images/characters/gen-shiba.png",
+  "gen-corgi": "/images/characters/gen-corgi.png",
+  "gen-maltese": "/images/characters/gen-maltese.png",
 };
 
 export function CharacterImage({
