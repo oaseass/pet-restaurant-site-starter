@@ -297,3 +297,67 @@
 
 ## 커밋 hash
 - 기능 변경 커밋: `9913fba1055ff09ad25ad4c8dff821412a7a05d5`
+
+## 저정보 카테고리·광고·SEO 마감 결과
+
+1. 이번 라운드에서 마무리한 범위
+- 홈 첫 화면은 이미 정리된 상태라 실제 production 화면으로 재확인만 했습니다.
+- 검색/목록 카드는 병원 검색 결과와 병원 목록을 기준으로 실제 노출 상태를 다시 검수했습니다.
+- 미용·유치원처럼 기본 등록 정보만으로 판단이 어려운 카테고리는 일반 목록과 분리해 별도 처리했습니다.
+- 광고 슬롯은 코드상 배치만 끝내지 않고, 임시 AdSense 환경변수로 로컬에서 실제 렌더를 확인했습니다.
+- SEO는 메타, canonical, sitemap 누락을 보강했습니다.
+
+2. 실제 수정 내용
+- `src/components/PlaceListSection.tsx`
+	- 미용/유치원·호텔 카테고리에 `상담 우선 카테고리` 안내 박스를 추가했습니다.
+	- 직접 확인, 후기, 지도 비교, 전화 가능 수를 따로 보여주도록 했습니다.
+	- 근거가 붙은 업체가 있으면 `먼저 확인할 곳`, 나머지는 `기본 등록 목록`으로 분리되도록 확장했습니다.
+	- 문구가 `반려동물 미용은`처럼 자연스럽게 보이도록 조사 처리까지 마감했습니다.
+- `src/app/search/page.tsx`, `src/app/map/page.tsx`, `src/app/restaurants/page.tsx`, `src/app/guide/page.tsx`, `src/app/categories/page.tsx`
+	- 핵심 공개 페이지 메타와 canonical을 추가했습니다.
+- `src/app/restaurants/[id]/page.tsx`, `src/app/places/[slug]/page.tsx`
+	- 상세 페이지 메타와 canonical을 보강했습니다.
+- `src/app/sitemap.ts`
+	- 기존 식당 상세 URL 외에 장소 상세 URL(`/places/{uuid}`)도 sitemap에 포함되도록 확장했습니다.
+
+3. 실제 화면 확인 결과
+- production 홈(`/`)은 기존 정리된 상단 구조가 유지되는 것을 확인했습니다.
+- production 검색(`/search?q=동물병원`)은 새 메타 제목 `동물병원 검색 | 댕냥지도`와 재검수된 카드 구조가 반영된 것을 확인했습니다.
+- production 식당 상세(`/restaurants/9bbc43ee-d9c5-4fac-a593-116d3cced8d6`)는 `시장뒷고기 | 반려동물 동반 식당 | 댕냥지도` 제목으로 반영된 것을 확인했습니다.
+- production 미용(`/grooming`)과 유치원(`/daycare`)은 `상담 우선 카테고리`, `기본 등록 목록` 구조가 실제로 뜨는 것을 확인했습니다.
+- sitemap.xml은 `/restaurants/{uuid}`뿐 아니라 `/places/{uuid}` 상세 URL도 실제로 포함하는 것을 DOM 추출로 확인했습니다.
+
+4. 광고 배치 실제 테스트 결과
+- 로컬 `127.0.0.1:3000`에서 임시 AdSense 환경변수로 실행해 광고 슬롯을 실제 렌더했습니다.
+- 확인 경로: `/`, `/search?q=동물병원`, `/grooming`, `/guide/travel`
+- 확인 결과:
+	- 홈: 최근 업데이트 섹션 뒤, 가이드 섹션 앞에 슬롯 노출
+	- 검색: 결과 요약 바로 아래, 카드 목록 앞에 슬롯 노출
+	- 미용 목록: 목록 하단 CTA 뒤에 슬롯 노출
+	- 가이드 상세: 본문 2번째 섹션 뒤에 슬롯 노출
+- production에는 AdSense 환경변수 미설정 상태라 실제 광고는 계속 숨김 처리되는 것이 정상입니다.
+
+5. 검증 결과
+- `npm run build`: 최종 통과
+- `npm test`: 39개 통과, 실패 0개
+- build가 재생성한 `public/data/**`는 `git restore -- public/data`로 다시 원복했습니다.
+
+6. 금지 파일 변경 여부
+- `.env.local`: 변경 없음
+- `prisma/schema.prisma`: 변경 없음
+- `prisma/migrations`: 변경 없음
+- `public/data/**`: 커밋 대상 변경 없음
+- `public/data/business-enrichment.json`: 변경 없음
+- DB reset: 수행하지 않음
+
+7. 배포 결과
+- production 배포: `https://pet-restaurant-site-starter-gc4rfz91y-larchides-projects.vercel.app`
+- alias: `https://pet-restaurant-site-starter.vercel.app`
+
+8. 남은 한계
+- 미용/유치원은 현재 데이터셋 기준으로 직접 확인, 후기, 지도 비교가 거의 없어서 `먼저 확인할 곳`보다 `기본 등록 목록` 비중이 큽니다.
+- 검색 결과 페이지는 query별 index를 열지 않기 위해 canonical을 `/search`로 고정하고 `noindex,follow`로 처리했습니다.
+
+9. 이번 라운드 종료 직전 상태
+- 커밋 전 작업트리에는 이번 범위의 소스 변경 9개와 보고서만 남겨둔 상태로 정리했습니다.
+- 금지 파일 diff는 비어 있는 것을 확인한 뒤 커밋/푸시 마감 단계로 넘어갑니다.

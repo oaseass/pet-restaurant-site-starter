@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { Compass, Search } from "lucide-react";
 import { redirect } from "next/navigation";
 import { MapCategoryChips } from "@/components/map/MapCategoryChips";
@@ -10,6 +11,13 @@ import { buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, 
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { REGION_OPTIONS } from "@/lib/platform-content";
 import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesByCategorySnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, getReviewSummariesSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
+import { absoluteUrl } from "@/lib/brand";
+
+export const metadata: Metadata = {
+  title: "지도에서 찾기 | 댕냥지도",
+  description: "반려동물 동반 식당과 병원, 약국, 미용, 유치원, 장례를 지도에서 비교하고 내 주변으로 찾아보세요.",
+  alternates: { canonical: absoluteUrl("/map") },
+};
 
 const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   all: "전체",

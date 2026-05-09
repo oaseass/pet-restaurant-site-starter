@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { PublicPageShell } from "@/components/PublicPageShell";
 import { getCategoryCountsSnapshot, getRestaurantsLightSnapshot, getPlacesLightSnapshot } from "@/lib/public-data";
 import { detectPlaceCategoryFromKeyword, searchRestaurantsSnapshot, searchGuidesStatic, searchPlacesSnapshot, getRecentRestaurants } from "@/lib/public-search";
@@ -6,6 +7,7 @@ import { SearchFilterTabs } from "@/components/search/SearchFilterTabs";
 import { SearchResultsList } from "@/components/search/SearchResultsList";
 import { SearchSuggestionPanel } from "@/components/search/SearchSuggestionPanel";
 import { SmartLink } from "@/components/SmartLink";
+import { absoluteUrl } from "@/lib/brand";
 
 // force-dynamic 제거 — DB 조회 없음, JSON 스냅샷 기반
 
@@ -16,6 +18,34 @@ const PLACE_CATEGORY_MAP_KEY: Record<string, string> = {
   DAYCARE: "daycare",
   FUNERAL: "funeral",
 };
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; category?: string }>;
+}): Promise<Metadata> {
+  const params = await searchParams;
+  const keyword = params.q?.trim() ?? "";
+
+  if (!keyword) {
+    return {
+      title: "검색 | 댕냥지도",
+      description: "지역, 업종, 업체명으로 식당과 병원, 약국, 미용, 유치원, 장례, 가이드를 한 번에 검색하세요.",
+      alternates: { canonical: absoluteUrl("/search") },
+    };
+  }
+
+  const trimmedKeyword = keyword.replace(/\s+/g, " ").slice(0, 40);
+  return {
+    title: `${trimmedKeyword} 검색 | 댕냥지도`,
+    description: `${trimmedKeyword} 관련 식당, 병원, 약국, 미용, 유치원, 장례, 가이드를 검색합니다.`,
+    alternates: { canonical: absoluteUrl("/search") },
+    robots: {
+      index: false,
+      follow: true,
+    },
+  };
+}
 
 export default async function SearchPage({
   searchParams,

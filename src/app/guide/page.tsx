@@ -1,7 +1,15 @@
-﻿import { PublicPageShell } from "@/components/PublicPageShell";
+﻿import type { Metadata } from "next";
+import { PublicPageShell } from "@/components/PublicPageShell";
 import { SmartLink } from "@/components/SmartLink";
 import { getCategoryCountsSnapshot } from "@/lib/public-data";
+import { absoluteUrl } from "@/lib/brand";
 import { GUIDE_DOCS, PLACE_CATEGORY_LABELS } from "@/lib/platform-content";
+
+export const metadata: Metadata = {
+  title: "생활 가이드 | 댕냥지도",
+  description: "여행, 예방접종, 장례, 미용, 유치원처럼 반려생활 전에 꼭 확인할 질문과 준비물을 빠르게 살펴보세요.",
+  alternates: { canonical: absoluteUrl("/guide") },
+};
 
 export default async function GuidePage() {
   const counts = await getCategoryCountsSnapshot();

@@ -111,6 +111,7 @@ export async function generateMetadata({
   return {
     title: `${displayName} | ${categoryLabel} | 댕냥지도`,
     description: `${region} ${categoryLabel} ${displayName} 정보. 주소, 전화번호, 방문 전 물어볼 점을 살펴보세요.`,
+    alternates: { canonical: absoluteUrl(`/places/${slug}`) },
   };
 }
 

@@ -1,12 +1,15 @@
 import type { MetadataRoute } from "next";
 import { getSiteUrl } from "@/lib/brand";
-import { getRestaurantsLightSnapshot } from "@/lib/public-data";
+import { getPlacesLightSnapshot, getRestaurantsLightSnapshot } from "@/lib/public-data";
 import { CALCULATOR_CARDS, GUIDE_DOCS, POLICY_LINKS, REGION_OPTIONS, getPlaceCategorySlug, PLACE_DIRECTORY_CATEGORIES } from "@/lib/platform-content";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = getSiteUrl().replace(/\/$/, "");
   const generatedAt = new Date();
-  const restaurants = await getRestaurantsLightSnapshot().catch(() => []);
+  const [restaurants, places] = await Promise.all([
+    getRestaurantsLightSnapshot().catch(() => []),
+    getPlacesLightSnapshot().catch(() => []),
+  ]);
 
   return [
     { url: `${baseUrl}/`, lastModified: generatedAt },
@@ -36,6 +39,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...restaurants.map((restaurant) => ({
       url: `${baseUrl}/restaurants/${restaurant.id}`,
       lastModified: restaurant.updatedAt ? new Date(restaurant.updatedAt) : generatedAt,
+    })),
+    ...places.map((place) => ({
+      url: `${baseUrl}/places/${place.id}`,
+      lastModified: place.updatedAt ? new Date(place.updatedAt) : generatedAt,
     })),
   ];
 }

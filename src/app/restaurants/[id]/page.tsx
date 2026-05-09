@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { prisma } from "@/lib/prisma";
@@ -17,6 +18,33 @@ import { getApprovedBusinessCheckSummary } from "@/lib/business-checks";
 import { getBusinessExternalCategory, getRestaurantIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
 import { getGooglePlaceVisualEnrichment, mergeGoogleVisualEnrichment } from "@/lib/google-place-visual";
 import { getApprovedReviewSummary } from "@/lib/reviews";
+import { absoluteUrl } from "@/lib/brand";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      address: true,
+      sido: true,
+      sigungu: true,
+      status: true,
+    },
+  });
+
+  if (!restaurant || restaurant.status !== "ACTIVE") {
+    return { title: "업체를 찾을 수 없습니다." };
+  }
+
+  const region = [restaurant.sido, restaurant.sigungu].filter(Boolean).join(" ");
+  return {
+    title: `${restaurant.name} | 반려동물 동반 식당 | 댕냥지도`,
+    description: `${region} ${restaurant.name} 반려동물 동반 식당 정보. 주소와 방문 전 확인할 점을 살펴보세요.`,
+    alternates: { canonical: absoluteUrl(`/restaurants/${restaurant.id}`) },
+  };
+}
 
 export default async function RestaurantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

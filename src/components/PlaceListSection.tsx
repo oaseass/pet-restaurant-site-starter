@@ -55,6 +55,24 @@ function getCategoryLeadCopy(categoryLabel: string) {
   return "방문 전 필요한 조건을 먼저 확인할 수 있게 정리했습니다.";
 }
 
+function isLowInformationCategory(categoryLabel: string) {
+  return categoryLabel.includes("미용") || categoryLabel.includes("유치원") || categoryLabel.includes("호텔");
+}
+
+function getLowInformationCategoryNotice(categoryLabel: string) {
+  if (categoryLabel.includes("미용")) {
+    return "미용은 견종, 몸무게, 피부 상태, 올가미 가능 여부에 따라 가능한 서비스가 달라져서 기본 등록 정보만으로는 판단이 어렵습니다. 직접 확인이나 후기, 지도 비교가 붙은 곳부터 먼저 보세요.";
+  }
+
+  return "유치원·호텔은 입소 기준, 예방접종, 단독 케어, 야간 상주 여부가 업체마다 달라서 기본 등록 정보만으로는 판단이 어렵습니다. 직접 확인이나 후기, 지도 비교가 붙은 곳부터 먼저 보세요.";
+}
+
+function getTopicParticle(text: string) {
+  const lastChar = text.trim().charCodeAt(text.trim().length - 1);
+  if (Number.isNaN(lastChar) || lastChar < 0xac00 || lastChar > 0xd7a3) return "는";
+  return (lastChar - 0xac00) % 28 === 0 ? "는" : "은";
+}
+
 function filterByRecentCheck<T extends { id: string }>(items: T[], recentCheckedIds: Set<string>, checked: "" | "recent") {
   return checked === "recent" ? items.filter((item) => recentCheckedIds.has(item.id)) : items;
 }
@@ -142,6 +160,109 @@ export async function PlaceListSection({ places, categoryLabel, mapHref, listHre
   const visiblePlaces = displayPlaces.slice(0, 50);
   const checkSummaries = await getApprovedBusinessCheckSummaries("PLACE", visiblePlaces.map((place) => place.id));
   const topSidos = getSidoStats(places, 6);
+  const lowInfoCategory = isLowInformationCategory(categoryLabel);
+  const cardItems = visiblePlaces.map((place) => {
+    const displayName = getDisplayPlaceName(place, categoryLabel);
+    const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
+    const phone = getBusinessPhone(place.phone, enrichment);
+    const externalCategory = getBusinessExternalCategory(enrichment);
+    const externalHref = getBusinessExternalHref(enrichment);
+    const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
+    const hasReview = Boolean(reviewSummary?.count && reviewSummary.count > 0);
+    const hasCoordinates = hasUsableCoordinates(place.lat, place.lng);
+    const identity = getPlaceIdentity({ category: place.category, name: displayName, externalCategory });
+    const checkSummary = checkSummaries.get(place.id) ?? null;
+    const checkBadgeLabel = getBusinessCheckBadgeLabel(checkSummary);
+    const completeness = getInformationCompletenessSummary({
+      hasSource: Boolean(place.sourceName),
+      phone,
+      externalHref,
+      externalCategory,
+      reviewCount: reviewSummary?.count,
+      hasCoordinates,
+      hasPhoto: Boolean(enrichment?.googlePhotoName),
+      hasBusinessCheck: Boolean(checkSummary?.count),
+      hasUpdatedAt: Boolean(place.updatedAt),
+    });
+    const placeMapHref = buildDiscoveryMapHref({
+      categoryKey: getPlaceMapCategoryKey(place.category),
+      name: displayName,
+      lat: place.lat,
+      lng: place.lng,
+    });
+
+    return {
+      place,
+      displayName,
+      phone,
+      externalCategory,
+      externalHref,
+      reviewSummary,
+      hasReview,
+      hasCoordinates,
+      identity,
+      checkSummary,
+      checkBadgeLabel,
+      completeness,
+      placeMapHref,
+      isEnriched: Boolean(checkSummary?.count) || hasReview || Boolean(externalHref),
+    };
+  });
+  const lowInfoStats = lowInfoCategory
+    ? {
+        checked: cardItems.filter((item) => Boolean(item.checkSummary?.count)).length,
+        reviewed: cardItems.filter((item) => item.hasReview).length,
+        compared: cardItems.filter((item) => Boolean(item.externalHref)).length,
+        callable: cardItems.filter((item) => Boolean(item.phone)).length,
+      }
+    : null;
+  const enrichedCardItems = lowInfoCategory ? cardItems.filter((item) => item.isEnriched) : [];
+  const enrichedCardItemIds = new Set(enrichedCardItems.map((item) => item.place.id));
+  const baselineCardItems = lowInfoCategory ? cardItems.filter((item) => !enrichedCardItemIds.has(item.place.id)) : cardItems;
+
+  const renderPlaceCards = (items: typeof cardItems) => (
+    <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {items.map((item) => (
+        <li
+          key={item.place.id}
+          className="rounded-xl border border-[rgba(56,41,29,0.08)] bg-white px-4 py-4 shadow-sm"
+        >
+          <SmartLink href={`/places/${item.place.id}`} className="block rounded-lg text-[var(--ink)] no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
+            <div className="flex flex-wrap gap-1.5">
+              <span className="rounded bg-[#e0f2fe] px-2 py-0.5 text-[10px] font-black text-[#0369a1]">{categoryLabel}</span>
+              <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{item.identity.identityLabel}</span>
+              <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{item.hasCoordinates ? "지도에서 보기" : "주소로 찾기"}</span>
+              <InformationCompletenessBadge summary={item.completeness} />
+              <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{item.phone ? "전화로 확인" : "전화번호 알려주기"}</span>
+              {item.checkBadgeLabel ? <span className="rounded bg-[#ecfdf5] px-2 py-0.5 text-[10px] font-black text-[#047857]">{item.checkBadgeLabel}</span> : null}
+              {item.place.businessStatus ? (
+                <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{item.place.businessStatus}</span>
+              ) : null}
+            </div>
+            <span className="mt-2 line-clamp-2 font-black leading-snug text-[#2d1d10] hover:text-[var(--brand)] hover:underline">
+              {item.displayName}
+            </span>
+            <p className="mt-2 line-clamp-1 text-xs leading-5 text-[#5f5550]">{item.identity.description}</p>
+            <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{[item.place.sido, item.place.sigungu].filter(Boolean).join(" ") || "지역 정보를 정리 중이에요"}</p>
+            <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{item.place.roadAddress ?? item.place.address ?? "주소는 정리 중이에요"}</p>
+            {item.completeness.gapLabel ? <p className="mt-2 line-clamp-1 text-[11px] font-bold text-[#8a6a3f]">{item.completeness.gapLabel}</p> : null}
+            <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-bold text-[#7b746d]">
+              <span>{item.externalCategory ?? getExternalInfoLabel(getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", item.place.id, item.place.category))}</span>
+              {item.checkSummary?.latestCheckedAt ? <span>{new Date(item.checkSummary.latestCheckedAt).toLocaleDateString("ko-KR")} 확인</span> : null}
+              {item.hasReview ? <span>{getReviewSummaryLabel(item.reviewSummary?.count, item.reviewSummary?.averageOverall)}</span> : null}
+            </div>
+          </SmartLink>
+          <DiscoveryCardActions
+            className="mt-2 border-t border-[var(--line)] pt-2"
+            detailHref={`/places/${item.place.id}`}
+            mapHref={item.placeMapHref}
+            phone={item.phone}
+            externalHref={item.externalHref}
+          />
+        </li>
+      ))}
+    </ul>
+  );
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-8">
@@ -219,78 +340,61 @@ export async function PlaceListSection({ places, categoryLabel, mapHref, listHre
 
       {/* 업체 카드 목록 (최대 50건 표시 — 정적 렌더) */}
       {displayPlaces.length > 0 ? (
-        <ul className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {visiblePlaces.map((place) => {
-          const displayName = getDisplayPlaceName(place, categoryLabel);
-          const enrichment = getTrustedBusinessEnrichment(enrichmentSnapshot, "PLACE", place.id, place.category);
-          const phone = getBusinessPhone(place.phone, enrichment);
-          const externalCategory = getBusinessExternalCategory(enrichment);
-          const externalHref = getBusinessExternalHref(enrichment);
-          const reviewSummary = getPublicReviewSummary(reviewSnapshot, "PLACE", place.id);
-          const hasReview = Boolean(reviewSummary?.count && reviewSummary.count > 0);
-          const hasCoordinates = hasUsableCoordinates(place.lat, place.lng);
-          const identity = getPlaceIdentity({ category: place.category, name: displayName, externalCategory });
-          const checkSummary = checkSummaries.get(place.id) ?? null;
-          const checkBadgeLabel = getBusinessCheckBadgeLabel(checkSummary);
-          const completeness = getInformationCompletenessSummary({
-            hasSource: Boolean(place.sourceName),
-            phone,
-            externalHref,
-            externalCategory,
-            reviewCount: reviewSummary?.count,
-            hasCoordinates,
-            hasPhoto: Boolean(enrichment?.googlePhotoName),
-            hasBusinessCheck: Boolean(checkSummary?.count),
-            hasUpdatedAt: Boolean(place.updatedAt),
-          });
-          const placeMapHref = buildDiscoveryMapHref({
-            categoryKey: getPlaceMapCategoryKey(place.category),
-            name: displayName,
-            lat: place.lat,
-            lng: place.lng,
-          });
+        <>
+          {lowInfoCategory ? (
+            <div className="mt-6 rounded-2xl border border-[#fde68a] bg-[#fff8db] p-5">
+              <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-black tracking-[0.04em] text-[#b45309]">상담 우선 카테고리</p>
+                  <h3 className="mt-2 text-lg font-black tracking-tight text-[#7c2d12]">{categoryLabel}{getTopicParticle(categoryLabel)} 기본 등록 정보만으로 판단하기 어려워요.</h3>
+                  <p className="mt-2 max-w-3xl text-sm leading-7 text-[#92400e]">{getLowInformationCategoryNotice(categoryLabel)}</p>
+                </div>
+                {lowInfoStats ? <span className="rounded-full bg-white px-4 py-2 text-xs font-black text-[#92400e]">전화 가능 {lowInfoStats.callable.toLocaleString("ko-KR")}곳</span> : null}
+              </div>
+              {lowInfoStats ? (
+                <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-black text-[#92400e]">
+                  <span className="rounded-full bg-white px-3 py-1.5">직접 확인 {lowInfoStats.checked.toLocaleString("ko-KR")}곳</span>
+                  <span className="rounded-full bg-white px-3 py-1.5">후기 있음 {lowInfoStats.reviewed.toLocaleString("ko-KR")}곳</span>
+                  <span className="rounded-full bg-white px-3 py-1.5">지도 비교 {lowInfoStats.compared.toLocaleString("ko-KR")}곳</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
-          return (
-            <li
-              key={place.id}
-              className="rounded-xl border border-[rgba(56,41,29,0.08)] bg-white px-4 py-4 shadow-sm"
-            >
-              <SmartLink href={`/places/${place.id}`} className="block rounded-lg text-[var(--ink)] no-underline focus:outline-none focus:ring-2 focus:ring-[var(--brand)] focus:ring-offset-2">
-                <div className="flex flex-wrap gap-1.5">
-                  <span className="rounded bg-[#e0f2fe] px-2 py-0.5 text-[10px] font-black text-[#0369a1]">{categoryLabel}</span>
-                  <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{identity.identityLabel}</span>
-                  <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{hasCoordinates ? "지도에서 보기" : "주소로 찾기"}</span>
-                  <InformationCompletenessBadge summary={completeness} />
-                  <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{phone ? "전화로 확인" : "전화번호 알려주기"}</span>
-                  {checkBadgeLabel ? <span className="rounded bg-[#ecfdf5] px-2 py-0.5 text-[10px] font-black text-[#047857]">{checkBadgeLabel}</span> : null}
-                  {place.businessStatus ? (
-                    <span className="rounded bg-[#f3f4f6] px-2 py-0.5 text-[10px] font-black text-[var(--muted)]">{place.businessStatus}</span>
-                  ) : null}
+          {lowInfoCategory && enrichedCardItems.length > 0 ? (
+            <div className="mt-6">
+              <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-black tracking-tight text-[#2d1d10]">먼저 확인할 곳</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--muted)]">직접 확인, 후기, 지도 비교처럼 추가 근거가 붙은 업체를 먼저 모았습니다.</p>
                 </div>
-                <span className="mt-2 line-clamp-2 font-black leading-snug text-[#2d1d10] hover:text-[var(--brand)] hover:underline">
-                  {displayName}
-                </span>
-                <p className="mt-2 line-clamp-1 text-xs leading-5 text-[#5f5550]">{identity.description}</p>
-                <p className="mt-2 flex items-center gap-1 text-xs font-bold text-[var(--muted)]"><MapPin size={12} />{[place.sido, place.sigungu].filter(Boolean).join(" ") || "지역 정보를 정리 중이에요"}</p>
-                <p className="mt-1 line-clamp-1 text-xs leading-5 text-[var(--muted)]">{place.roadAddress ?? place.address ?? "주소는 정리 중이에요"}</p>
-                {completeness.gapLabel ? <p className="mt-2 line-clamp-1 text-[11px] font-bold text-[#8a6a3f]">{completeness.gapLabel}</p> : null}
-                <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] font-bold text-[#7b746d]">
-                  <span>{externalCategory ?? getExternalInfoLabel(enrichment)}</span>
-                  {checkSummary?.latestCheckedAt ? <span>{new Date(checkSummary.latestCheckedAt).toLocaleDateString("ko-KR")} 확인</span> : null}
-                  {hasReview ? <span>{getReviewSummaryLabel(reviewSummary?.count, reviewSummary?.averageOverall)}</span> : null}
+                <span className="badge bg-[#ecfdf5] text-[#047857]">{enrichedCardItems.length.toLocaleString("ko-KR")}곳</span>
+              </div>
+              {renderPlaceCards(enrichedCardItems)}
+            </div>
+          ) : null}
+
+          {lowInfoCategory && enrichedCardItems.length === 0 ? (
+            <div className="mt-6 rounded-xl border border-dashed border-[var(--line)] bg-white px-5 py-5 text-sm font-bold leading-7 text-[var(--muted)]">
+              아직 직접 확인, 후기, 지도 비교가 붙은 업체가 많지 않습니다. 아래 기본 등록 목록에서 후보를 고른 뒤 전화로 조건을 먼저 상담해 주세요.
+            </div>
+          ) : null}
+
+          {!lowInfoCategory ? <div className="mt-6">{renderPlaceCards(cardItems)}</div> : null}
+
+          {lowInfoCategory && baselineCardItems.length > 0 ? (
+            <div className="mt-6">
+              <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                  <h3 className="text-lg font-black tracking-tight text-[#2d1d10]">기본 등록 목록</h3>
+                  <p className="mt-1 text-sm leading-6 text-[var(--muted)]">공개자료 기준으로 먼저 모아둔 목록입니다. 서비스 범위와 가능 여부는 업체와 직접 확인해 주세요.</p>
                 </div>
-              </SmartLink>
-              <DiscoveryCardActions
-                className="mt-2 border-t border-[var(--line)] pt-2"
-                detailHref={`/places/${place.id}`}
-                mapHref={placeMapHref}
-                phone={phone}
-                externalHref={externalHref}
-              />
-            </li>
-          );
-          })}
-        </ul>
+                <span className="badge">{baselineCardItems.length.toLocaleString("ko-KR")}곳</span>
+              </div>
+              {renderPlaceCards(baselineCardItems)}
+            </div>
+          ) : null}
+        </>
       ) : (
         <div className="mt-6 rounded-xl border border-dashed border-[var(--line)] bg-white px-5 py-8 text-center">
           <p className="text-base font-black text-[#2d1d10]">{filterState.checked === "recent" ? `최근 확인된 ${categoryLabel} 업체가 아직 없어요.` : `조건에 맞는 ${categoryLabel} 업체가 아직 없어요.`}</p>
