@@ -6,7 +6,16 @@ export type CharacterAsset =
   | "dog-hoodie"
   | "dog-brown"
   | "cat-waving"
-  | "cat-peeking";
+  | "cat-peeking"
+  | "theme-hospital"
+  | "theme-restaurant"
+  | "theme-grooming"
+  | "theme-hotel"
+  | "theme-pharmacy"
+  | "theme-memorial"
+  | "gen-shiba"
+  | "gen-corgi"
+  | "gen-maltese";
 
 export type CategorySummary = {
   slug: string;
@@ -94,7 +103,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "식당",
     description: "강아지와 갈 식당을 찾고 좌석 조건은 방문 전에 확인하세요.",
     href: "/map",
-    character: "dog-hoodie",
+    character: "theme-restaurant",
   },
   {
     slug: "hospitals",
@@ -103,7 +112,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "병원",
     description: "가까운 동물병원을 찾고 오늘 진료 가능한지 전화로 확인하세요.",
     href: "/hospitals",
-    character: "puppy-front-white",
+    character: "theme-hospital",
     tone: "medical",
   },
   {
@@ -113,7 +122,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "24시응급",
     description: "야간·응급 진료 여부를 먼저 확인하고 이동하세요.",
     href: "/hospitals/emergency",
-    character: "cat-peeking",
+    character: "theme-hospital",
     tone: "medical",
   },
   {
@@ -123,7 +132,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "예방접종",
     description: "강아지와 고양이 접종 시기와 전후 주의사항을 챙겨보세요.",
     href: "/guide/vaccination",
-    character: "cat-waving",
+    character: "theme-hospital",
     tone: "medical",
   },
   {
@@ -133,7 +142,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "수술",
     description: "상담 전에 물어볼 비용과 수술 전후 체크포인트를 정리했어요.",
     href: "/guide/surgery",
-    character: "dog-brown",
+    character: "theme-hospital",
     tone: "medical",
   },
   {
@@ -143,7 +152,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "여행",
     description: "이동장, 숙소, 항공·선박 준비를 여행 흐름대로 챙겨보세요.",
     href: "/guide/travel",
-    character: "puppy-side-white",
+    character: "gen-corgi",
     tone: "travel",
   },
   {
@@ -153,7 +162,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "미용",
     description: "미용업소를 찾고 견종·크기별 예약 조건을 확인하세요.",
     href: "/grooming",
-    character: "dog-hoodie",
+    character: "theme-grooming",
   },
   {
     slug: "daycare",
@@ -162,7 +171,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "유치원",
     description: "유치원, 호텔, 위탁관리 업체를 찾고 입소 기준을 확인하세요.",
     href: "/daycare",
-    character: "dog-brown",
+    character: "theme-hotel",
   },
   {
     slug: "training",
@@ -171,7 +180,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "훈련",
     description: "방문훈련, 합숙훈련, 사회화 상담을 준비할 때 참고하세요.",
     href: "/training",
-    character: "cat-waving",
+    character: "gen-shiba",
   },
   {
     slug: "supplies",
@@ -180,7 +189,7 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "용품",
     description: "이동장, 급여, 생활용품을 고를 때 확인할 점을 모았습니다.",
     href: "/guide/pet-supply",
-    character: "cat-peeking",
+    character: "gen-corgi",
   },
   {
     slug: "funeral",
@@ -189,24 +198,26 @@ export const QUICK_CATEGORIES: CategorySummary[] = [
     shortLabel: "장례",
     description: "장례업체를 찾고 절차, 비용, 픽업 가능 여부를 확인하세요.",
     href: "/funeral",
-    character: "puppy-front-white",
+    character: "theme-memorial",
     tone: "calm",
   },
-  {    slug: "pharmacy",
+  {
+    slug: "pharmacy",
     category: "PHARMACY",
     title: "동물약국",
     shortLabel: "약국",
     description: "동물의약품 취급 약국을 찾고 원하는 약 재고를 물어보세요.",
     href: "/pharmacy",
-    character: "cat-waving",
+    character: "theme-pharmacy",
   },
-  {    slug: "lost-pets",
+  {
+    slug: "lost-pets",
     category: "LOST_PET",
     title: "댕냥이 찾아요",
     shortLabel: "찾아요",
     description: "보호동물 공고와 실종 제보를 지역별로 확인하세요.",
     href: "/lost-pets",
-    character: "puppy-side-white",
+    character: "gen-maltese",
   },
 ];
 
