@@ -6,6 +6,7 @@ import { getPlaceDetailById } from "@/lib/place-detail";
 import { getPlacesByCategorySnapshot } from "@/lib/public-data";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
 import { BusinessCheckPanel } from "@/components/detail/BusinessCheckPanel";
+import { ExternalReviewLinksPanel } from "@/components/detail/ExternalReviewLinksPanel";
 import { BusinessStoryPanel } from "@/components/detail/BusinessStoryPanel";
 import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
@@ -19,6 +20,7 @@ import { absoluteUrl } from "@/lib/brand";
 import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
 import { getApprovedBusinessCheckSummary } from "@/lib/business-checks";
 import { getBusinessExternalCategory, getPlaceIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
+import { getExternalReviewLinks } from "@/lib/external-review-links";
 import { getGooglePlaceVisualEnrichment, mergeGoogleVisualEnrichment } from "@/lib/google-place-visual";
 import type { ListPageSearchParams } from "@/lib/list-location-filters";
 import { getPublicPlaceProfile } from "@/lib/place-profiles";
@@ -178,6 +180,14 @@ export default async function PlaceSlugPage({
   const reviewLabel = getReviewSummaryLabel(reviewSummary.count, reviewSummary.averageOverall);
   const hasReview = reviewSummary.count > 0;
   const decisionQuestions = DECISION_QUESTIONS[type] ?? ["오늘 운영 여부를 확인할 수 있나요?", "예약이나 방문 제한이 있나요?", "비용과 준비물이 어떻게 되나요?", "주차나 대기 방식이 어떻게 되나요?"];
+  const externalReviewLinks = await getExternalReviewLinks({
+    name: displayName,
+    category: type,
+    categoryLabel,
+    regionLabel: [place.sido, place.sigungu].filter(Boolean).join(" "),
+    address: navigationAddress,
+    enrichment: reliableEnrichment,
+  });
   const nearby = allSameCategory
     .filter((p) => p.id !== place.id && p.sido === place.sido && p.sigungu === place.sigungu)
     .slice(0, 5);
@@ -341,6 +351,10 @@ export default async function PlaceSlugPage({
           <BusinessEnrichmentPanel enrichment={reliableEnrichment} category={type} reportHref={reportHref} reviewHref={reviewHref} showPhoto={false} />
         </div>
       ) : null}
+
+      <div className="mt-8">
+        <ExternalReviewLinksPanel name={displayName} categoryLabel={categoryLabel} links={externalReviewLinks} />
+      </div>
 
       <div className="mt-6">
         <VisitInfoPanel category={type} />

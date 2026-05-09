@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { AdSlot } from "@/components/AdSlot";
 import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentPanel";
 import { BusinessCheckPanel } from "@/components/detail/BusinessCheckPanel";
+import { ExternalReviewLinksPanel } from "@/components/detail/ExternalReviewLinksPanel";
 import { BusinessStoryPanel } from "@/components/detail/BusinessStoryPanel";
 import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
@@ -16,6 +17,7 @@ import { SmartLink } from "@/components/SmartLink";
 import { getBusinessEnrichmentForTarget } from "@/lib/business-enrichment";
 import { getApprovedBusinessCheckSummary } from "@/lib/business-checks";
 import { getBusinessExternalCategory, getRestaurantIdentity, getReviewSummaryLabel } from "@/lib/discovery-cards";
+import { getExternalReviewLinks } from "@/lib/external-review-links";
 import { getGooglePlaceVisualEnrichment, mergeGoogleVisualEnrichment } from "@/lib/google-place-visual";
 import { getApprovedReviewSummary } from "@/lib/reviews";
 import { absoluteUrl } from "@/lib/brand";
@@ -104,6 +106,14 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
     "대형견이나 다견 방문 제한이 있나요?",
     "피크타임 또는 주말 입장 제한이 있나요?",
   ];
+  const externalReviewLinks = await getExternalReviewLinks({
+    name: restaurant.name,
+    category: "RESTAURANT",
+    categoryLabel: "반려동물 동반 식당",
+    regionLabel,
+    address: restaurant.address,
+    enrichment: displayEnrichment && displayEnrichment.matchScore >= 0.85 ? displayEnrichment : null,
+  });
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:py-10">
@@ -202,6 +212,10 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
 
       <div className="mt-8">
         <BusinessEnrichmentPanel enrichment={displayEnrichment} category="RESTAURANT" reportHref={reportHref} reviewHref={reviewHref} showPhoto={false} />
+      </div>
+
+      <div className="mt-8">
+        <ExternalReviewLinksPanel name={restaurant.name} categoryLabel="반려동물 동반 식당" links={externalReviewLinks} />
       </div>
 
       <div className="mt-6">
