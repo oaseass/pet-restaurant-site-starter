@@ -126,6 +126,12 @@ enum BusinessCheckResult {
   CLOSED_OR_UNAVAILABLE
 }
 
+enum ExternalLinkKind {
+  BLOG
+  WEB
+  MAP
+}
+
 model Restaurant {
   id                 String           @id @default(cuid())
   sourceKey          String           @unique
@@ -356,6 +362,25 @@ model BusinessCheck {
 
   @@index([targetType, targetId, status, checkedAt])
   @@index([status, createdAt])
+}
+
+model ExternalLinkSubmission {
+  id          String           @id @default(cuid())
+  targetType  ReviewTargetType
+  targetId    String
+  href        String
+  title       String
+  sourceLabel String
+  summary     String?
+  kind        ExternalLinkKind @default(WEB)
+  publishedAt DateTime?
+  status      ReviewStatus     @default(PENDING)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  @@index([targetType, targetId, status, createdAt])
+  @@index([status, createdAt])
+  @@unique([targetType, targetId, href])
 }
 
 model SyncLog {

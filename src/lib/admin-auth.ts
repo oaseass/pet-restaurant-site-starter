@@ -1,3 +1,4 @@
+import "@/lib/auth-env";
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth-options";

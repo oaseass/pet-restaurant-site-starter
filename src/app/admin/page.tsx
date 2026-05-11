@@ -42,6 +42,7 @@ export default async function AdminConsolePage({ searchParams }: { searchParams:
     pendingClaimCount,
     pendingReportCount,
     pendingBusinessCheckCount,
+    pendingExternalLinkCount,
     failedSyncCount,
     recentPlaces,
     recentRestaurants,
@@ -68,6 +69,7 @@ export default async function AdminConsolePage({ searchParams }: { searchParams:
     prisma.businessClaim.count({ where: { status: "PENDING" } }),
     prisma.priceReport.count({ where: { status: "PENDING" } }),
     prisma.businessCheck.count({ where: { status: "PENDING" } }),
+    prisma.externalLinkSubmission.count({ where: { status: "PENDING" } }),
     prisma.syncLog.count({ where: { status: "FAILED" } }),
     prisma.place.findMany({
       orderBy: { updatedAt: "desc" },
@@ -173,6 +175,7 @@ export default async function AdminConsolePage({ searchParams }: { searchParams:
             <AdminLinkCard title="검수센터" description="실종 제보, 업체 요청, 가격 제보 처리" href={withSecret("/admin/data-health", secret)} />
             <AdminLinkCard title="리뷰 검수" description="방문 리뷰 승인, 거절, 삭제 처리" href={withSecret("/admin/reviews", secret)} />
             <AdminLinkCard title="확인 제보 검수" description="전화·방문 확인 결과 승인 처리" href={withSecret("/admin/business-checks", secret)} />
+            <AdminLinkCard title="외부 링크 저장소" description="상세 페이지에 노출할 외부 링크 승인 처리" href={withSecret("/admin/external-links", secret)} />
             <AdminLinkCard title="장소 관리" description="실제 장소 필드를 검색하고 바로 수정" href={withSecret("/admin/places", secret)} />
             <AdminLinkCard title="데이터 파이프라인" description="공식 동기화 → 좌표화 → 스냅샷 갱신" href={withSecret("/admin/data-pipeline", secret)} />
             <AdminLinkCard title="비식당 장소 가져오기" description="병원·미용·유치원·장례 공공데이터 import" href={withSecret("/admin/import-places", secret)} />
@@ -190,7 +193,7 @@ export default async function AdminConsolePage({ searchParams }: { searchParams:
         <Stat title="업체 인증 장소" value={formatNumber(ownerVerifiedPlaceCount)} note="ownerVerified 기준" />
         <Stat title="공개 식당" value={formatNumber(activeRestaurantCount)} note={`원천 제외 ${formatNumber(removedRestaurantCount)}건`} />
         <Stat title="가이드 문서" value={formatNumber(guideCount)} note="관리자 검수형 콘텐츠" />
-        <Stat title="검수 대기" value={formatNumber(pendingLostPetCount + pendingClaimCount + pendingReportCount + pendingBusinessCheckCount)} note={`실종 ${pendingLostPetCount} · 업체 ${pendingClaimCount} · 가격 ${pendingReportCount} · 확인 ${pendingBusinessCheckCount}`} />
+        <Stat title="검수 대기" value={formatNumber(pendingLostPetCount + pendingClaimCount + pendingReportCount + pendingBusinessCheckCount + pendingExternalLinkCount)} note={`실종 ${pendingLostPetCount} · 업체 ${pendingClaimCount} · 가격 ${pendingReportCount} · 확인 ${pendingBusinessCheckCount} · 링크 ${pendingExternalLinkCount}`} />
         <Stat title="참여자" value={formatNumber(contributorCount)} note="제보자·업체 요청자·목격 제보자 기준" />
         <Stat title="실종 제보 누적" value={formatNumber(lostPetCount)} note="게시형 콘텐츠 운영 수치" />
         <Stat title="실패한 배치" value={formatNumber(failedSyncCount)} note="최근 전체 실패 누적" />

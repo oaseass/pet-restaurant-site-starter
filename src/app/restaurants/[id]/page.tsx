@@ -107,6 +107,8 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
     "피크타임 또는 주말 입장 제한이 있나요?",
   ];
   const externalReviewLinks = await getExternalReviewLinks({
+    targetType: "RESTAURANT",
+    targetId: restaurant.id,
     name: restaurant.name,
     category: "RESTAURANT",
     categoryLabel: "반려동물 동반 식당",
@@ -215,7 +217,14 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       </div>
 
       <div className="mt-8">
-        <ExternalReviewLinksPanel name={restaurant.name} categoryLabel="반려동물 동반 식당" links={externalReviewLinks} />
+        <ExternalReviewLinksPanel
+          name={restaurant.name}
+          category="RESTAURANT"
+          categoryLabel="반려동물 동반 식당"
+          regionLabel={regionLabel}
+          address={restaurant.address}
+          links={externalReviewLinks}
+        />
       </div>
 
       <div className="mt-6">
@@ -223,9 +232,9 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
-        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보를 더 정확하게 만들기</h2>
+        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">빠진 정보 알려주기</h2>
         <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-          메뉴, 좌석 운영, 대형견 가능 여부, 이동장 조건처럼 다음 보호자가 꼭 알면 좋은 내용만 확인한 뒤 반영합니다.
+          메뉴, 좌석, 대형견 가능 여부, 이동장 조건처럼 방문 전에 꼭 필요한 정보만 확인해 반영합니다.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <SmartLink href={reportHref} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">

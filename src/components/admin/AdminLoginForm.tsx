@@ -10,6 +10,7 @@ export function AdminLoginForm({ callbackUrl, suggestedEmail }: { callbackUrl: s
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isPending, setIsPending] = useState(false);
+  const safeCallbackUrl = encodeURI(callbackUrl);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -21,7 +22,7 @@ export function AdminLoginForm({ callbackUrl, suggestedEmail }: { callbackUrl: s
         email,
         password,
         redirect: false,
-        callbackUrl,
+        callbackUrl: safeCallbackUrl,
       });
 
       setIsPending(false);
@@ -31,7 +32,7 @@ export function AdminLoginForm({ callbackUrl, suggestedEmail }: { callbackUrl: s
         return;
       }
 
-      router.push(result.url ?? callbackUrl);
+      router.push(result.url ?? safeCallbackUrl);
       router.refresh();
     });
   }
