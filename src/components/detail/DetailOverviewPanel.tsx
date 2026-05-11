@@ -49,7 +49,7 @@ function formatGoogleRating(enrichment?: BusinessEnrichmentEntry | null) {
 }
 
 function formatReviewSummary(reviewCount: number, reviewAverage?: number | null) {
-  if (reviewCount <= 0) return "댕냥지도 후기 기다리는 중";
+  if (reviewCount <= 0) return "댕냥지도 후기 없음";
   if (typeof reviewAverage === "number") return `댕냥지도 후기 ${reviewCount.toLocaleString("ko-KR")}개 · ${reviewAverage.toFixed(1)}`;
   return `댕냥지도 후기 ${reviewCount.toLocaleString("ko-KR")}개`;
 }
@@ -64,8 +64,10 @@ function getExternalCategory(enrichment?: BusinessEnrichmentEntry | null) {
 
 function buildLead({ name, category, identityLabel, regionLabel, enrichment }: DetailOverviewPanelProps) {
   const externalCategory = getExternalCategory(enrichment);
-  const sourceHint = externalCategory ? `외부 지도에서는 ${externalCategory} 정보와 잘 맞습니다.` : `${identityLabel} 정보와 공식 등록 자료를 기준으로 안내합니다.`;
-  return `${name}은 ${regionLabel}의 ${categoryLabelForSentence(category)}입니다. ${CATEGORY_LEADS[category]} ${sourceHint}`;
+  const sourceHint = externalCategory
+    ? `외부 지도 기준으로는 ${externalCategory} 정보와 가깝습니다.`
+    : `${identityLabel} 기준 공개자료를 먼저 정리했습니다.`;
+  return `${name}은 ${regionLabel}의 ${categoryLabelForSentence(category)}입니다. 지금 확인 가능한 기본 정보와 아직 전화가 필요한 항목을 먼저 구분해 보여드립니다. ${CATEGORY_LEADS[category]} ${sourceHint}`;
 }
 
 function categoryLabelForSentence(category: VisitInfoCategory) {
@@ -82,14 +84,14 @@ export function DetailOverviewPanel(props: DetailOverviewPanelProps) {
   const openingPreview = getOpeningPreview(enrichment);
   const googleRatingLabel = formatGoogleRating(enrichment);
   const reviewLabel = googleRatingLabel ?? formatReviewSummary(reviewCount, reviewAverage);
-  const photoLabel = enrichment?.googlePhotoName ? "Google Places 사진 연결" : "사진 제보 기다리는 중";
+  const photoLabel = enrichment?.googlePhotoName ? "Google Places 사진 연결" : "사진 정보 없음";
   const externalReviewCount = typeof enrichment?.googleUserRatingCount === "number" ? enrichment.googleUserRatingCount : 0;
   const checkLabel = getBusinessCheckSummaryLabel(checkSummary);
   const trustSignals = [
     { label: "공개자료", active: Boolean(sourceLabel), value: sourceLabel },
     { label: "지도 좌표", active: hasCoordinates, value: hasCoordinates ? "핀 확인 가능" : "주소 검색 필요" },
     { label: "전화", active: Boolean(phone), value: phone ? "바로 전화 가능" : "전화번호 없음" },
-    { label: "확인 제보", active: Boolean(checkSummary?.count), value: checkLabel },
+    { label: "최근 직접 확인", active: Boolean(checkSummary?.count), value: checkSummary?.count ? checkLabel : "최근 확인 없음" },
     { label: "외부지도 대조", active: Boolean(enrichment), value: enrichment ? "이름·주소 매칭" : "대조 정보 없음" },
     { label: "사진", active: Boolean(enrichment?.googlePhotoName), value: enrichment?.googlePhotoName ? "사진 연결" : "사진 없음" },
     { label: "후기", active: reviewCount > 0 || externalReviewCount > 0, value: reviewLabel },
@@ -102,7 +104,7 @@ export function DetailOverviewPanel(props: DetailOverviewPanelProps) {
     { icon: MapPinned, label: "위치", value: `${regionLabel} · ${addressLabel}` },
     { icon: Phone, label: "전화", value: phone ? "전화로 바로 확인 가능" : "전화번호 정리 중" },
     { icon: Clock3, label: "영업", value: openingPreview ?? "오늘 운영은 업체에 직접 확인" },
-    { icon: ClipboardCheck, label: "확인", value: checkSummary?.count ? `${checkLabel} · 최근 ${formatBusinessCheckDate(checkSummary.latestCheckedAt)}` : "전화 확인 제보 기다리는 중" },
+    { icon: ClipboardCheck, label: "확인", value: checkSummary?.count ? `${checkLabel} · 최근 ${formatBusinessCheckDate(checkSummary.latestCheckedAt)}` : "최근 운영 확인 없음" },
     { icon: Star, label: "후기", value: reviewLabel },
     { icon: Camera, label: "사진", value: photoLabel },
     { icon: ClipboardCheck, label: "출처", value: businessStatus ? `${sourceLabel} · ${businessStatus}` : sourceLabel },
@@ -115,8 +117,8 @@ export function DetailOverviewPanel(props: DetailOverviewPanelProps) {
           <Sparkles size={18} />
         </span>
         <div>
-          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">방문 요약</p>
-          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">검색 전에 볼 핵심만 모았어요</h2>
+          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">먼저 확인</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">방문 전에 먼저 볼 정보</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">{buildLead(props)}</p>
         </div>
       </div>
@@ -165,8 +167,8 @@ export function DetailOverviewPanel(props: DetailOverviewPanelProps) {
       </div>
 
       <div className="mt-4 rounded-lg bg-white px-4 py-3 text-sm leading-7 text-[var(--muted)] ring-1 ring-[var(--line)]">
-        <span className="font-black text-[var(--ink)]">전화할 때는 </span>
-        {checks.join(", ")}을 확인해보세요.
+        <span className="font-black text-[var(--ink)]">전화 전에 체크: </span>
+        {checks.join(", ")}을 먼저 물어보세요.
       </div>
     </section>
   );

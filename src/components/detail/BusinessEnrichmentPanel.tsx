@@ -96,9 +96,9 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
           <Info size={18} />
         </span>
         <div>
-          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">지도 정보와 비교해봤어요</h2>
+          <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">외부 지도와 비교한 정보</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-            카카오·네이버·Google 지도에서 이름과 주소가 잘 맞는 경우만 함께 보여드립니다. 외부 리뷰 내용은 저장하지 않습니다.
+            카카오·네이버·Google 지도에서 이름과 주소가 잘 맞는 경우에만 보여드립니다. 외부 리뷰 본문은 저장하지 않고, 방문 판단에 필요한 링크만 연결합니다.
           </p>
         </div>
       </div>
@@ -156,13 +156,13 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
         </div>
       ) : isCandidate ? (
         <div className="mt-5 rounded-xl border border-dashed border-[#fed7aa] bg-[#fff7ed] p-4">
-          <p className="text-sm font-black text-[#9a3412]">비슷한 지도 결과를 검토 중이에요</p>
-          <p className="mt-2 text-sm leading-7 text-[#9a3412]">이름이나 주소가 완전히 맞지 않아 아직 공개하지 않습니다. 잘못 연결되는 것보다 천천히 보여드리는 쪽을 선택했습니다.</p>
+          <p className="text-sm font-black text-[#9a3412]">지도 결과가 애매해 아직 숨겨두고 있습니다</p>
+          <p className="mt-2 text-sm leading-7 text-[#9a3412]">이름이나 주소가 완전히 맞지 않아 잘못 연결될 가능성이 있습니다. 확인 전에는 보수적으로 보여주지 않습니다.</p>
         </div>
       ) : (
         <div className="mt-5 rounded-xl border border-dashed border-[var(--line)] bg-[#f9fbfa] p-4">
-          <p className="text-sm font-black text-[var(--ink)]">지도 비교 정보는 아직 없어요</p>
-          <p className="mt-2 text-sm leading-7 text-[var(--muted)]">지금은 공식 등록 정보와 댕냥지도 후기를 중심으로 보여드립니다. 전화번호나 서비스가 다르면 알려주세요.</p>
+          <p className="text-sm font-black text-[var(--ink)]">외부 지도에서 일치하는 정보를 아직 찾지 못했습니다</p>
+          <p className="mt-2 text-sm leading-7 text-[var(--muted)]">지금은 공식 등록 정보와 사용자 제보를 우선 보여드립니다. 전화번호나 서비스가 다르면 알려주세요.</p>
         </div>
       )}
 

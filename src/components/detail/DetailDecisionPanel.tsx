@@ -74,10 +74,10 @@ export function DetailDecisionPanel({
     <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
-          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">방문 판단</p>
-          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">오늘 할 수 있는 행동만 모았어요</h2>
+          <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">지금 할 일</p>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">지금 바로 확인할 것</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-            {regionLabel} {categoryLabel}입니다. 주소는 {addressLabel} 기준으로 보여드리고, 운영 방식이나 세부 조건은 업체마다 다를 수 있습니다.
+            {regionLabel} {categoryLabel} 기준으로, 지금 바로 할 수 있는 확인 행동만 먼저 정리했습니다. 주소는 {addressLabel} 기준이며 세부 운영 조건은 업체에 직접 확인하는 편이 가장 정확합니다.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -89,7 +89,7 @@ export function DetailDecisionPanel({
           ) : null}
           <SmartLink href={reportHref} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
             <ClipboardList size={14} />
-            정보 알려주기
+            빠진 정보 알려주기
           </SmartLink>
         </div>
       </div>
@@ -105,8 +105,8 @@ export function DetailDecisionPanel({
 
       <div className="mt-5 grid gap-4 lg:grid-cols-[0.75fr_1fr]">
         <div className="rounded-lg bg-[#f8faf9] p-4 text-sm leading-7 text-[var(--muted)]">
-          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 공개자료와 보완할 정보</p>
-          <p className="mt-2">{sourceLabel}를 바탕으로 정리했고, 마지막 반영일은 {dataUpdatedLabel}입니다. 메뉴·서비스·사진처럼 방문자가 알려준 정보는 확인 후 반영합니다.</p>
+          <p className="flex items-center gap-2 font-black text-[var(--ink)]"><ShieldCheck size={16} /> 지금 기준으로 확인된 정보</p>
+          <p className="mt-2">{sourceLabel} 기준 마지막 반영일은 {dataUpdatedLabel}입니다. 운영시간, 서비스, 사진처럼 자주 바뀌는 내용은 제보와 확인 기록으로 계속 보강합니다.</p>
         </div>
         <div className="rounded-lg bg-[#fcfbf8] p-4">
           <p className="flex items-center gap-2 text-sm font-black text-[var(--ink)]"><Phone size={16} /> 전화할 때 물어볼 것</p>

@@ -48,7 +48,7 @@ function getMainStory({ category, profile, enrichment, identityLabel, regionLabe
   if (profile?.description) return profile.description;
   if (enrichment?.googleEditorialSummary) return enrichment.googleEditorialSummary;
   const externalCategory = enrichment?.externalCategory ?? enrichment?.googlePrimaryType;
-  const categoryHint = externalCategory ? `${externalCategory} 정보와 매칭되는 곳입니다.` : `${identityLabel}로 분류된 곳입니다.`;
+  const categoryHint = externalCategory ? `외부 지도 기준으로는 ${externalCategory} 정보와 가깝습니다.` : `현재는 ${identityLabel} 기준으로 정리했습니다.`;
   return `${regionLabel}에서 ${CATEGORY_STORY[category]} ${categoryHint}`;
 }
 
@@ -121,8 +121,8 @@ export function BusinessStoryPanel(props: BusinessStoryPanelProps) {
               <Sparkles size={18} />
             </span>
             <div>
-              <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">이런 곳이에요</p>
-              <h2 className="mt-2 text-2xl font-black tracking-tight text-[var(--ink)]">{name} 한눈에 보기</h2>
+              <p className="text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">업체 성격</p>
+              <h2 className="mt-2 text-2xl font-black tracking-tight text-[var(--ink)]">이 업체가 어떤 곳인지</h2>
               <p className="mt-3 text-sm leading-7 text-[var(--muted)]">{getMainStory(props)}</p>
             </div>
           </div>
@@ -145,12 +145,12 @@ export function BusinessStoryPanel(props: BusinessStoryPanelProps) {
           ) : null}
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <InfoTile icon={Clock3} label="운영 힌트" value={getOpeningLabel(profile, enrichment)} />
-            <InfoTile icon={PawPrint} label="비용·이용" value={getPriceLabel(profile)} />
+            <InfoTile icon={Clock3} label="오늘 운영 확인" value={getOpeningLabel(profile, enrichment)} />
+            <InfoTile icon={PawPrint} label="비용·이용 정보" value={getPriceLabel(profile)} />
           </div>
 
           <div className="mt-5 rounded-lg border border-[rgba(31,107,91,0.16)] bg-[#f8faf9] px-4 py-3">
-            <p className="text-sm font-black text-[var(--ink)]">가보기 전에 보면 좋은 것</p>
+            <p className="text-sm font-black text-[var(--ink)]">방문 전에 꼭 확인할 것</p>
             <div className="mt-3 grid gap-2 sm:grid-cols-2">
               {points.map((point) => (
                 <div key={point} className="flex gap-2 text-sm leading-6 text-[var(--muted)]">
@@ -172,7 +172,7 @@ export function BusinessStoryPanel(props: BusinessStoryPanelProps) {
               후기 남기기
             </SmartLink>
             <SmartLink href={`${reportHref}&topic=service`} className="inline-flex min-h-10 items-center rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
-              정보 보강하기
+              운영 정보 알려주기
             </SmartLink>
           </div>
         </div>
@@ -193,9 +193,9 @@ export function BusinessStoryPanel(props: BusinessStoryPanelProps) {
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[var(--brand-soft)] text-[var(--brand)]">
                   <Camera size={19} />
                 </div>
-                <p className="mt-4 text-lg font-black text-[var(--ink)]">사진과 실제 분위기를 채워가는 중</p>
+                <p className="mt-4 text-lg font-black text-[var(--ink)]">사진은 아직 확인되지 않았습니다</p>
                 <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-                  업체 사진, 내부·외부 모습, 대표 서비스가 확인되면 이 영역에 먼저 보여드립니다.
+                  내부·외부 사진과 실제 분위기 정보가 확인되면 이 영역에 먼저 보여드립니다.
                 </p>
               </div>
               <SmartLink href={`${reportHref}&topic=photo`} className="mt-5 inline-flex min-h-10 w-fit items-center rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
@@ -204,7 +204,7 @@ export function BusinessStoryPanel(props: BusinessStoryPanelProps) {
             </div>
           )}
           <p className="mt-3 text-xs font-bold leading-5 text-[var(--muted)]">
-            {categoryLabel} 정보는 공개자료, 지도 비교, 사용자 제보, 운영자 확인을 분리해 보여드립니다.
+            {categoryLabel} 정보는 공개자료, 지도 비교, 사용자 제보, 운영자 확인으로 나눠 보여드립니다.
           </p>
         </div>
       </div>

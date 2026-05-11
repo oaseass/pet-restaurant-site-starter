@@ -54,7 +54,7 @@ export function BusinessCheckPanel({ targetType, targetId, categoryLabel, summar
     }
 
     setState("submitted");
-    setMessage("확인 제보가 접수되었습니다. 검수 후 신뢰도에 반영됩니다.");
+    setMessage("직접 확인한 내용이 접수되었습니다. 검수 후 최근 운영 확인에 반영됩니다.");
     setNote("");
   };
 
@@ -63,15 +63,15 @@ export function BusinessCheckPanel({ targetType, targetId, categoryLabel, summar
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
           <p className="flex items-center gap-2 text-[11px] font-black tracking-[0.04em] text-[var(--brand)]">
-            <ShieldCheck size={15} /> 확인 제보
+            <ShieldCheck size={15} /> 최근 운영 확인
           </p>
-          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">전화해본 결과를 쌓아요</h2>
+          <h2 className="mt-2 text-xl font-black tracking-tight text-[var(--ink)]">최근에 직접 확인된 내용</h2>
           <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-            {categoryLabel}은 오늘 운영, 예약, 재고, 동반 조건이 자주 바뀝니다. 확인된 제보만 상세 신뢰도에 반영합니다.
+            {categoryLabel}은 운영 여부, 예약, 재고, 동반 조건이 자주 바뀝니다. 최근에 직접 확인된 내용만 따로 보여주고, 새 확인 결과도 받을 수 있습니다.
           </p>
         </div>
         <div className="rounded-lg border border-[var(--line)] bg-[#fafdf9] px-4 py-3">
-          <p className="text-xs font-black text-[var(--muted)]">승인된 확인</p>
+          <p className="text-xs font-black text-[var(--muted)]">최근 승인 기록</p>
           <p className="mt-1 text-lg font-black text-[var(--ink)]">{getBusinessCheckSummaryLabel(summary)}</p>
           <p className="mt-1 text-xs font-bold text-[var(--muted)]">최근 {formatBusinessCheckDate(summary.latestCheckedAt)}</p>
         </div>
@@ -110,7 +110,7 @@ export function BusinessCheckPanel({ targetType, targetId, categoryLabel, summar
         </label>
         <button type="submit" disabled={state === "submitting"} className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full bg-[var(--brand)] px-4 text-xs font-black text-white disabled:cursor-wait disabled:opacity-60 sm:col-span-2">
           {state === "submitting" ? <PhoneCall size={14} /> : state === "submitted" ? <ClipboardCheck size={14} /> : <Send size={14} />}
-          {state === "submitting" ? "접수 중..." : state === "submitted" ? "접수 완료" : "확인 결과 보내기"}
+          {state === "submitting" ? "접수 중..." : state === "submitted" ? "접수 완료" : "직접 확인한 내용 보내기"}
         </button>
       </form>
 
