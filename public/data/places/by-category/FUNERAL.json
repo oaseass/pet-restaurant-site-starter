@@ -975,21 +975,6 @@
     "updatedAt": "2026-05-02T09:39:29.445Z"
   },
   {
-    "id": "e7c616ad-e6a8-4e6b-8ff5-e15d69e59e33",
-    "category": "FUNERAL",
-    "name": "주식회사 21그램그룹",
-    "address": "경기도 파주시 광탄면 분수리 458",
-    "roadAddress": "경기도 파주시 광탄면 수레길 302",
-    "sido": "경기도",
-    "sigungu": "파주시",
-    "phone": "02-1688-1240",
-    "lat": 37.763,
-    "lng": 126.8462,
-    "sourceName": "LOCALDATA_FUNERAL",
-    "businessStatus": "폐업",
-    "updatedAt": "2026-05-02T09:39:29.445Z"
-  },
-  {
     "id": "9ad5fdeb-56c7-4c16-8c69-db20251cbe1d",
     "category": "FUNERAL",
     "name": "주식회사 21그램그룹",
@@ -1000,6 +985,21 @@
     "phone": "02-1688-1240",
     "lat": 37.7248,
     "lng": 126.6126,
+    "sourceName": "LOCALDATA_FUNERAL",
+    "businessStatus": "폐업",
+    "updatedAt": "2026-05-02T09:39:29.445Z"
+  },
+  {
+    "id": "e7c616ad-e6a8-4e6b-8ff5-e15d69e59e33",
+    "category": "FUNERAL",
+    "name": "주식회사 21그램그룹",
+    "address": "경기도 파주시 광탄면 분수리 458",
+    "roadAddress": "경기도 파주시 광탄면 수레길 302",
+    "sido": "경기도",
+    "sigungu": "파주시",
+    "phone": "02-1688-1240",
+    "lat": 37.763,
+    "lng": 126.8462,
     "sourceName": "LOCALDATA_FUNERAL",
     "businessStatus": "폐업",
     "updatedAt": "2026-05-02T09:39:29.445Z"

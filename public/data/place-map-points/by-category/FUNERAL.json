@@ -448,19 +448,19 @@
     "phone": "1688-1240"
   },
   {
-    "id": "e7c616ad-e6a8-4e6b-8ff5-e15d69e59e33",
-    "category": "FUNERAL",
-    "name": "주식회사 21그램그룹",
-    "lat": 37.763,
-    "lng": 126.8462,
-    "phone": "02-1688-1240"
-  },
-  {
     "id": "9ad5fdeb-56c7-4c16-8c69-db20251cbe1d",
     "category": "FUNERAL",
     "name": "주식회사 21그램그룹",
     "lat": 37.7248,
     "lng": 126.6126,
+    "phone": "02-1688-1240"
+  },
+  {
+    "id": "e7c616ad-e6a8-4e6b-8ff5-e15d69e59e33",
+    "category": "FUNERAL",
+    "name": "주식회사 21그램그룹",
+    "lat": 37.763,
+    "lng": 126.8462,
     "phone": "02-1688-1240"
   },
   {
