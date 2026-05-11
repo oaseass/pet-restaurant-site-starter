@@ -23,7 +23,7 @@ async function main() {
         officialRegistered: true,
         updatedAt: true,
       },
-      orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+      orderBy: [{ updatedAt: "desc" }, { name: "asc" }, { id: "asc" }],
     }),
     prisma.place.count({ where: { isActive: true } }),
     prisma.lostPet.count({ where: { status: { in: ["APPROVED", "FOUND"] } } }),
@@ -47,7 +47,7 @@ async function main() {
         businessStatus: true,
         updatedAt: true,
       },
-      orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+      orderBy: [{ updatedAt: "desc" }, { name: "asc" }, { id: "asc" }],
     }),
     prisma.review.groupBy({
       by: ["targetType", "targetId"],
@@ -169,7 +169,9 @@ async function main() {
   const categoryCountsWithPlaces = { ...categoryCounts, placeCategoryCounts };
 
   const reviewSummaries = Object.fromEntries(
-    reviewGroups.map((group) => [
+    [...reviewGroups]
+      .sort((left, right) => left.targetType.localeCompare(right.targetType) || left.targetId.localeCompare(right.targetId))
+      .map((group) => [
       `${group.targetType}:${group.targetId}`,
       {
         targetType: group.targetType,

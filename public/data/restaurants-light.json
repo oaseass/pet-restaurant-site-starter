@@ -14534,19 +14534,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomez5r200hcwe8k6lbpibpb",
-    "name": "송경솥밥",
-    "businessType": "일반음식점",
-    "sido": "광주",
-    "sigungu": "동구",
-    "eupmyeondong": "동명동",
-    "address": "광주광역시 동구 동명로14번길 19-8(2층 동명동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomez5ms00hbwe8k11cca5c0",
     "name": "송경솥밥",
     "businessType": "일반음식점",
@@ -14554,6 +14541,19 @@
     "sigungu": "서구",
     "eupmyeondong": "치평동",
     "address": "광주광역시 서구 상무시민로 136(수성빌딩 1층 치평동)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomez5r200hcwe8k6lbpibpb",
+    "name": "송경솥밥",
+    "businessType": "일반음식점",
+    "sido": "광주",
+    "sigungu": "동구",
+    "eupmyeondong": "동명동",
+    "address": "광주광역시 동구 동명로14번길 19-8(2층 동명동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -17186,19 +17186,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeyt0x00edwe8k2g9zql70",
-    "name": "오퐁드부아",
-    "businessType": "휴게음식점",
-    "sido": "대구",
-    "sigungu": "달성군",
-    "eupmyeondong": "가창면",
-    "address": "대구광역시 달성군 가창면 주리2길 104(2동 1층)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomeypgg00djwe8kqcuaowpa",
     "name": "오퐁드부아",
     "businessType": "일반음식점",
@@ -17206,6 +17193,19 @@
     "sigungu": "달성군",
     "eupmyeondong": "가창면",
     "address": "대구광역시 달성군 가창면 주리2길 104",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomeyt0x00edwe8k2g9zql70",
+    "name": "오퐁드부아",
+    "businessType": "휴게음식점",
+    "sido": "대구",
+    "sigungu": "달성군",
+    "eupmyeondong": "가창면",
+    "address": "대구광역시 달성군 가창면 주리2길 104(2동 1층)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -18733,19 +18733,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeyzll00fwwe8k6goke5g5",
-    "name": "조선백호",
-    "businessType": "일반음식점",
-    "sido": "인천",
-    "sigungu": "중구",
-    "eupmyeondong": "경동",
-    "address": "인천광역시 중구 개항로96번길 11(1,2층 경동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomeyzhc00fvwe8k5u896m7x",
     "name": "조선백호",
     "businessType": "일반음식점",
@@ -18753,6 +18740,19 @@
     "sigungu": "중구",
     "eupmyeondong": "경동",
     "address": "인천광역시 중구 개항로96번길 11(1층 경동)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomeyzll00fwwe8k6goke5g5",
+    "name": "조선백호",
+    "businessType": "일반음식점",
+    "sido": "인천",
+    "sigungu": "중구",
+    "eupmyeondong": "경동",
+    "address": "인천광역시 중구 개항로96번길 11(1,2층 경동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -21801,19 +21801,6 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomeyqei00drwe8k64xatpj0",
-    "name": "파이널나인",
-    "businessType": "일반음식점",
-    "sido": "대구",
-    "sigungu": "달서구",
-    "eupmyeondong": "상인동",
-    "address": "대구광역시 달서구 월곡로51길 9(지상2층 상인동)",
-    "lat": null,
-    "lng": null,
-    "officialRegistered": true,
-    "updatedAt": "2026-05-01T04:39:57.672Z"
-  },
-  {
     "id": "cmomeyqa700dqwe8kwclyhu78",
     "name": "파이널나인",
     "businessType": "일반음식점",
@@ -21821,6 +21808,19 @@
     "sigungu": "중구",
     "eupmyeondong": null,
     "address": "대구광역시 중구 동성로4길 57(삼덕동1가)",
+    "lat": null,
+    "lng": null,
+    "officialRegistered": true,
+    "updatedAt": "2026-05-01T04:39:57.672Z"
+  },
+  {
+    "id": "cmomeyqei00drwe8k64xatpj0",
+    "name": "파이널나인",
+    "businessType": "일반음식점",
+    "sido": "대구",
+    "sigungu": "달서구",
+    "eupmyeondong": "상인동",
+    "address": "대구광역시 달서구 월곡로51길 9(지상2층 상인동)",
     "lat": null,
     "lng": null,
     "officialRegistered": true,
@@ -22893,9 +22893,9 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "cmomf0lrh00tbwe8kjblxdwca",
+    "id": "abd5c903-b0d1-4c83-a37d-ca0ef4abc617",
     "name": "하백",
-    "businessType": "일반음식점",
+    "businessType": "휴게음식점",
     "sido": "경기",
     "sigungu": "남양주시",
     "eupmyeondong": "화도읍",
@@ -22906,9 +22906,9 @@
     "updatedAt": "2026-05-01T04:39:57.672Z"
   },
   {
-    "id": "abd5c903-b0d1-4c83-a37d-ca0ef4abc617",
+    "id": "cmomf0lrh00tbwe8kjblxdwca",
     "name": "하백",
-    "businessType": "휴게음식점",
+    "businessType": "일반음식점",
     "sido": "경기",
     "sigungu": "남양주시",
     "eupmyeondong": "화도읍",

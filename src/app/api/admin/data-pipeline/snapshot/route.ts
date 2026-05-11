@@ -26,7 +26,7 @@ async function generateSnapshotData() {
         officialRegistered: true,
         updatedAt: true,
       },
-      orderBy: [{ updatedAt: "desc" }, { name: "asc" }],
+      orderBy: [{ updatedAt: "desc" }, { name: "asc" }, { id: "asc" }],
     }),
     prisma.place.count({ where: { isActive: true } }),
     prisma.lostPet.count({ where: { status: { in: ["APPROVED", "FOUND"] } } }),
