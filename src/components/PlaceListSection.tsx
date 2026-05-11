@@ -15,6 +15,7 @@ type Props = {
   places: PublicPlaceLight[];
   categoryLabel: string;
   mapHref?: string;
+  mapCategoryKeyOverride?: string;
   listHref?: string;
   searchParams?: ListPageSearchParams;
 };
@@ -48,6 +49,7 @@ function getDisplayPlaceName(place: PublicPlaceLight, categoryLabel: string) {
 
 function getCategoryLeadCopy(categoryLabel: string) {
   if (categoryLabel.includes("미용")) return "견종·크기·피부 상태에 따라 예약 조건이 달라질 수 있어요. 먼저 예약할 곳부터 살펴보세요.";
+  if (categoryLabel.includes("펜션") || categoryLabel.includes("숙소")) return "객실별 동반 기준, 추가 요금, 실내 가능 범위가 크게 달라져요. 후기와 확인 기록이 붙은 곳부터 먼저 보세요.";
   if (categoryLabel.includes("유치원") || categoryLabel.includes("호텔")) return "입소 기준, 예방접종, 호텔링 가능 여부는 업체마다 달라요. 상담할 곳을 먼저 골라보세요.";
   if (categoryLabel.includes("장례")) return "화장·봉안·픽업 가능 여부와 비용은 업체마다 달라요. 급할수록 전화 상담이 빠릅니다.";
   if (categoryLabel.includes("약국")) return "찾는 동물의약품 재고는 수시로 달라질 수 있어요. 가까운 약국을 고른 뒤 전화로 물어보세요.";
@@ -56,12 +58,16 @@ function getCategoryLeadCopy(categoryLabel: string) {
 }
 
 function isLowInformationCategory(categoryLabel: string) {
-  return categoryLabel.includes("미용") || categoryLabel.includes("유치원") || categoryLabel.includes("호텔");
+  return categoryLabel.includes("미용") || categoryLabel.includes("유치원") || categoryLabel.includes("호텔") || categoryLabel.includes("펜션") || categoryLabel.includes("숙소");
 }
 
 function getLowInformationCategoryNotice(categoryLabel: string) {
   if (categoryLabel.includes("미용")) {
     return "미용은 견종, 몸무게, 피부 상태, 올가미 가능 여부에 따라 가능한 서비스가 달라져서 기본 등록 정보만으로는 판단이 어렵습니다. 직접 확인이나 후기, 지도 비교가 붙은 곳부터 먼저 보세요.";
+  }
+
+  if (categoryLabel.includes("펜션") || categoryLabel.includes("숙소")) {
+    return "펜션과 숙소는 반려견 동반 객실, 견종·무게 제한, 추가 요금, 침구 이용 규칙이 숙소마다 달라 기본 등록 정보만으로는 판단이 어렵습니다. 직접 확인이나 후기, 지도 비교가 붙은 곳부터 먼저 보세요.";
   }
 
   return "유치원·호텔은 입소 기준, 예방접종, 단독 케어, 야간 상주 여부가 업체마다 달라서 기본 등록 정보만으로는 판단이 어렵습니다. 직접 확인이나 후기, 지도 비교가 붙은 곳부터 먼저 보세요.";
@@ -92,7 +98,7 @@ function compareByInformationNeeds<T>(left: T, right: T, info: "" | "needs", get
   return leftSummary.score - rightSummary.score || rightSummary.missingLabels.length - leftSummary.missingLabels.length;
 }
 
-export async function PlaceListSection({ places, categoryLabel, mapHref, listHref, searchParams }: Props) {
+export async function PlaceListSection({ places, categoryLabel, mapHref, mapCategoryKeyOverride, listHref, searchParams }: Props) {
   if (places.length === 0) return null;
 
   const filterState = parseListSearchParams(searchParams);
@@ -185,7 +191,7 @@ export async function PlaceListSection({ places, categoryLabel, mapHref, listHre
       hasUpdatedAt: Boolean(place.updatedAt),
     });
     const placeMapHref = buildDiscoveryMapHref({
-      categoryKey: getPlaceMapCategoryKey(place.category),
+      categoryKey: mapCategoryKeyOverride ?? getPlaceMapCategoryKey(place.category),
       name: displayName,
       lat: place.lat,
       lng: place.lng,

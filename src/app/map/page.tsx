@@ -10,12 +10,13 @@ import { getBusinessEnrichmentSnapshot } from "@/lib/business-enrichment";
 import { buildReviewHref, getBusinessExternalCategory, getBusinessExternalHref, getBusinessPhone, getDiscoveryQualityScore, getExternalInfoLabel, getPlaceIdentity, getPublicReviewSummary, getRestaurantIdentity, getReviewSummaryLabel, getTrustedBusinessEnrichment, hasUsableCoordinates } from "@/lib/discovery-cards";
 import type { MapCategoryKey, MapCategoryOption, MapRestaurantListItem, PreparedCategoryState } from "@/components/map/types";
 import { REGION_OPTIONS } from "@/lib/platform-content";
+import { getPlaceExperienceLabel, inferPlaceExperienceCategory, matchesPlaceExperienceCategory } from "@/lib/place-experience";
 import { filterRestaurantsLight, getCategoryCountsSnapshot, getPlacesByCategorySnapshot, getRestaurantBusinessTypes, getRestaurantsLightSnapshot, getReviewSummariesSnapshot, normalizePublicRestaurantSearchParams, sortRestaurantsLight } from "@/lib/public-data";
 import { absoluteUrl } from "@/lib/brand";
 
 export const metadata: Metadata = {
   title: "지도에서 찾기 | 댕냥지도",
-  description: "반려동물 동반 식당과 병원, 약국, 미용, 유치원, 장례를 지도에서 비교하고 내 주변으로 찾아보세요.",
+  description: "반려동물 동반 식당과 병원, 약국, 미용, 펜션, 호텔, 캠핑장, 유치원, 장례를 지도에서 비교하고 내 주변으로 찾아보세요.",
   alternates: { canonical: absoluteUrl("/map") },
 };
 
@@ -25,6 +26,9 @@ const MAP_CATEGORY_LABELS: Record<MapCategoryKey, string> = {
   hospitals: "병원",
   grooming: "미용",
   daycare: "유치원",
+  pension: "펜션",
+  hotel: "호텔",
+  camping: "캠핑",
   funeral: "장례",
   pharmacy: "약국",
   "lost-pets": "찾아요",
@@ -42,7 +46,7 @@ const PLACE_CATEGORY_SEARCH_TERMS: Record<string, string[]> = {
   ANIMAL_HOSPITAL: ["병원", "동물병원", "진료"],
   PHARMACY: ["약국", "동물약국", "동물의약품"],
   GROOMING: ["미용", "반려동물 미용", "애견미용"],
-  DAYCARE: ["유치원", "호텔", "위탁", "훈련", "반려동물 유치원"],
+  DAYCARE: ["유치원", "호텔", "위탁", "훈련", "반려동물 유치원", "펜션", "숙소", "캠핑", "글램핑"],
   FUNERAL: ["장례", "장묘", "화장", "반려동물 장례"],
 };
 
@@ -53,6 +57,9 @@ const CATEGORY_LIST_HREF: Record<MapCategoryKey, string> = {
   pharmacy: "/pharmacy",
   grooming: "/grooming",
   daycare: "/daycare",
+  pension: "/pension",
+  hotel: "/hotel",
+  camping: "/camping",
   funeral: "/funeral",
   "lost-pets": "/lost-pets?tab=shelter",
 };
@@ -64,6 +71,9 @@ const CATEGORY_GUIDANCE_COPY: Record<MapCategoryKey, string> = {
   pharmacy: "동물약국 위치를 찾은 뒤 원하는 약 재고는 전화로 물어보세요.",
   grooming: "반려동물 미용업소를 찾고 견종·크기 조건은 예약 전에 확인하세요.",
   daycare: "유치원·호텔·위탁관리 업체를 찾고 입소 조건은 상담 때 확인하세요.",
+  pension: "애견동반 펜션을 찾고 객실별 동반 조건과 추가 요금을 확인하세요.",
+  hotel: "반려동물 동반 호텔과 리조트를 찾고 객실·부대시설 동반 범위를 확인하세요.",
+  camping: "반려동물 동반 캠핑장과 글램핑을 찾고 동반 구역과 현장 규칙을 확인하세요.",
   funeral: "반려동물 장례업체 위치를 찾고 비용·픽업 가능 여부는 상담으로 확인하세요.",
   "lost-pets": "보호동물 공고는 찾아요 페이지에서 더 자세히 볼 수 있어요.",
 };
@@ -88,6 +98,21 @@ const PREPARED_CATEGORY_COPY: Record<Exclude<MapCategoryKey, "restaurants" | "al
     title: "맡길 곳을 동네에서 찾아보세요.",
     description: "지역이나 현재 위치를 적용하면 유치원, 호텔, 위탁관리 업체를 볼 수 있습니다.",
     note: "입소 조건과 예방접종 증명은 상담 전에 챙겨두면 좋아요.",
+  },
+  pension: {
+    title: "애견동반 펜션을 찾아보세요.",
+    description: "지역이나 현재 위치를 적용하면 숙소형 업체를 먼저 모아 볼 수 있습니다.",
+    note: "객실 허용 범위와 추가 요금은 숙소마다 다르니 전화로 다시 확인하세요.",
+  },
+  hotel: {
+    title: "반려동물 동반 호텔을 찾아보세요.",
+    description: "지역이나 현재 위치를 적용하면 호텔·리조트형 숙소를 먼저 모아 볼 수 있습니다.",
+    note: "객실 타입, 부대시설 동반 범위, 추가 요금은 숙소마다 다릅니다.",
+  },
+  camping: {
+    title: "반려동물 동반 캠핑장을 찾아보세요.",
+    description: "지역이나 현재 위치를 적용하면 캠핑장·글램핑 후보를 먼저 모아 볼 수 있습니다.",
+    note: "동반 가능한 사이트 구역과 공용공간 규칙은 현장마다 다릅니다.",
   },
   funeral: {
     title: "상담 가능한 장례업체를 찾아보세요.",
@@ -131,6 +156,24 @@ const MAP_CATEGORY_META: Record<MapCategoryKey, { pageTitle: string; listTitle: 
     listTitle: "맡길 곳 찾기",
     listSubtitle: "유치원, 호텔, 위탁관리, 훈련 관련 장소를 찾아보세요.",
     mapTitle: "유치원·호텔 지도",
+  },
+  pension: {
+    pageTitle: "애견동반 펜션 지도",
+    listTitle: "애견동반 펜션 찾기",
+    listSubtitle: "숙소형 업체만 모아 보고 객실 정책과 추가 요금을 비교하세요.",
+    mapTitle: "애견동반 펜션 지도",
+  },
+  hotel: {
+    pageTitle: "반려동물 동반 호텔 지도",
+    listTitle: "호텔·리조트 찾기",
+    listSubtitle: "호텔형 숙소만 모아 보고 객실과 부대시설 규정을 비교하세요.",
+    mapTitle: "호텔·리조트 지도",
+  },
+  camping: {
+    pageTitle: "반려동물 동반 캠핑 지도",
+    listTitle: "캠핑장·글램핑 찾기",
+    listSubtitle: "캠핑형 숙소만 모아 보고 동반 구역과 현장 규칙을 비교하세요.",
+    mapTitle: "캠핑장·글램핑 지도",
   },
   funeral: {
     pageTitle: "반려동물 장례 지도",
@@ -188,8 +231,16 @@ const MAP_CATEGORY_ALIASES: Record<string, MapCategoryKey> = {
   grooming: "grooming",
   pet_grooming: "grooming",
   daycare: "daycare",
+  pension: "pension",
+  hotels: "hotel",
   boarding: "daycare",
-  hotel: "daycare",
+  hotel: "hotel",
+  resort: "hotel",
+  camping: "camping",
+  glamping: "camping",
+  camp: "camping",
+  pensions: "pension",
+  accommodation: "pension",
   training: "daycare",
   funeral: "funeral",
   cremation: "funeral",
@@ -232,7 +283,7 @@ function placeMatchesKeyword(place: { category: string; name?: string | null; ad
     place.sido,
     place.sigungu,
     place.phone,
-    PLACE_CATEGORY_LABEL[place.category],
+    getPlaceCategoryLabelForMap(place),
     ...(PLACE_CATEGORY_SEARCH_TERMS[place.category] ?? []),
   ]
     .filter(Boolean)
@@ -244,6 +295,49 @@ function placeMatchesKeyword(place: { category: string; name?: string | null; ad
 
 function compareKnownName(leftName: string, rightName: string) {
   return Number(isUnknownBusinessName(leftName)) - Number(isUnknownBusinessName(rightName));
+}
+
+function getPlaceExperienceCategoryForMap(place: { category: string; name?: string | null; tags?: string[] }) {
+  return inferPlaceExperienceCategory({
+    baseCategory: place.category,
+    name: place.name ?? "",
+    categoryLabel: PLACE_CATEGORY_LABEL[place.category],
+    tags: place.tags,
+  });
+}
+
+function isPensionPlace(place: { category: string; name?: string | null; tags?: string[] }) {
+  return matchesPlaceExperienceCategory({
+    baseCategory: place.category,
+    name: place.name ?? "",
+    categoryLabel: PLACE_CATEGORY_LABEL[place.category],
+    tags: place.tags,
+  }, "ACCOMMODATION_PENSION");
+}
+
+function isHotelPlace(place: { category: string; name?: string | null; tags?: string[] }) {
+  return matchesPlaceExperienceCategory({
+    baseCategory: place.category,
+    name: place.name ?? "",
+    categoryLabel: PLACE_CATEGORY_LABEL[place.category],
+    tags: place.tags,
+  }, "ACCOMMODATION_HOTEL");
+}
+
+function isCampingPlace(place: { category: string; name?: string | null; tags?: string[] }) {
+  return matchesPlaceExperienceCategory({
+    baseCategory: place.category,
+    name: place.name ?? "",
+    categoryLabel: PLACE_CATEGORY_LABEL[place.category],
+    tags: place.tags,
+  }, "ACCOMMODATION_CAMPING");
+}
+
+function getPlaceCategoryLabelForMap(place: { category: string; name?: string | null; tags?: string[] }) {
+  if (place.category !== "DAYCARE") return PLACE_CATEGORY_LABEL[place.category] ?? "시설";
+  const experienceCategory = getPlaceExperienceCategoryForMap(place);
+  if (experienceCategory === "DAYCARE") return PLACE_CATEGORY_LABEL[place.category] ?? "시설";
+  return getPlaceExperienceLabel(experienceCategory);
 }
 
 function limitKnownNameFirst<T extends { name: string }>(items: T[], limit: number) {
@@ -295,6 +389,9 @@ export default async function MapPage({
     hospitals: "ANIMAL_HOSPITAL",
     grooming: "GROOMING",
     daycare: "DAYCARE",
+    pension: "DAYCARE",
+    hotel: "DAYCARE",
+    camping: "DAYCARE",
     funeral: "FUNERAL",
     pharmacy: "PHARMACY",
   };
@@ -326,6 +423,9 @@ export default async function MapPage({
   );
 
   const businessTypeOptions = getRestaurantBusinessTypes(restaurantsLight);
+  const pensionCount = categoryPlaces.filter((place) => place.category === "DAYCARE" && isPensionPlace(place)).length;
+  const hotelCount = categoryPlaces.filter((place) => place.category === "DAYCARE" && isHotelPlace(place)).length;
+  const campingCount = categoryPlaces.filter((place) => place.category === "DAYCARE" && isCampingPlace(place)).length;
 
   function getDistanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371;
@@ -359,7 +459,15 @@ export default async function MapPage({
   const filteredRestaurantCount = (isRestaurantView || isAllView) ? restaurantsFiltered.length : 0;
 
   // 비식당 카테고리 Place 데이터 — categoryPlaces는 이미 해당 카테고리만 포함
-  let placesForCategory = categoryPlaces.filter((place) => {
+  const categoryScopedPlaces = activeCategory === "pension"
+    ? categoryPlaces.filter((place) => place.category === "DAYCARE" && isPensionPlace(place))
+    : activeCategory === "hotel"
+      ? categoryPlaces.filter((place) => place.category === "DAYCARE" && isHotelPlace(place))
+      : activeCategory === "camping"
+        ? categoryPlaces.filter((place) => place.category === "DAYCARE" && isCampingPlace(place))
+    : categoryPlaces;
+
+  let placesForCategory = categoryScopedPlaces.filter((place) => {
     if (normalized.sido && place.sido !== normalized.sido) return false;
     return placeMatchesKeyword(place, normalized.q);
   });
@@ -449,7 +557,7 @@ export default async function MapPage({
               name: displayName,
               address: formatPublicAddress(p),
               businessType: p.businessStatus ?? "운영은 업체마다 달라요",
-              categoryLabel: PLACE_CATEGORY_LABEL[p.category] ?? "시설",
+              categoryLabel: getPlaceCategoryLabelForMap(p),
               regionLabel: [p.sido, p.sigungu].filter(Boolean).join(" · "),
               href: `/places/${p.id}`,
               officialRegistered: false,
@@ -542,7 +650,7 @@ export default async function MapPage({
           name: displayName,
           address: formatPublicAddress(place),
           businessType: place.businessStatus ?? "운영은 업체마다 달라요",
-          categoryLabel: PLACE_CATEGORY_LABEL[place.category] ?? "시설",
+          categoryLabel: getPlaceCategoryLabelForMap(place),
           regionLabel: [place.sido, place.sigungu].filter(Boolean).join(" · "),
           href: `/places/${place.id}`,
           officialRegistered: false,
@@ -631,6 +739,30 @@ export default async function MapPage({
       countLabel: placeCategoryMap.get("DAYCARE") ? `${(placeCategoryMap.get("DAYCARE") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
     },
     {
+      key: "pension",
+      label: "펜션",
+      description: pensionCount > 0 ? `${pensionCount.toLocaleString("ko-KR")}건` : "숙소 검색",
+      href: buildCategoryHref("pension", normalized, locationForHref),
+      status: (placeCategoryMap.get("DAYCARE") ?? 0) > 0 ? "active" : "coming-soon",
+      countLabel: pensionCount > 0 ? `${pensionCount.toLocaleString("ko-KR")}건` : "숙소",
+    },
+    {
+      key: "hotel",
+      label: "호텔",
+      description: hotelCount > 0 ? `${hotelCount.toLocaleString("ko-KR")}건` : "숙소 검색",
+      href: buildCategoryHref("hotel", normalized, locationForHref),
+      status: (placeCategoryMap.get("DAYCARE") ?? 0) > 0 ? "active" : "coming-soon",
+      countLabel: hotelCount > 0 ? `${hotelCount.toLocaleString("ko-KR")}건` : "숙소",
+    },
+    {
+      key: "camping",
+      label: "캠핑",
+      description: campingCount > 0 ? `${campingCount.toLocaleString("ko-KR")}건` : "숙소 검색",
+      href: buildCategoryHref("camping", normalized, locationForHref),
+      status: (placeCategoryMap.get("DAYCARE") ?? 0) > 0 ? "active" : "coming-soon",
+      countLabel: campingCount > 0 ? `${campingCount.toLocaleString("ko-KR")}건` : "숙소",
+    },
+    {
       key: "funeral",
       label: "장례",
       description: placeCategoryMap.get("FUNERAL") ? `${(placeCategoryMap.get("FUNERAL") ?? 0).toLocaleString("ko-KR")}건` : "데이터 없음",
@@ -691,8 +823,14 @@ export default async function MapPage({
     ? `${(categoryCounts.restaurantCount + categoryCounts.placeCount).toLocaleString("ko-KR")}건`
     : activeCategory === "restaurants"
       ? `${categoryCounts.restaurantCount.toLocaleString("ko-KR")}건`
-      : activePlaceCategory
-        ? `${(placeCategoryMap.get(activePlaceCategory) ?? 0).toLocaleString("ko-KR")}건`
+      : activeCategory === "pension"
+        ? `${pensionCount.toLocaleString("ko-KR")}건`
+        : activeCategory === "hotel"
+          ? `${hotelCount.toLocaleString("ko-KR")}건`
+          : activeCategory === "camping"
+            ? `${campingCount.toLocaleString("ko-KR")}건`
+        : activePlaceCategory
+          ? `${(placeCategoryMap.get(activePlaceCategory) ?? 0).toLocaleString("ko-KR")}건`
         : "";
   const activeCategoryListHref = CATEGORY_LIST_HREF[activeCategory];
   const activeCategoryListLabel = activeCategory === "all" ? "카테고리별 목록 보기" : "전체 목록 보기";

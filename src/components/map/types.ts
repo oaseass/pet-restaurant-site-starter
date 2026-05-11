@@ -1,4 +1,4 @@
-export type MapCategoryKey = "all" | "restaurants" | "hospitals" | "grooming" | "daycare" | "funeral" | "pharmacy" | "lost-pets";
+export type MapCategoryKey = "all" | "restaurants" | "hospitals" | "grooming" | "daycare" | "pension" | "hotel" | "camping" | "funeral" | "pharmacy" | "lost-pets";
 
 export type MapCategoryOption = {
   key: MapCategoryKey;

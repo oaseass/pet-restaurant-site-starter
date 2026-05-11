@@ -25,6 +25,7 @@ import { getGooglePlaceVisualEnrichment, mergeGoogleVisualEnrichment } from "@/l
 import type { ListPageSearchParams } from "@/lib/list-location-filters";
 import { getPublicPlaceProfile } from "@/lib/place-profiles";
 import { getApprovedReviewSummary } from "@/lib/reviews";
+import { getPlaceExperienceLabel, inferPlaceExperienceCategory } from "@/lib/place-experience";
 import { getPlaceCategoryBySlug, getPlaceCategoryLabel } from "@/lib/platform-content";
 
 export const dynamic = "force-dynamic";
@@ -84,6 +85,23 @@ function getDisplayPlaceName(place: { name: string; sido?: string | null; sigung
   return region ? `${region} ${categoryLabel}` : `${categoryLabel} 업체`;
 }
 
+function getDerivedPlaceCategoryLabel(place: { category: string; name: string }) {
+  const derivedCategory = inferPlaceExperienceCategory({ baseCategory: place.category, name: place.name });
+  if (place.category === "DAYCARE" && derivedCategory !== "DAYCARE") {
+    return getPlaceExperienceLabel(derivedCategory);
+  }
+
+  return PLACE_CATEGORY_LABELS[place.category] ?? place.category;
+}
+
+function getDerivedPlaceMapKey(place: { category: string; name: string }) {
+  const derivedCategory = inferPlaceExperienceCategory({ baseCategory: place.category, name: place.name });
+  if (derivedCategory === "ACCOMMODATION_PENSION") return "pension";
+  if (derivedCategory === "ACCOMMODATION_HOTEL") return "hotel";
+  if (derivedCategory === "ACCOMMODATION_CAMPING") return "camping";
+  return PLACE_CATEGORY_MAP_KEY[place.category] ?? "all";
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -136,9 +154,10 @@ export default async function PlaceSlugPage({
   const place = await getPlaceDetailById(slug);
   if (!place) notFound();
 
-  const categoryLabel = PLACE_CATEGORY_LABELS[place.category] ?? place.category;
+  const categoryLabel = getDerivedPlaceCategoryLabel(place);
   const displayName = getDisplayPlaceName(place, categoryLabel);
-  const mapCategoryKey = PLACE_CATEGORY_MAP_KEY[place.category] ?? "all";
+  const derivedCategory = inferPlaceExperienceCategory({ baseCategory: place.category, name: place.name, categoryLabel });
+  const mapCategoryKey = getDerivedPlaceMapKey(place);
   const sourceLabel = SOURCE_LABELS[place.sourceName ?? ""] ?? "정부 공개자료를 정리했어요";
 
   // 공개 표시 주소 — 마스킹된 경우 시도+시군구만
@@ -181,8 +200,10 @@ export default async function PlaceSlugPage({
   const hasReview = reviewSummary.count > 0;
   const decisionQuestions = DECISION_QUESTIONS[type] ?? ["오늘 운영 여부를 확인할 수 있나요?", "예약이나 방문 제한이 있나요?", "비용과 준비물이 어떻게 되나요?", "주차나 대기 방식이 어떻게 되나요?"];
   const externalReviewLinks = await getExternalReviewLinks({
+    targetType: "PLACE",
+    targetId: place.id,
     name: displayName,
-    category: type,
+    category: derivedCategory,
     categoryLabel,
     regionLabel: [place.sido, place.sigungu].filter(Boolean).join(" "),
     address: navigationAddress,
@@ -353,7 +374,14 @@ export default async function PlaceSlugPage({
       ) : null}
 
       <div className="mt-8">
-        <ExternalReviewLinksPanel name={displayName} categoryLabel={categoryLabel} links={externalReviewLinks} />
+        <ExternalReviewLinksPanel
+          name={displayName}
+          category={derivedCategory}
+          categoryLabel={categoryLabel}
+          regionLabel={[place.sido, place.sigungu].filter(Boolean).join(" ")}
+          address={navigationAddress}
+          links={externalReviewLinks}
+        />
       </div>
 
       <div className="mt-6">
@@ -361,9 +389,9 @@ export default async function PlaceSlugPage({
       </div>
 
       <section className="mt-6 rounded-[1rem] border border-[var(--line)] bg-white p-5">
-        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">정보를 더 정확하게 만들기</h2>
+        <h2 className="text-xl font-black tracking-tight text-[var(--ink)]">빠진 정보 알려주기</h2>
         <p className="mt-2 text-sm leading-7 text-[var(--muted)]">
-          운영시간, 서비스, 비용, 사진처럼 실제 방문에 도움이 되는 내용을 확인한 뒤 반영합니다.
+          운영시간, 서비스, 비용, 사진처럼 방문 전에 꼭 필요한 정보만 확인해 반영합니다.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <SmartLink href={reportHref} className="inline-flex min-h-11 items-center justify-center rounded-full bg-[var(--brand)] px-5 py-2.5 text-sm font-black text-white">
