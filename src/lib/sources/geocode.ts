@@ -17,12 +17,34 @@ export type GeocodeDetailedResult = {
   reason?: string;
 };
 
+type NaverGeocodeConfig = {
+  keyId: string;
+  key: string;
+  source: "dedicated" | "legacy";
+};
+
 function hasKakaoRestKey() {
   return Boolean(process.env.KAKAO_REST_API_KEY?.trim());
 }
 
+function getNaverGeocodeConfig(): NaverGeocodeConfig | null {
+  const keyId = process.env.NAVER_MAPS_API_KEY_ID?.trim() || "";
+  const key = process.env.NAVER_MAPS_API_KEY?.trim() || "";
+  if (keyId && key) {
+    return { keyId, key, source: "dedicated" };
+  }
+
+  const legacyKeyId = process.env.NAVER_CLIENT_ID?.trim() || "";
+  const legacyKey = process.env.NAVER_CLIENT_SECRET?.trim() || "";
+  if (legacyKeyId && legacyKey) {
+    return { keyId: legacyKeyId, key: legacyKey, source: "legacy" };
+  }
+
+  return null;
+}
+
 function hasNaverGeocodeKeys() {
-  return Boolean(process.env.NAVER_CLIENT_ID?.trim() && process.env.NAVER_CLIENT_SECRET?.trim());
+  return Boolean(getNaverGeocodeConfig());
 }
 
 export function hasGeocodeServerConfig() {
@@ -58,20 +80,24 @@ async function geocodeWithKakao(address: string): Promise<GeocodeResult | null> 
 }
 
 async function geocodeWithNaver(address: string): Promise<GeocodeResult | null> {
-  const clientId = process.env.NAVER_CLIENT_ID?.trim();
-  const clientSecret = process.env.NAVER_CLIENT_SECRET?.trim();
-  if (!clientId || !clientSecret) return null;
+  const config = getNaverGeocodeConfig();
+  if (!config) return null;
 
   const response = await fetch(`https://maps.apigw.ntruss.com/map-geocode/v2/geocode?query=${encodeURIComponent(address)}`, {
     cache: "no-store",
     headers: {
-      "x-ncp-apigw-api-key-id": clientId,
-      "x-ncp-apigw-api-key": clientSecret,
+      "x-ncp-apigw-api-key-id": config.keyId,
+      "x-ncp-apigw-api-key": config.key,
     },
   });
 
   if (!response.ok) {
-    throw new Error(`Naver geocode failed: ${response.status} ${response.statusText}`);
+    const baseMessage = `Naver geocode failed: ${response.status} ${response.statusText}`;
+    if (config.source === "legacy" && (response.status === 401 || response.status === 403)) {
+      throw new Error(`${baseMessage}. This endpoint requires NAVER_MAPS_API_KEY_ID/NAVER_MAPS_API_KEY from Naver Cloud Platform Maps, not NAVER_CLIENT_ID/NAVER_CLIENT_SECRET from Naver Developers.`);
+    }
+
+    throw new Error(baseMessage);
   }
 
   const json = await response.json() as { addresses?: Array<{ y?: string; x?: string }> };
@@ -109,7 +135,7 @@ export async function geocodeAddressDetailed(input: GeocodeInput): Promise<Geoco
       provider: null,
       coordinates: null,
       attemptedProviders,
-      reason: "KAKAO_REST_API_KEY or NAVER_CLIENT_ID/NAVER_CLIENT_SECRET is required.",
+      reason: "KAKAO_REST_API_KEY or NAVER_MAPS_API_KEY_ID/NAVER_MAPS_API_KEY is required.",
     };
   }
 

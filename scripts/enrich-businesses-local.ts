@@ -74,8 +74,15 @@ const SOURCE_PRIORITY: Record<ExternalCandidate["source"], number> = {
   GOOGLE: 2,
 };
 
+function getNaverSearchConfig() {
+  const clientId = process.env.NAVER_SEARCH_CLIENT_ID || process.env.NAVER_CLIENT_ID;
+  const clientSecret = process.env.NAVER_SEARCH_CLIENT_SECRET || process.env.NAVER_CLIENT_SECRET;
+  if (!clientId || !clientSecret) return null;
+  return { clientId, clientSecret };
+}
+
 function printHelp() {
-  console.log(`댕냥지도 업체 외부 장소 정보 보강\n\n사용법:\n  npm run enrich:businesses -- --target=ALL --limit=20 --dry-run\n  npm run enrich:businesses -- --target=RESTAURANT --limit=500 --concurrency=3 --skip-existing\n  npm run enrich:businesses -- --validate-only\n\n옵션:\n  --target=ALL|RESTAURANT|ANIMAL_HOSPITAL|PHARMACY|GROOMING|DAYCARE|FUNERAL\n  --limit=1..1000\n  --concurrency=1..5 동시 API 처리 수입니다. 기본값은 3입니다.\n  --skip-existing  이미 public/data/business-enrichment.json에 있는 key는 API 호출 전 제외합니다. 기본값은 켜짐입니다.\n  --no-skip-existing 기존 항목도 다시 조회합니다.\n  --dry-run       API 조회와 매칭 결과만 출력하고 파일을 쓰지 않습니다. 원본/후보/matchScore/반영 가능 여부/거절 사유를 확인합니다.\n  --validate-only 인자, 스크립트 구조, API 키 존재 여부만 검증합니다. DB 연결이 없어도 실행됩니다.\n\n저장 정책:\n  matchScore 0.85 이상이면서 이름·주소 지역·카테고리 조건을 통과한 후보만 public/data/business-enrichment.json에 반영합니다.\n  matchScore 0.65~0.84 후보는 관리자 확인 필요 후보로만 dry-run에 기록하고 상세 페이지에는 자동 표시하지 않습니다.\n  matchScore 0.65 미만 후보는 저장하지 않습니다.\n\n환경변수:\n  KAKAO_REST_API_KEY\n  NAVER_CLIENT_ID\n  NAVER_CLIENT_SECRET\n  GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY`);
+  console.log(`댕냥지도 업체 외부 장소 정보 보강\n\n사용법:\n  npm run enrich:businesses -- --target=ALL --limit=20 --dry-run\n  npm run enrich:businesses -- --target=RESTAURANT --limit=500 --concurrency=3 --skip-existing\n  npm run enrich:businesses -- --validate-only\n\n옵션:\n  --target=ALL|RESTAURANT|ANIMAL_HOSPITAL|PHARMACY|GROOMING|DAYCARE|FUNERAL\n  --limit=1..1000\n  --concurrency=1..5 동시 API 처리 수입니다. 기본값은 3입니다.\n  --skip-existing  이미 public/data/business-enrichment.json에 있는 key는 API 호출 전 제외합니다. 기본값은 켜짐입니다.\n  --no-skip-existing 기존 항목도 다시 조회합니다.\n  --dry-run       API 조회와 매칭 결과만 출력하고 파일을 쓰지 않습니다. 원본/후보/matchScore/반영 가능 여부/거절 사유를 확인합니다.\n  --validate-only 인자, 스크립트 구조, API 키 존재 여부만 검증합니다. DB 연결이 없어도 실행됩니다.\n\n저장 정책:\n  matchScore 0.85 이상이면서 이름·주소 지역·카테고리 조건을 통과한 후보만 public/data/business-enrichment.json에 반영합니다.\n  matchScore 0.65~0.84 후보는 관리자 확인 필요 후보로만 dry-run에 기록하고 상세 페이지에는 자동 표시하지 않습니다.\n  matchScore 0.65 미만 후보는 저장하지 않습니다.\n\n환경변수:\n  KAKAO_REST_API_KEY\n  NAVER_SEARCH_CLIENT_ID 또는 NAVER_CLIENT_ID\n  NAVER_SEARCH_CLIENT_SECRET 또는 NAVER_CLIENT_SECRET\n  GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY`);
 }
 
 function readOption(args: string[], name: string) {
@@ -300,11 +307,13 @@ function sortCandidates(left: ExternalCandidate, right: ExternalCandidate) {
 }
 
 function getApiKeyStatus() {
-  const naverReady = Boolean(process.env.NAVER_CLIENT_ID && process.env.NAVER_CLIENT_SECRET);
+  const naverSearchConfig = getNaverSearchConfig();
   const googleReady = Boolean(process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY);
   return {
     keys: {
       KAKAO_REST_API_KEY: Boolean(process.env.KAKAO_REST_API_KEY),
+      NAVER_SEARCH_CLIENT_ID: Boolean(process.env.NAVER_SEARCH_CLIENT_ID),
+      NAVER_SEARCH_CLIENT_SECRET: Boolean(process.env.NAVER_SEARCH_CLIENT_SECRET),
       NAVER_CLIENT_ID: Boolean(process.env.NAVER_CLIENT_ID),
       NAVER_CLIENT_SECRET: Boolean(process.env.NAVER_CLIENT_SECRET),
       GOOGLE_PLACES_API_KEY: Boolean(process.env.GOOGLE_PLACES_API_KEY),
@@ -312,16 +321,15 @@ function getApiKeyStatus() {
     },
     providers: {
       KAKAO: Boolean(process.env.KAKAO_REST_API_KEY),
-      NAVER: naverReady,
+      NAVER: Boolean(naverSearchConfig),
       GOOGLE: googleReady,
     },
     missing: [
       process.env.KAKAO_REST_API_KEY ? null : "KAKAO_REST_API_KEY",
-      process.env.NAVER_CLIENT_ID ? null : "NAVER_CLIENT_ID",
-      process.env.NAVER_CLIENT_SECRET ? null : "NAVER_CLIENT_SECRET",
+      naverSearchConfig ? null : "NAVER_SEARCH_CLIENT_ID/NAVER_SEARCH_CLIENT_SECRET 또는 NAVER_CLIENT_ID/NAVER_CLIENT_SECRET",
       googleReady ? null : "GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY",
     ].filter(Boolean),
-    hasAnyProvider: Boolean(process.env.KAKAO_REST_API_KEY || naverReady || googleReady),
+    hasAnyProvider: Boolean(process.env.KAKAO_REST_API_KEY || naverSearchConfig || googleReady),
   };
 }
 
@@ -526,12 +534,13 @@ async function main() {
   }
 
   const kakaoKey = process.env.KAKAO_REST_API_KEY;
-  const naverClientId = process.env.NAVER_CLIENT_ID;
-  const naverClientSecret = process.env.NAVER_CLIENT_SECRET;
+  const naverSearchConfig = getNaverSearchConfig();
+  const naverClientId = naverSearchConfig?.clientId;
+  const naverClientSecret = naverSearchConfig?.clientSecret;
   const googlePlacesKey = process.env.GOOGLE_PLACES_API_KEY || process.env.GOOGLE_MAPS_API_KEY;
   const apiKeyStatus = getApiKeyStatus();
   if (!apiKeyStatus.hasAnyProvider) {
-    throw new Error(`[enrich-businesses] 외부 로컬 검색 API 키가 없습니다. 누락: ${apiKeyStatus.missing.join(", ")}. KAKAO_REST_API_KEY, NAVER_CLIENT_ID/NAVER_CLIENT_SECRET, GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY 중 하나를 설정한 뒤 --dry-run으로 먼저 확인하세요. 키 없이 구조만 확인하려면 --validate-only를 사용하세요.`);
+    throw new Error(`[enrich-businesses] 외부 로컬 검색 API 키가 없습니다. 누락: ${apiKeyStatus.missing.join(", ")}. KAKAO_REST_API_KEY, NAVER_SEARCH_CLIENT_ID/NAVER_SEARCH_CLIENT_SECRET 또는 legacy NAVER_CLIENT_ID/NAVER_CLIENT_SECRET, GOOGLE_PLACES_API_KEY 또는 GOOGLE_MAPS_API_KEY 중 하나를 설정한 뒤 --dry-run으로 먼저 확인하세요. 키 없이 구조만 확인하려면 --validate-only를 사용하세요.`);
   }
 
   const snapshot = await readSnapshot();
