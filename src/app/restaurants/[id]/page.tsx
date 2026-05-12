@@ -7,7 +7,6 @@ import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentP
 import { BusinessCheckPanel } from "@/components/detail/BusinessCheckPanel";
 import { ExternalReviewLinksPanel } from "@/components/detail/ExternalReviewLinksPanel";
 import { BusinessStoryPanel } from "@/components/detail/BusinessStoryPanel";
-import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
 import { DetailMapCard } from "@/components/detail/DetailMapCard";
 import { DetailOverviewPanel } from "@/components/detail/DetailOverviewPanel";
@@ -186,23 +185,11 @@ export default async function RestaurantDetailPage({ params }: { params: Promise
         dataUpdatedLabel={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")}
         reviewCount={reviewSummary.count}
         reviewAverage={reviewSummary.averageOverall}
-        checkSummary={checkSummary}
-        enrichment={reliableEnrichment}
-      />
-
-      <DetailDecisionPanel
-        categoryLabel="반려동물 동반 식당"
-        regionLabel={regionLabel}
-        addressLabel={restaurant.address}
-        phone={bestPhone}
-        hasCoordinates={restaurant.lat !== null && restaurant.lng !== null}
-        businessStatus="공식 등록 정보"
-        dataUpdatedLabel={restaurant.dataUpdatedAt.toLocaleDateString("ko-KR")}
-        sourceLabel="식품안전나라 공개자료"
-        reviewCount={reviewSummary.count}
         questions={decisionQuestions}
         reportHref={reportHref}
         reviewHref={reviewHref}
+        checkSummary={checkSummary}
+        enrichment={reliableEnrichment}
       />
 
       <BusinessCheckPanel

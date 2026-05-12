@@ -15,7 +15,7 @@ interface InstantSearchBoxProps {
 
 export function InstantSearchBox({
   defaultValue = "",
-  placeholder = "식당, 지역, 업종 검색",
+  placeholder = "지역, 업종, 업체명으로 검색",
   autoFocus = false,
   compact = false,
 }: InstantSearchBoxProps) {
@@ -111,8 +111,8 @@ export function InstantSearchBox({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const inputHeight = compact ? "36px" : "44px";
-  const btnHeight = compact ? "36px" : "44px";
+  const inputHeight = compact ? "40px" : "44px";
+  const btnHeight = compact ? "40px" : "44px";
   const fontSize = compact ? "13px" : "14px";
 
   return (
@@ -151,12 +151,12 @@ export function InstantSearchBox({
               paddingRight: value ? "32px" : "10px",
               paddingTop: 0,
               paddingBottom: 0,
-              border: "1.5px solid var(--line)",
-              borderRadius: "10px",
+              border: compact ? "1px solid var(--line)" : "1.5px solid var(--line)",
+              borderRadius: compact ? "14px" : "16px",
               fontSize,
-              fontWeight: 500,
+              fontWeight: compact ? 500 : 600,
               color: "var(--ink)",
-              background: "white",
+              background: "var(--surface)",
               outline: "none",
             }}
             className="focus:border-[var(--brand)]"
@@ -194,13 +194,14 @@ export function InstantSearchBox({
           disabled={pendingAction === "search"}
           style={{
             height: btnHeight,
-            padding: "0 14px",
+            minWidth: compact ? "64px" : "74px",
+            padding: compact ? "0 14px" : "0 16px",
             background: "var(--brand)",
             color: "white",
             border: "none",
-            borderRadius: "10px",
+            borderRadius: compact ? "14px" : "16px",
             fontSize,
-            fontWeight: 700,
+            fontWeight: 800,
             cursor: pendingAction === "search" ? "wait" : "pointer",
             opacity: pendingAction === "search" ? 0.72 : 1,
             whiteSpace: "nowrap",
@@ -217,13 +218,13 @@ export function InstantSearchBox({
             disabled={pendingAction === "map"}
             style={{
               height: btnHeight,
-              padding: "0 12px",
+              padding: "0 14px",
               background: "white",
               color: "var(--brand)",
-              border: "1.5px solid var(--brand)",
-              borderRadius: "10px",
-              fontSize: "12px",
-              fontWeight: 700,
+              border: "1px solid var(--brand)",
+              borderRadius: "16px",
+              fontSize: "13px",
+              fontWeight: 800,
               cursor: pendingAction === "map" ? "wait" : "pointer",
               opacity: pendingAction === "map" ? 0.72 : 1,
               whiteSpace: "nowrap",
@@ -247,8 +248,8 @@ export function InstantSearchBox({
             left: 0,
             right: 0,
             background: "white",
-            border: "1.5px solid var(--line)",
-            borderRadius: "10px",
+            border: "1px solid var(--line)",
+            borderRadius: "16px",
             boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
             zIndex: 200,
             overflow: "hidden",

@@ -4,12 +4,14 @@ import { RightRail } from "@/components/RightRail";
 interface PublicPageShellProps {
   children: React.ReactNode;
   restaurantCount?: number;
+  registeredPlaceCount?: number;
   lastUpdatedAt?: string | null;
 }
 
 export function PublicPageShell({
   children,
   restaurantCount,
+  registeredPlaceCount,
   lastUpdatedAt,
 }: PublicPageShellProps) {
   return (
@@ -23,6 +25,7 @@ export function PublicPageShell({
       <aside className="portal-rail">
         <RightRail
           restaurantCount={restaurantCount}
+          registeredPlaceCount={registeredPlaceCount}
           lastUpdatedAt={lastUpdatedAt}
         />
       </aside>

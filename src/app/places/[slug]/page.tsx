@@ -8,7 +8,6 @@ import { BusinessEnrichmentPanel } from "@/components/detail/BusinessEnrichmentP
 import { BusinessCheckPanel } from "@/components/detail/BusinessCheckPanel";
 import { ExternalReviewLinksPanel } from "@/components/detail/ExternalReviewLinksPanel";
 import { BusinessStoryPanel } from "@/components/detail/BusinessStoryPanel";
-import { DetailDecisionPanel } from "@/components/detail/DetailDecisionPanel";
 import { DetailActionBar } from "@/components/detail/DetailActionBar";
 import { DetailMapCard } from "@/components/detail/DetailMapCard";
 import { DetailOverviewPanel } from "@/components/detail/DetailOverviewPanel";
@@ -341,23 +340,11 @@ export default async function PlaceSlugPage({
         dataUpdatedLabel={new Date(place.updatedAt).toLocaleDateString("ko-KR")}
         reviewCount={reviewSummary.count}
         reviewAverage={reviewSummary.averageOverall}
-        checkSummary={checkSummary}
-        enrichment={reliableEnrichment}
-      />
-
-      <DetailDecisionPanel
-        categoryLabel={categoryLabel}
-        regionLabel={[place.sido, place.sigungu].filter(Boolean).join(" ") || "지역 정보를 정리 중이에요"}
-        addressLabel={displayAddress}
-        phone={bestPhone}
-        hasCoordinates={place.lat !== null && place.lng !== null}
-        businessStatus={place.businessStatus ?? null}
-        dataUpdatedLabel={new Date(place.updatedAt).toLocaleDateString("ko-KR")}
-        sourceLabel={sourceLabel}
-        reviewCount={reviewSummary.count}
         questions={decisionQuestions}
         reportHref={reportHref}
         reviewHref={reviewHref}
+        checkSummary={checkSummary}
+        enrichment={reliableEnrichment}
       />
 
       <BusinessCheckPanel

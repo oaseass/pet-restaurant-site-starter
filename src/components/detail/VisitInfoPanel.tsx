@@ -101,15 +101,17 @@ export function VisitInfoPanel({ category }: VisitInfoPanelProps) {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-2 sm:grid-cols-2">
-        {info.items.map((item) => (
-          <div key={item.label} className="flex items-center justify-between gap-3 rounded-lg border border-[var(--line)] bg-white px-3 py-2.5">
-            <span className="text-sm font-bold text-[var(--ink)]">{item.label}</span>
-            <span className={item.tone === "confirmed" ? "rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-black text-[var(--brand)]" : "rounded-full bg-[#f3f4f6] px-2.5 py-1 text-xs font-black text-[var(--muted)]"}>
-              {item.value}
-            </span>
-          </div>
-        ))}
+      <div className="mt-5 rounded-xl border border-[var(--line)] bg-white px-4 py-4">
+        <dl className="grid gap-x-6 gap-y-3 sm:grid-cols-2">
+          {info.items.map((item) => (
+            <div key={item.label} className="flex items-center justify-between gap-3">
+              <dt className="text-sm font-bold text-[var(--ink)]">{item.label}</dt>
+              <dd className={item.tone === "confirmed" ? "rounded-full bg-[var(--brand-soft)] px-2.5 py-1 text-xs font-black text-[var(--brand)]" : "rounded-full bg-[#f3f4f6] px-2.5 py-1 text-xs font-black text-[var(--muted)]"}>
+                {item.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

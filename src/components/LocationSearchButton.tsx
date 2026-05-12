@@ -44,20 +44,21 @@ export function LocationSearchButton() {
       onClick={handleClick}
       disabled={status === "loading" || status === "opening"}
       style={{
-        display: "flex",
+        display: "inline-flex",
         alignItems: "center",
         justifyContent: "center",
         gap: "6px",
-        padding: "9px 14px",
-        width: "100%",
-        background: status === "loading" || status === "opening" ? "#e8e8e8" : "var(--brand-soft)",
+        minHeight: "36px",
+        padding: "0 14px",
+        background: status === "loading" || status === "opening" ? "#eef1ef" : "#ffffff",
         color: "var(--brand)",
-        border: "1px solid rgba(31,107,91,0.2)",
-        borderRadius: "8px",
-        fontSize: "13px",
-        fontWeight: 700,
+        border: "1px solid var(--line)",
+        borderRadius: "999px",
+        fontSize: "12px",
+        fontWeight: 800,
         cursor: status === "loading" || status === "opening" ? "wait" : "pointer",
-        transition: "opacity 0.15s",
+        transition: "opacity 0.15s, border-color 0.15s",
+        whiteSpace: "nowrap",
       }}
     >
       <Crosshair size={15} />
@@ -66,7 +67,7 @@ export function LocationSearchButton() {
         : status === "opening"
           ? "지도 여는 중..."
           : status === "error"
-            ? "위치 권한 없음 - 지도 열기"
+            ? "위치 권한 없음"
             : "내 위치 반영"}
     </button>
   );

@@ -90,9 +90,9 @@ export const PRIMARY_NAV = [
 export const MOBILE_NAV = [
   { href: "/", label: "홈" },
   { href: "/map", label: "지도" },
-  { href: "/lost-pets", label: "찾아요" },
+  { href: "/categories", label: "카테고리" },
   { href: "/guide", label: "가이드" },
-  { href: "/business", label: "마이" },
+  { href: "/business", label: "등록" },
 ] as const;
 
 export const QUICK_CATEGORIES: CategorySummary[] = [

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, type FormEvent } from "react";
-import { ClipboardCheck, PhoneCall, Send, ShieldCheck } from "lucide-react";
+import { ChevronDown, ChevronUp, ClipboardCheck, PhoneCall, Send, ShieldCheck } from "lucide-react";
 import {
   BUSINESS_CHECK_RESULT_LABELS,
   BUSINESS_CHECK_RESULTS,
@@ -30,6 +30,7 @@ export function BusinessCheckPanel({ targetType, targetId, categoryLabel, summar
   const [result, setResult] = useState<BusinessCheckResultValue>("CONFIRMED_OPEN");
   const [checkedAt, setCheckedAt] = useState(today);
   const [note, setNote] = useState("");
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const [state, setState] = useState<SubmitState>("idle");
   const [message, setMessage] = useState("");
 
@@ -56,6 +57,7 @@ export function BusinessCheckPanel({ targetType, targetId, categoryLabel, summar
     setState("submitted");
     setMessage("직접 확인한 내용이 접수되었습니다. 검수 후 최근 운영 확인에 반영됩니다.");
     setNote("");
+    setIsFormOpen(false);
   };
 
   return (
@@ -87,32 +89,52 @@ export function BusinessCheckPanel({ targetType, targetId, categoryLabel, summar
         </div>
       ) : null}
 
-      <form onSubmit={submit} className="mt-5 grid gap-3 rounded-lg border border-[var(--line)] bg-[#fcfbf8] p-4 sm:grid-cols-2">
-        <label className="space-y-2 text-xs font-black text-[var(--muted)]">
-          확인 방식
-          <select value={checkType} onChange={(event) => setCheckType(event.target.value as BusinessCheckTypeValue)} className="input rounded-xl text-sm">
-            {BUSINESS_CHECK_TYPES.map((item) => <option key={item} value={item}>{BUSINESS_CHECK_TYPE_LABELS[item]}</option>)}
-          </select>
-        </label>
-        <label className="space-y-2 text-xs font-black text-[var(--muted)]">
-          확인 결과
-          <select value={result} onChange={(event) => setResult(event.target.value as BusinessCheckResultValue)} className="input rounded-xl text-sm">
-            {BUSINESS_CHECK_RESULTS.map((item) => <option key={item} value={item}>{BUSINESS_CHECK_RESULT_LABELS[item]}</option>)}
-          </select>
-        </label>
-        <label className="space-y-2 text-xs font-black text-[var(--muted)]">
-          확인일
-          <input type="date" value={checkedAt} max={today} onChange={(event) => setCheckedAt(event.target.value)} required className="input rounded-xl text-sm" />
-        </label>
-        <label className="space-y-2 text-xs font-black text-[var(--muted)] sm:col-span-2">
-          짧은 메모
-          <textarea value={note} onChange={(event) => setNote(event.target.value)} maxLength={300} className="input min-h-24 rounded-xl py-3 text-sm" placeholder="예: 오늘 전화했더니 예약 후 방문 가능하다고 안내받았어요." />
-        </label>
-        <button type="submit" disabled={state === "submitting"} className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full bg-[var(--brand)] px-4 text-xs font-black text-white disabled:cursor-wait disabled:opacity-60 sm:col-span-2">
-          {state === "submitting" ? <PhoneCall size={14} /> : state === "submitted" ? <ClipboardCheck size={14} /> : <Send size={14} />}
-          {state === "submitting" ? "접수 중..." : state === "submitted" ? "접수 완료" : "직접 확인한 내용 보내기"}
-        </button>
-      </form>
+      <div className="mt-5 rounded-lg border border-[var(--line)] bg-[#fcfbf8] p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-sm font-black text-[var(--ink)]">새 확인 결과 보내기</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--muted)]">전화나 방문으로 확인한 최신 운영 내용을 짧게 남겨주세요.</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setIsFormOpen((open) => !open)}
+            className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] bg-white px-4 text-xs font-black text-[var(--ink)]"
+            aria-expanded={isFormOpen}
+          >
+            {isFormOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+            {isFormOpen ? "폼 접기" : "직접 확인 보내기"}
+          </button>
+        </div>
+
+        {isFormOpen ? (
+          <form onSubmit={submit} className="mt-4 grid gap-3 sm:grid-cols-2">
+            <label className="space-y-2 text-xs font-black text-[var(--muted)]">
+              확인 방식
+              <select value={checkType} onChange={(event) => setCheckType(event.target.value as BusinessCheckTypeValue)} className="input rounded-xl text-sm">
+                {BUSINESS_CHECK_TYPES.map((item) => <option key={item} value={item}>{BUSINESS_CHECK_TYPE_LABELS[item]}</option>)}
+              </select>
+            </label>
+            <label className="space-y-2 text-xs font-black text-[var(--muted)]">
+              확인 결과
+              <select value={result} onChange={(event) => setResult(event.target.value as BusinessCheckResultValue)} className="input rounded-xl text-sm">
+                {BUSINESS_CHECK_RESULTS.map((item) => <option key={item} value={item}>{BUSINESS_CHECK_RESULT_LABELS[item]}</option>)}
+              </select>
+            </label>
+            <label className="space-y-2 text-xs font-black text-[var(--muted)]">
+              확인일
+              <input type="date" value={checkedAt} max={today} onChange={(event) => setCheckedAt(event.target.value)} required className="input rounded-xl text-sm" />
+            </label>
+            <label className="space-y-2 text-xs font-black text-[var(--muted)] sm:col-span-2">
+              짧은 메모
+              <textarea value={note} onChange={(event) => setNote(event.target.value)} maxLength={300} className="input min-h-24 rounded-xl py-3 text-sm" placeholder="예: 오늘 전화했더니 예약 후 방문 가능하다고 안내받았어요." />
+            </label>
+            <button type="submit" disabled={state === "submitting"} className="inline-flex min-h-10 w-fit items-center gap-2 rounded-full bg-[var(--brand)] px-4 text-xs font-black text-white disabled:cursor-wait disabled:opacity-60 sm:col-span-2">
+              {state === "submitting" ? <PhoneCall size={14} /> : state === "submitted" ? <ClipboardCheck size={14} /> : <Send size={14} />}
+              {state === "submitting" ? "접수 중..." : state === "submitted" ? "접수 완료" : "직접 확인한 내용 보내기"}
+            </button>
+          </form>
+        ) : null}
+      </div>
 
       {message ? (
         <p className={`mt-3 rounded-lg px-4 py-3 text-sm font-black ${state === "error" ? "bg-[#fff1e8] text-[#b45309]" : "bg-[var(--brand-soft)] text-[var(--brand)]"}`}>

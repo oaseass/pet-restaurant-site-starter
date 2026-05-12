@@ -74,6 +74,7 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
   const canDisplay = enrichment && enrichment.matchScore >= 0.85;
   const isCandidate = enrichment && enrichment.matchScore >= 0.65 && enrichment.matchScore < 0.85;
   const visibleEnrichment = canDisplay ? enrichment : null;
+  const showDetailedActions = Boolean(visibleEnrichment);
   const checkedAtLabel = formatCheckedAt(visibleEnrichment?.enrichedAt ?? visibleEnrichment?.checkedAt);
   const googleRatingLabel = visibleEnrichment ? formatGoogleRating(visibleEnrichment) : null;
   const openingPreview = visibleEnrichment ? getOpeningPreview(visibleEnrichment) : null;
@@ -155,14 +156,14 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
           ) : null}
         </div>
       ) : isCandidate ? (
-        <div className="mt-5 rounded-xl border border-dashed border-[#fed7aa] bg-[#fff7ed] p-4">
+        <div className="mt-5 rounded-lg border border-dashed border-[#fed7aa] bg-[#fff7ed] px-4 py-3">
           <p className="text-sm font-black text-[#9a3412]">지도 결과가 애매해 아직 숨겨두고 있습니다</p>
-          <p className="mt-2 text-sm leading-7 text-[#9a3412]">이름이나 주소가 완전히 맞지 않아 잘못 연결될 가능성이 있습니다. 확인 전에는 보수적으로 보여주지 않습니다.</p>
+          <p className="mt-1 text-sm leading-6 text-[#9a3412]">이름이나 주소가 완전히 맞지 않아 잘못 연결될 가능성이 있습니다. 확인 전에는 보수적으로 보여주지 않습니다.</p>
         </div>
       ) : (
-        <div className="mt-5 rounded-xl border border-dashed border-[var(--line)] bg-[#f9fbfa] p-4">
+        <div className="mt-5 rounded-lg border border-dashed border-[var(--line)] bg-[#f9fbfa] px-4 py-3">
           <p className="text-sm font-black text-[var(--ink)]">외부 지도에서 일치하는 정보를 아직 찾지 못했습니다</p>
-          <p className="mt-2 text-sm leading-7 text-[var(--muted)]">지금은 공식 등록 정보와 사용자 제보를 우선 보여드립니다. 전화번호나 서비스가 다르면 알려주세요.</p>
+          <p className="mt-1 text-sm leading-6 text-[var(--muted)]">지금은 공식 등록 정보와 사용자 제보를 우선 보여드립니다. 전화번호나 서비스가 다르면 알려주세요.</p>
         </div>
       )}
 
@@ -171,21 +172,25 @@ export function BusinessEnrichmentPanel({ enrichment, category, reportHref, revi
           <MessageSquarePlus size={14} />
           방문 후기 남기기
         </SmartLink>
-        <SmartLink href={appendReportTopic(reportHref, "service")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
-          <Utensils size={14} />
-          메뉴·서비스 알려주기
-        </SmartLink>
-        <SmartLink href={appendReportTopic(reportHref, "photo")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
-          <Camera size={14} />
-          사진 올리기
-        </SmartLink>
-        <SmartLink href={appendReportTopic(reportHref, "pet-policy")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
-          <PawPrint size={14} />
-          동반 조건 알려주기
-        </SmartLink>
+        {showDetailedActions ? (
+          <>
+            <SmartLink href={appendReportTopic(reportHref, "service")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
+              <Utensils size={14} />
+              메뉴·서비스 알려주기
+            </SmartLink>
+            <SmartLink href={appendReportTopic(reportHref, "photo")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
+              <Camera size={14} />
+              사진 올리기
+            </SmartLink>
+            <SmartLink href={appendReportTopic(reportHref, "pet-policy")} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--ink)]">
+              <PawPrint size={14} />
+              동반 조건 알려주기
+            </SmartLink>
+          </>
+        ) : null}
         <SmartLink href={reportHref} className="inline-flex min-h-10 items-center gap-2 rounded-full border border-[var(--line)] px-4 text-xs font-black text-[var(--muted)]">
           <MessageSquareWarning size={14} />
-          정보 수정 요청
+          {showDetailedActions ? "정보 수정 요청" : "빠진 정보 알려주기"}
         </SmartLink>
       </div>
     </section>
