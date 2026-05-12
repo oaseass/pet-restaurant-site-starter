@@ -88,11 +88,19 @@ function buildKakaoMapHref({ name, address, lat, lng }: DetailMapCardProps) {
   return `https://map.kakao.com/link/search/${encodeURIComponent(query || destinationName)}`;
 }
 
+function buildGoogleEmbedHref({ name, address }: Pick<DetailMapCardProps, "name" | "address">) {
+  const destinationName = name.trim() || "목적지";
+  const query = [destinationName, address?.trim()].filter(Boolean).join(" ");
+  return `https://maps.google.com/maps?q=${encodeURIComponent(query || destinationName)}&z=15&output=embed`;
+}
+
 export function DetailMapCard({ name, address, lat, lng, mapHref }: DetailMapCardProps) {
   const hasCoordinates = typeof lat === "number" && Number.isFinite(lat) && typeof lng === "number" && Number.isFinite(lng);
+  const hasAddress = Boolean(address?.trim());
   const mapStatus = useLeafletScript(hasCoordinates);
   const mapRef = useRef<HTMLDivElement | null>(null);
   const kakaoMapHref = buildKakaoMapHref({ name, address, lat, lng, mapHref });
+  const googleEmbedHref = hasAddress ? buildGoogleEmbedHref({ name, address }) : null;
 
   useEffect(() => {
     const leaflet = getLeaflet();
@@ -120,6 +128,19 @@ export function DetailMapCard({ name, address, lat, lng, mapHref }: DetailMapCar
                   <p className="text-sm font-black text-[var(--ink)]">지도를 불러오지 못했습니다.</p>
                 </div>
               ) : null}
+            </>
+          ) : googleEmbedHref ? (
+            <>
+              <iframe
+                title={`${name} 주소 기준 지도`}
+                src={googleEmbedHref}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="h-[280px] w-full border-0"
+              />
+              <div className="pointer-events-none absolute left-4 top-4 inline-flex items-center rounded-full bg-white/92 px-3 py-1 text-[11px] font-black text-[var(--ink)] shadow-sm">
+                주소 기준 지도
+              </div>
             </>
           ) : (
             <div className="flex h-[280px] flex-col items-center justify-center gap-3 p-6 text-center">
